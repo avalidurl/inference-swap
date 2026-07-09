@@ -11,6 +11,7 @@ import {
   baseNetwork,
   baseAsset,
   discoveryAccepts,
+  settleMode,
   DISCOVERY_BAZAAR,
   MATCH_PAY_BAZAAR,
 } from "./x402.js";
@@ -527,6 +528,11 @@ export function buildOpenApi(env, origin) {
         solana: solanaEnabled(env) ? USDC_SOLANA : null,
       },
       noUpstreamKeys: true,
+      settlement: {
+        mode: settleMode(env),
+        note:
+          "demo: a present payment header settles but the grant is marked verified:false (NOT verified on-chain). verify (SETTLE_MODE=verify + CDP secrets): only a facilitator-verified+settled payment mints a grant; fake/bare headers get 402.",
+      },
       ...payShHook,
     },
   };

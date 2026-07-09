@@ -1,5 +1,5 @@
 import { createOffer, listOffers, createIntent, getMatch, markPaid } from "./swap.js";
-import { hasPaymentHeader } from "./x402.js";
+import { hasPaymentHeader, verifyPayment } from "./x402.js";
 import { sanitizeOfferInput, sanitizeIntentInput, validateCaps } from "./harden.js";
 
 const TOOLS = [
@@ -154,7 +154,23 @@ async function callTool(env, name, args, origin, request) {
       const m = await getMatch(env, matchId);
       if (!m) throw new Error("not_found");
       if (hasPaymentHeader(request)) {
-        const paid = await markPaid(env, matchId, { note: "mcp_payment_header" });
+        const verdict = await verifyPayment(env, request, m);
+        if (!verdict.ok) {
+          return {
+            status: 402,
+            verified: false,
+            reason: verdict.reason || "unverified",
+            challenge: m.challenge,
+            payUrl: `${origin}/v1/matches/${m.id}/pay`,
+          };
+        }
+        const paid = await markPaid(env, matchId, {
+          note: verdict.verified ? "mcp_x402_verified" : "mcp_demo_settle",
+          demo: Boolean(verdict.demo),
+          verified: Boolean(verdict.verified),
+          mode: verdict.mode,
+          settlement: verdict.settlement || null,
+        });
         return paid.body;
       }
       return { status: 402, challenge: m.challenge, payUrl: `${origin}/v1/matches/${m.id}/pay` };

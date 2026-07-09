@@ -1,6 +1,6 @@
 import { createOffer, listOffers, createIntent, getMatch, markPaid, stats, refreshMatchChallenge } from "./swap.js";
 import { isValidId } from "./store.js";
-import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts } from "./x402.js";
+import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts, verifyPayment, settleMode } from "./x402.js";
 import { buildOpenApi, wellKnownX402 } from "./openapi.js";
 import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
@@ -362,7 +362,26 @@ export default {
     try {
       if (path === "/health" && request.method === "GET") {
         const s = await stats(env);
-        return json({ ok: true, product: PRODUCT_ID, brand: "CURB", api: apiOrigin, site: siteOrigin, ...s }, 200, request);
+        const mode = settleMode(env);
+        return json(
+          {
+            ok: true,
+            product: PRODUCT_ID,
+            brand: "CURB",
+            api: apiOrigin,
+            site: siteOrigin,
+            settle: {
+              mode,
+              note:
+                mode === "verify"
+                  ? "verify: only CDP-facilitator-verified payments mint a grant"
+                  : "demo: a present payment header settles but grants are marked verified:false (not on-chain verified)",
+            },
+            ...s,
+          },
+          200,
+          request
+        );
       }
 
       if (path === "/" && request.method === "GET") {
@@ -600,13 +619,45 @@ export default {
 
         if (!m) return json({ error: "not_found" }, 404, request);
 
-        const demo = url.searchParams.get("demo") === "1" && bearerOk(request, env.ACCESS_KEY);
-        if (demo) {
-          const paid = await markPaid(env, id, { demo: true, note: "demo_settle" });
+        // Explicit admin/manual demo settle (bearer-gated) — always marked demo.
+        const adminDemo = url.searchParams.get("demo") === "1" && bearerOk(request, env.ACCESS_KEY);
+        if (adminDemo) {
+          const paid = await markPaid(env, id, {
+            demo: true,
+            verified: false,
+            mode: settleMode(env),
+            note: "admin_demo_settle",
+          });
           return json(paid.body, paid.status, request);
         }
 
-        const paid = await markPaid(env, id, { note: "x_payment_header_present" });
+        // Real settlement gate. verify mode: only a facilitator-verified payment
+        // mints a grant; a fake/bare header is re-challenged with 402.
+        const verdict = await verifyPayment(env, request, m);
+        if (!verdict.ok) {
+          const fresh = await refreshMatchChallenge(env, m, origin);
+          return paymentRequiredResponse({
+            error: "payment_required",
+            message: `Payment not verified (${verdict.reason || "unverified"}). Attach a facilitator-verifiable payment covering seller + hub_fee on one network (Base or Solana), then retry.`,
+            price: { amount: String(fresh.split.grossUsd), currency: "USD" },
+            paymentInfo: {
+              networks: fresh.challenge?.rails?.solana
+                ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
+                : ["eip155:8453"],
+              asset: "USDC",
+              x402Version: 2,
+            },
+            ...fresh.challenge,
+          });
+        }
+
+        const paid = await markPaid(env, id, {
+          note: verdict.verified ? "x402_verified_settled" : "demo_settle_header_present",
+          demo: Boolean(verdict.demo),
+          verified: Boolean(verdict.verified),
+          mode: verdict.mode,
+          settlement: verdict.settlement || null,
+        });
         return json(paid.body, paid.status, request);
       }
 

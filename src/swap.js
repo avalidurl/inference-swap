@@ -221,6 +221,10 @@ export async function markPaid(env, id, meta = {}) {
   match.paymentMeta = {
     note: meta.note || "payment_header_present_or_demo_settle",
     demo: Boolean(meta.demo),
+    // verified=false means NOT confirmed on-chain via a facilitator (demo settle).
+    verified: Boolean(meta.verified),
+    ...(meta.mode ? { mode: meta.mode } : {}),
+    ...(meta.settlement ? { settlement: meta.settlement } : {}),
   };
   match.grant = {
     token,

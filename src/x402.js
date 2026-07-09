@@ -481,11 +481,221 @@ export function paymentRequiredResponse(body, status = 402) {
 
 /** Lightweight payment header presence check — full CDP verify is optional when secrets set. */
 export function hasPaymentHeader(request) {
-  return Boolean(
+  return Boolean(getPaymentHeaderValue(request));
+}
+
+function getPaymentHeaderValue(request) {
+  return (
     request.headers.get("X-Payment") ||
-      request.headers.get("x-payment") ||
-      request.headers.get("PAYMENT-SIGNATURE") ||
-      request.headers.get("Payment-Signature") ||
-      request.headers.get("payment-signature")
+    request.headers.get("x-payment") ||
+    request.headers.get("PAYMENT-SIGNATURE") ||
+    request.headers.get("Payment-Signature") ||
+    request.headers.get("payment-signature") ||
+    ""
   );
+}
+
+// ── Settlement verification (the money path) ───────────────────────────────
+//
+// SETTLE_MODE:
+//   "verify" → ONLY a CDP-facilitator-verified+settled payment mints a grant.
+//              A bare/fake header is re-challenged with 402.
+//   "demo"   → a present payment header settles for the live pitch, BUT the
+//              grant is marked verified:false / demo:true (NOT a real on-chain
+//              settlement). Never presented as a verified payment.
+// Default: "verify" when CDP creds are present, else "demo" (fail-soft so the
+// public pitch keeps working without secrets). An explicit env.SETTLE_MODE wins.
+
+export function settleMode(env) {
+  const explicit = String(env?.SETTLE_MODE || "").trim().toLowerCase();
+  if (explicit === "verify") return "verify";
+  if (explicit === "demo") return "demo";
+  return env?.CDP_API_KEY_ID && env?.CDP_API_KEY_SECRET ? "verify" : "demo";
+}
+
+/** Decode X-Payment / payment-signature → array of payment payload objects. */
+function decodePaymentPayloads(header) {
+  let parsed = null;
+  for (const dec of [() => atob(header), () => header]) {
+    try {
+      parsed = JSON.parse(dec());
+      break;
+    } catch {
+      /* try next form */
+    }
+  }
+  if (!parsed) return [];
+  return Array.isArray(parsed) ? parsed : [parsed];
+}
+
+/** Extract signed terms {rail, network, payTo, amount} from one payment payload. */
+function legFromPayload(obj) {
+  if (!obj || typeof obj !== "object") return null;
+  const payload = obj.payload && typeof obj.payload === "object" ? obj.payload : {};
+  const accepted = obj.accepted && typeof obj.accepted === "object" ? obj.accepted : {};
+  const network = String(obj.network || payload.network || accepted.network || "");
+  const svm = payload.transaction != null || network.startsWith("solana:");
+  if (svm) {
+    return {
+      rail: "svm",
+      network,
+      payTo: accepted.payTo != null ? String(accepted.payTo) : undefined,
+      amount: accepted.amount != null ? String(accepted.amount) : undefined,
+    };
+  }
+  const auth =
+    (payload.authorization && typeof payload.authorization === "object" && payload.authorization) ||
+    (obj.authorization && typeof obj.authorization === "object" && obj.authorization) ||
+    payload;
+  return {
+    rail: "evm",
+    network: network || NETWORK_BASE,
+    payTo: auth.to != null ? String(auth.to) : accepted.payTo != null ? String(accepted.payTo) : undefined,
+    amount:
+      auth.value != null ? String(auth.value) : accepted.amount != null ? String(accepted.amount) : undefined,
+  };
+}
+
+function payToEq(a, b, rail) {
+  if (!a || !b) return false;
+  return rail === "evm" ? a.toLowerCase() === b.toLowerCase() : a === b;
+}
+
+// ── CDP (mainnet) auth: a per-request EdDSA Bearer JWT ─────────────────────
+const jwtEnc = new TextEncoder();
+function b64urlBytes(bytes) {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+function fromB64(s) {
+  return Uint8Array.from(atob(String(s).trim()), (c) => c.charCodeAt(0));
+}
+
+/**
+ * Mint a Coinbase CDP Bearer JWT (EdDSA / Ed25519) bound to ONE request
+ * (method+host+path), valid ~2 min. Secret is base64 of a 64-byte Ed25519 key
+ * ([32 seed][32 public]); wrap the seed in the fixed Ed25519 PKCS8 prefix.
+ */
+export async function cdpBearer(keyId, secretB64, method, host, path) {
+  const raw = fromB64(secretB64);
+  const seed = raw.length >= 32 ? raw.slice(0, 32) : raw;
+  const pkcs8 = new Uint8Array([
+    0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x04, 0x22, 0x04, 0x20, ...seed,
+  ]);
+  const key = await crypto.subtle.importKey("pkcs8", pkcs8, { name: "Ed25519" }, false, ["sign"]);
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: "EdDSA", typ: "JWT", kid: keyId, nonce: b64urlBytes(crypto.getRandomValues(new Uint8Array(16))) };
+  const payload = { sub: keyId, iss: "cdp", aud: ["cdp_service"], nbf: now, exp: now + 120, uris: [`${method} ${host}${path}`] };
+  const signingInput = `${b64urlBytes(jwtEnc.encode(JSON.stringify(header)))}.${b64urlBytes(jwtEnc.encode(JSON.stringify(payload)))}`;
+  const sig = new Uint8Array(await crypto.subtle.sign({ name: "Ed25519" }, key, jwtEnc.encode(signingInput)));
+  return `${signingInput}.${b64urlBytes(sig)}`;
+}
+
+async function cdpVerifySettle(env, facilitator, host, basePath, paymentPayload, paymentRequirements, resourceUrl) {
+  try {
+    if (paymentPayload && typeof paymentPayload === "object" && !paymentPayload.resource && resourceUrl) {
+      paymentPayload.resource = resourceUrl;
+    }
+    const body = JSON.stringify({ x402Version: X402_VERSION, paymentPayload, paymentRequirements });
+    const vTok = await cdpBearer(env.CDP_API_KEY_ID, env.CDP_API_KEY_SECRET, "POST", host, `${basePath}/verify`);
+    const vr = await fetch(`${facilitator}/verify`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${vTok}` },
+      body,
+    });
+    if (!vr.ok) return { ok: false, reason: `cdp_verify_${vr.status}` };
+    const vj = await vr.json();
+    if (!vj.isValid) return { ok: false, reason: vj.invalidReason || "cdp_rejected" };
+    const sTok = await cdpBearer(env.CDP_API_KEY_ID, env.CDP_API_KEY_SECRET, "POST", host, `${basePath}/settle`);
+    const sr = await fetch(`${facilitator}/settle`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${sTok}` },
+      body,
+    });
+    if (!sr.ok) return { ok: false, reason: `cdp_settle_${sr.status}` };
+    const sj = await sr.json();
+    if (!sj.success) return { ok: false, reason: sj.errorReason || "cdp_settle_failed" };
+    return { ok: true, tx: sj.transaction, payer: sj.payer };
+  } catch (err) {
+    console.error("cdp_verify_settle_error", { err: String(err?.message || err) });
+    return { ok: false, reason: "verify_error" };
+  }
+}
+
+/**
+ * Verify a payment against a match's dual-payee challenge before minting a grant.
+ * Returns {ok, verified, demo, mode, ...}. Never throws; never prints secrets.
+ *
+ * verify mode: a full leg = both role=seller (when present) AND role=hub_fee
+ * on the SAME network must be CDP-verified+settled. Anything short → ok:false.
+ * demo mode: header presence → ok:true but verified:false (marked demo).
+ */
+export async function verifyPayment(env, request, match) {
+  const header = getPaymentHeaderValue(request);
+  if (!header) return { ok: false, verified: false, mode: settleMode(env), reason: "no_payment_header" };
+
+  const mode = settleMode(env);
+  if (mode === "demo") {
+    return {
+      ok: true,
+      verified: false,
+      demo: true,
+      mode,
+      note: "demo settlement — payment header present but NOT verified against a facilitator",
+    };
+  }
+
+  // verify mode — fail closed without CDP creds or accepts.
+  if (!env.CDP_API_KEY_ID || !env.CDP_API_KEY_SECRET) {
+    return { ok: false, verified: false, mode, reason: "verify_mode_no_cdp_creds" };
+  }
+  const accepts = Array.isArray(match?.challenge?.accepts) ? match.challenge.accepts : [];
+  if (!accepts.length) return { ok: false, verified: false, mode, reason: "no_accepts_to_verify" };
+
+  const payloads = decodePaymentPayloads(header);
+  if (!payloads.length) return { ok: false, verified: false, mode, reason: "payment_unreadable" };
+
+  const facilitator = (env.FACILITATOR || CDP_FACILITATOR).replace(/\/+$/, "");
+  let host, basePath;
+  try {
+    const fu = new URL(facilitator);
+    host = fu.host;
+    basePath = fu.pathname.replace(/\/+$/, "");
+  } catch {
+    return { ok: false, verified: false, mode, reason: "bad_facilitator" };
+  }
+  const resourceUrl = match?.challenge?.resource?.url || null;
+  const settled = [];
+
+  for (const raw of payloads) {
+    const leg = legFromPayload(raw);
+    if (!leg || !leg.payTo || !leg.amount) continue;
+    const req = accepts.find((a) => {
+      if (String(a.network) !== leg.network) return false;
+      if (!payToEq(String(a.payTo), leg.payTo, leg.rail)) return false;
+      try {
+        return BigInt(leg.amount) >= BigInt(a.amount);
+      } catch {
+        return false;
+      }
+    });
+    if (!req) continue;
+    const res = await cdpVerifySettle(env, facilitator, host, basePath, raw, req, resourceUrl);
+    if (!res.ok) return { ok: false, verified: false, mode, reason: res.reason };
+    settled.push({ network: req.network, role: req.extra?.role || null, payTo: req.payTo, tx: res.tx, payer: res.payer });
+  }
+
+  // Dual-payee: one network must carry hub_fee AND (seller when the challenge has one).
+  const byNet = {};
+  for (const s of settled) {
+    (byNet[s.network] = byNet[s.network] || new Set()).add(s.role);
+  }
+  const needsSeller = accepts.some((a) => a.extra?.role === "seller");
+  const fullNet = Object.keys(byNet).find(
+    (n) => byNet[n].has("hub_fee") && (!needsSeller || byNet[n].has("seller"))
+  );
+  if (!fullNet) return { ok: false, verified: false, mode, reason: "incomplete_dual_payee", settlement: settled };
+
+  return { ok: true, verified: true, mode, network: fullNet, settlement: settled };
 }
