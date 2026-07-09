@@ -89,7 +89,7 @@ export function feesHtml(origin = ORIGIN_CANON, env = {}) {
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>CURB — token &amp; fees</title>
-<meta name="description" content="CURB token on Base — address, pool, Bankr LP fee split (95% creator / 5% protocol), and hub x402 fee wallets."/>
+<meta name="description" content="CURB token on Base — Bankr LP 95/5 layer, Numetal-style WETH/$CURB team·treasury·burn distribution, and hub x402 fee wallets."/>
 <link rel="canonical" href="${origin}/fees"/>
 <link rel="icon" href="/assets/curb-favicon-32.png" type="image/png"/>
 <link rel="alternate" type="application/rss+xml" title="CURB" href="${origin}/feed.xml"/>
@@ -164,18 +164,36 @@ ${SHARED_CSS}
     font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
     color: var(--muted); margin-bottom: 0.4rem;
   }
+  .dnote {
+    margin: 0.55rem 0 0; font-size: 0.72rem; line-height: 1.45;
+    color: var(--fg); font-family: var(--sans); font-weight: 500;
+  }
   .barx { display: flex; height: 22px; border: 1px solid var(--fg); }
   .seg {
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem; color: var(--bg); font-weight: 600;
+    font-size: 0.65rem; color: #fff; font-weight: 700;
     white-space: nowrap; overflow: hidden;
-    border-right: 1px solid rgba(255,255,255,.35);
+    border-right: 1px solid rgba(255,255,255,.45);
   }
   .seg:last-child { border-right: 0; }
-  .s-creator { background: var(--fg); color: var(--bg); flex: 95 0 0; }
-  .s-protocol { background: var(--muted); color: var(--bg); flex: 5 0 0; }
-  .s-seller { background: var(--fg); color: var(--bg); }
-  .s-hub { background: var(--muted); color: var(--bg); }
+  /* Numetal fee-engine bar aesthetic (orange / Klein blue / near-black) */
+  .s-team { background: #FF5A1F; }
+  .s-trez { background: #002FA7; }
+  .s-burn { background: #2a2a2a; }
+  .s-creator { background: var(--fg); color: var(--bg); flex: 95 0 0; font-weight: 600; }
+  .s-protocol { background: var(--muted); color: var(--bg); flex: 5 0 0; font-weight: 600; }
+  .s-seller { background: var(--fg); color: var(--bg); font-weight: 600; }
+  .s-hub { background: var(--muted); color: var(--bg); font-weight: 600; }
+  .leg {
+    display: flex; flex-wrap: wrap; gap: 0.65rem 1rem;
+    padding: 0.45rem 0.9rem 0.15rem; font-size: 0.65rem;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted);
+  }
+  .leg .lg { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .leg .d { width: 10px; height: 10px; display: inline-block; border: 1px solid var(--fg); }
+  .leg .d-team { background: #FF5A1F; }
+  .leg .d-trez { background: #002FA7; }
+  .leg .d-burn { background: #2a2a2a; }
   .ldr {
     display: flex; align-items: center; gap: 10px;
     padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--line);
@@ -227,7 +245,7 @@ ${themeBootScript()}
     </div>
     <p class="eyebrow">Token &amp; fees · Base · Bankr Doppler</p>
     <h1>Token &amp; fees.</h1>
-    <p class="sub">CURB on Base — contract, pool, LP fee split, and the wallets that receive trading fees and hub x402 protocol fees.</p>
+    <p class="sub">CURB on Base — contract, pool, Bankr LP layer, creator-fee distribution (team / treasury / burn), and hub x402 wallets.</p>
     <div class="nav" aria-label="Primary">
       <a href="/">Home</a>
       <a class="on" href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
@@ -252,9 +270,9 @@ ${themeBootScript()}
     <div class="row"><span class="k">Total supply</span><span class="lead"></span><span class="v">${t.supply}</span></div>
     <div class="row"><span class="k">Decimals</span><span class="lead"></span><span class="v">${t.decimals}</span></div>
 
-    <div class="csec"><span class="lab"><span class="blk">█</span>Distribution · LP trading fees</span><span class="cnt">Bankr verified</span></div>
+    <div class="csec"><span class="lab"><span class="blk">█</span>LP / protocol layer</span><span class="cnt">Bankr Doppler · on-chain</span></div>
     <div class="dwrap">
-      <div class="dh">Creator / protocol share (immutable per launch)</div>
+      <div class="dh">Creator / protocol share (immutable per launch · verified via bankr fees)</div>
       <div class="barx" aria-label="95 percent creator, 5 percent protocol">
         <span class="seg s-creator">95% creator</span>
         <span class="seg s-protocol">5%</span>
@@ -263,7 +281,31 @@ ${themeBootScript()}
     <div class="row"><span class="k">Creator claimer</span><span class="lead"></span><span class="v"><a href="https://basescan.org/address/0x8f49d4d782488e8576c8c54288027c57f4acf521" target="_blank" rel="noopener">0x8f49…f521 ↗</a></span></div>
     <div class="row"><span class="k">Source</span><span class="lead"></span><span class="v">Bankr · Doppler</span></div>
 
-    <div class="csec"><span class="lab"><span class="blk">█</span>Distribution · hub swap fees</span><span class="cnt">x402 dual-payee</span></div>
+    <div class="csec"><span class="lab"><span class="blk">█</span>Distribution</span><span class="cnt">creator-side fees · same as $NUMETAL</span></div>
+    <div class="leg" aria-hidden="true">
+      <span class="lg"><span class="d d-team"></span>team</span>
+      <span class="lg"><span class="d d-trez"></span>treasury</span>
+      <span class="lg"><span class="d d-burn"></span>burn</span>
+    </div>
+    <div class="dwrap">
+      <div class="dh">WETH side</div>
+      <div class="barx" aria-label="80 percent team, 10 percent treasury, 10 percent burn">
+        <span class="seg s-team" style="flex:80 0 0">80% team</span>
+        <span class="seg s-trez" style="flex:10 0 0">10%</span>
+        <span class="seg s-burn" style="flex:10 0 0">10%</span>
+      </div>
+    </div>
+    <div class="dwrap">
+      <div class="dh">$CURB side</div>
+      <div class="barx" aria-label="40 percent team, 30 percent treasury, 30 percent burn">
+        <span class="seg s-team" style="flex:40 0 0">40% team</span>
+        <span class="seg s-trez" style="flex:30 0 0">30% treasury</span>
+        <span class="seg s-burn" style="flex:30 0 0">30% burn</span>
+      </div>
+      <p class="dnote">Every creator-fee claim splits WETH 80/10/10 and $CURB 40/30/30 to team, treasury, and burn — same policy as $NUMETAL.</p>
+    </div>
+
+    <div class="csec"><span class="lab"><span class="blk">█</span>Hub swap fees</span><span class="cnt">x402 dual-payee</span></div>
     <div class="dwrap">
       <div class="dh">Each matched inference swap (seller + hub)</div>
       <div class="barx" aria-label="${(100 - Number(feePct)).toFixed(1)} percent seller, ${feePct} percent hub">
@@ -286,9 +328,10 @@ ${themeBootScript()}
 
   <section class="how">
     <h2>How fees work</h2>
-    <p><strong>LP / trading fees.</strong> CURB launched on Bankr (Doppler) on Base. Creator fee share is <strong>${t.creatorSharePct}%</strong> to the goekhan Bankr EVM wallet; the remaining <strong>${t.protocolSharePct}%</strong> is the protocol/platform share. Claim via Bankr (<code>bankr fees claim ${t.address}</code> or the launch page).</p>
+    <p><strong>LP / protocol layer.</strong> CURB launched on Bankr (Doppler) on Base. On-chain reward share is <strong>${t.creatorSharePct}%</strong> creator (goekhan Bankr EVM claimer) / <strong>${t.protocolSharePct}%</strong> protocol — verified via <code>bankr fees --token</code>. That layer does not yet multi-split to team/treasury/burn on-chain; claims land at the creator claimer first.</p>
+    <p><strong>Distribution (creator-side).</strong> Claimed creator fees follow the same Numetal policy as <a href="https://numetal.xyz/fees" target="_blank" rel="noopener">numetal.xyz/fees</a>: WETH side 80% team / 10% treasury / 10% burn; $CURB side 40% team / 30% treasury / 30% burn.</p>
     <p><strong>Hub swap fees.</strong> On CURB inference matches, payment is dual-payee x402: seller wallet + hub fee (<strong>${feePct}%</strong>, min $0.001 USDC) on Base and/or Solana. Hub never holds upstream LLM keys.</p>
-    <p class="muted">Studio team / treasury addresses below are the same Numetal Labs wallets published on <a href="https://numetal.xyz/fees" target="_blank" rel="noopener">numetal.xyz/fees</a> — not separate CURB-only EOAs.</p>
+    <p class="muted">Team / treasury wallets are the same Numetal Labs addresses published on <a href="https://numetal.xyz/fees" target="_blank" rel="noopener">numetal.xyz/fees</a>.</p>
   </section>
 
   <section>
