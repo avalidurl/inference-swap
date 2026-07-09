@@ -23,6 +23,7 @@ npm run deploy     # docs build + wrangler deploy
 | Path | Role |
 | --- | --- |
 | `/` | Landing |
+| `/fees` | Token & fees (CURB on Base + wallets); `/token` → 302 |
 | `/docs/` | Diátaxis docs |
 | `/feed.xml` | Empty RSS channel (feedhub) |
 | `/newsletter` | Estate subscribe (`site=curb`) |

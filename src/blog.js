@@ -17,6 +17,7 @@ export function feedXml(origin) {
 export function sitemapXml(origin) {
   const paths = [
     "/",
+    "/fees",
     "/docs/",
     "/newsletter",
     "/terms",

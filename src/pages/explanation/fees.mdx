@@ -1,14 +1,23 @@
 # Fees
 
+Human-facing ledger (token address, Bankr LP split, hub wallets): **[Token & fees](https://curb.numetal.xyz/fees)**.
+
+## Hub swap fees (x402)
+
 Protocol fee is taken as a **second x402 accept** on match pay (not skimmed from seller settlement off-band).
 
 Defaults (env):
 
 - `FEE_BPS` — basis points of the matched price (e.g. `500` = 5%)
 - `MIN_FEE_USDC` — floor (e.g. `0.001`)
-- `HUB_PAY_TO` — fee recipient
+- `HUB_PAY_TO` — fee recipient (Base)
+- `HUB_PAY_TO_SOLANA` — fee recipient (Solana)
 - Asset: **USDC** via x402 on **Base** and **Solana**
 
 We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. That does not change the dual-payee split.
 
 Exact live values: `GET https://curb.numetal.xyz/.well-known/x402` and the 402 body on `POST /v1/matches/{id}/pay`.
+
+## $CURB LP / trading fees
+
+CURB launched on Bankr (Doppler) on Base. Creator share is **95%** to the goekhan Bankr EVM fee claimer; **5%** is protocol/platform. See `/fees` for addresses and explorers.

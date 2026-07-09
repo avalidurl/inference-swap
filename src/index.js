@@ -3,6 +3,7 @@ import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts } from "./x
 import { buildOpenApi, wellKnownX402 } from "./openapi.js";
 import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
+import { feesHtml } from "./fees.js";
 import { termsHtml, privacyHtml } from "./legal.js";
 import { feedXml, sitemapXml, newsletterHtml } from "./blog.js";
 import { corsHeaders, securityHeaders } from "./skin.js";
@@ -86,6 +87,8 @@ function llmsTxt(origin) {
     `> Agent↔agent inference swap. We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee. No upstream keys on hub. Product: ${PRODUCT_ID}`,
     "",
     `Home: ${origin}/`,
+    `Token & fees: ${origin}/fees`,
+    `Token: CURB on Base · 0xf0CBbf0806eD88910a011eEc9439A990c8C24BA3`,
     `Docs: ${origin}/docs/`,
     `OpenAPI: ${origin}/openapi.json`,
     `Discovery: ${origin}/.well-known/x402`,
@@ -147,6 +150,16 @@ export default {
       if (path === "/" && request.method === "GET") {
         const s = await stats(env);
         return text(landingHtml(origin, s), "text/html; charset=utf-8", 200, request);
+      }
+
+      if (path === "/fees" && request.method === "GET") {
+        return text(feesHtml(origin, env), "text/html; charset=utf-8", 200, request);
+      }
+      if (path === "/token" && request.method === "GET") {
+        return new Response(null, {
+          status: 302,
+          headers: { Location: "/fees", ...corsHeaders(request), ...securityHeaders({ "Content-Security-Policy": undefined }) },
+        });
       }
 
       if (path === "/terms" && request.method === "GET") {

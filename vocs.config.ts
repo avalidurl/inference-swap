@@ -14,6 +14,7 @@ export default defineConfig({
   },
   topNav: [
     { text: "Home", link: "https://curb.numetal.xyz" },
+    { text: "Token & fees", link: "https://curb.numetal.xyz/fees" },
     { text: "Tutorials", link: "/tutorials/first-swap" },
     { text: "How-to", link: "/how-to/post-offer" },
     { text: "Explanation", link: "/explanation/what-curb-is" },
