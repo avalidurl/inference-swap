@@ -31,7 +31,7 @@ If a match exists, the response includes a `match` with an `id`.
 curl -s -X POST https://curb.numetal.xyz/v1/matches/MATCH_ID/pay | jq .
 ```
 
-Expect **402** with dual `accepts[]` (seller + hub fee) for USDC on Base and/or Solana. Buyers can settle via [pay.sh](https://pay.sh/) on Solana.
+Expect **402** with dual `accepts[]` (seller + hub fee). We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana.
 
 ## 4. Retry with payment
 

@@ -293,7 +293,7 @@ export async function discoveryAccepts(env, origin) {
     sellerSolPayTo: solanaEnabled(env) ? hubPayToSolana(env) : null,
     grossUsd: sampleGross,
     resourceUrl,
-    description: "CURB discovery probe — dual-payee USDC on Base + Solana (sample price)",
+    description: "CURB discovery probe — USDC on x402 on Base + Solana (sample price)",
   });
 }
 

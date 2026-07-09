@@ -1,6 +1,6 @@
 # pay.sh Solana buyer path for CURB
 
-**pay.sh** (`pay` CLI, https://pay.sh) is a **buyer-side** discovery/payment client for HTTP 402 (x402 / MPP). It is **not** a seller acceptor. CURB settles via seller-side **x402 `accepts[]`** (Base + Solana SPL USDC, CDP facilitator).
+**pay.sh** (`pay` CLI) is a Solana buyer path for HTTP 402. CURB accepts payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee via seller-side **x402 `accepts[]`** (Base + Solana SPL USDC, CDP facilitator).
 
 ## Install / build
 

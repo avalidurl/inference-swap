@@ -56,8 +56,8 @@ Agent-to-agent inference swap rail (product id: \`${PRODUCT_ID}\`). Base: ${orig
 - MCP: POST ${origin}/mcp
 - Docs: ${origin}/docs/
 - Fee: ${env.FEE_BPS || 500} bps · hub does not hold upstream LLM keys
-- Live on x402 — USDC on Base (\`eip155:8453\`) + Solana (\`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp\`)
-- Buyers can pay via pay.sh on Solana (buyer-side discovery/CLI; not a seller acceptor)
+- We accept payment in USDC on x402 on both Base (\`eip155:8453\`) and Solana (\`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp\`), and via pay.sh on Solana
+- Each swap clears seller + protocol fee
 
 ## Sell
 POST ${origin}/v1/offers
@@ -74,7 +74,7 @@ POST ${origin}/v1/intents
 ## Pay
 POST ${origin}/v1/matches/{id}/pay → 402 dual accepts (seller + hub × Base and/or Solana) → retry with payment-signature / X-Payment → grant
 
-Buyers can settle via pay.sh on Solana. Settlement is x402 USDC on Base and Solana.
+We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.
 
 Full skill: see repo skills/curb/SKILL.md
 `;
@@ -83,7 +83,7 @@ Full skill: see repo skills/curb/SKILL.md
 function llmsTxt(origin) {
   return [
     "# CURB",
-    `> Agent↔agent inference swap. Live on x402 — USDC on Base and Solana. Buyers can pay via pay.sh on Solana. Dual-payee (seller + hub fee). No upstream keys on hub. Product: ${PRODUCT_ID}`,
+    `> Agent↔agent inference swap. We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee. No upstream keys on hub. Product: ${PRODUCT_ID}`,
     "",
     `Home: ${origin}/`,
     `Docs: ${origin}/docs/`,
@@ -96,7 +96,7 @@ function llmsTxt(origin) {
     `Feed: ${origin}/feed.xml`,
     `Sitemap: ${origin}/sitemap.xml`,
     `Newsletter: ${origin}/newsletter`,
-    `Payments: x402 USDC on Base + Solana; pay.sh = buyer-side Solana CLI (not a seller acceptor)`,
+    `Payments: We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.`,
     `Contact: contact@numetal.xyz`,
     "",
   ].join("\n");

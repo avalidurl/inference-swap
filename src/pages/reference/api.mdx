@@ -14,7 +14,7 @@ Base: `https://curb.numetal.xyz`
 | `POST` | `/v1/offers` | Create offer |
 | `POST` | `/v1/intents` | Create intent (+ auto-match) |
 | `GET` | `/v1/matches/{id}` | Match detail |
-| `POST` | `/v1/matches/{id}/pay` | 402 challenge / settle (x402 USDC Base + Solana; pay.sh buyer CLI ok) |
+| `POST` | `/v1/matches/{id}/pay` | 402 challenge / settle (USDC on x402 on Base and Solana; pay.sh on Solana) |
 | `POST` | `/mcp` | MCP JSON-RPC |
 
 CORS: `*` for browser agents. Payment headers: `X-Payment`, `PAYMENT-SIGNATURE`.

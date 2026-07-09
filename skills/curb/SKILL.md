@@ -1,6 +1,6 @@
 ---
 name: curb
-description: CURB — agent-to-agent inference swap on Numetal. Offer, bid, match, pay (x402 dual payee on Base + Solana USDC; buyers can use pay.sh on Solana), fulfill. Use when an agent wants to sell or buy MTok of model inference peer-to-peer without a retail gateway holding upstream keys.
+description: CURB — agent-to-agent inference swap on Numetal. Offer, bid, match, pay (USDC on x402 on Base and Solana, and via pay.sh on Solana), fulfill. Use when an agent wants to sell or buy MTok of model inference peer-to-peer without a retail gateway holding upstream keys.
 ---
 
 # CURB
@@ -11,9 +11,8 @@ Product id: `numetal-curb` · Brand: **CURB**
 
 ## Payments
 
-- **Live on x402.**
-- Accept **USDC on Base and Solana** (dual-payee: seller + hub fee).
-- Buyers can pay via **[pay.sh](https://pay.sh/)** on Solana (buyer-side discovery/CLI). Settlement is still x402 USDC — pay.sh is **not** a seller acceptor.
+- We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana.
+- Each swap clears seller + protocol fee.
 
 ## Base URL
 
@@ -73,7 +72,7 @@ Without `payment-signature` / `X-Payment` → **402** with `accepts[]` (pick **o
 3. `role=seller` · `solana:…` → seller Solana `payTo` (when `sellerSolPayTo` set)
 4. `role=hub_fee` · `solana:…` → hub Solana `payTo` (AgentCash deposit)
 
-Rails: USDC via x402 on **Base** and **Solana**. Retry with `payment-signature` / `X-Payment`. On success you receive a **grant** (bearer + seller endpoint). Call the seller endpoint to consume MTok.
+Rails: USDC via x402 on **Base** and **Solana**, and via pay.sh on Solana. Retry with `payment-signature` / `X-Payment`. On success you receive a **grant** (bearer + seller endpoint). Call the seller endpoint to consume MTok.
 
 ## MCP
 

@@ -132,7 +132,7 @@ function pay402(env, origin, description) {
           error: "payment_required",
           resource: {
             url: `${origin}/v1/pay`,
-            description: "CURB discovery probe — dual-payee USDC on Base + Solana",
+            description: "CURB discovery probe — USDC on x402 on Base + Solana (sample price)",
             mimeType: "application/json",
           },
           accepts,
@@ -162,7 +162,7 @@ export function buildOpenApi(env, origin) {
   const payShHook = {
     "x-numetal-pay-sh": {
       status: "buyer_cli",
-      note: "Buyers can pay via pay.sh on Solana (discovery/CLI). Settlement is x402 USDC on Base and Solana — pay.sh is not a seller acceptor.",
+      note: "We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.",
     },
   };
 
@@ -172,7 +172,7 @@ export function buildOpenApi(env, origin) {
       title: "CURB",
       version: "0.1.0",
       description:
-        "CURB — agent-to-agent inference swap rail. Live on x402 — dual-payee USDC on Base and Solana (seller + protocol fee). Buyers can pay via pay.sh on Solana (buyer-side discovery/CLI; not a seller acceptor). Hub does not hold upstream LLM keys.",
+        "CURB — agent-to-agent inference swap rail. We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee. Hub does not hold upstream LLM keys.",
       "x-guidance":
         "1) GET /v1/offers (free) to browse capacity. 2) POST /v1/offers to sell (include sellerPayTo Base 0x…; optional sellerSolPayTo for full Solana dual-payee). 3) POST /v1/intents to buy — hub auto-matches. 4) POST /v1/matches/{id}/pay bare → 402 with accepts[] (role=seller + role=hub_fee on eip155:8453 and, when enabled, solana:…). Pick ONE network; pay BOTH roles on that network; retry with payment-signature / X-Payment. 5) Discovery probe: bare POST /v1/pay → sample 402 (no side effects). Refunds/billing: contact@numetal.xyz.",
       contact: { email: "contact@numetal.xyz", name: "Numetal Labs", url: "https://curb.numetal.xyz" },
@@ -437,7 +437,7 @@ export async function wellKnownX402(env, origin) {
           type: "http",
           x402Version: X402_VERSION,
           description:
-            "CURB — live on x402. Dual-payee USDC on Base and Solana (seller + hub fee). Buyers can pay via pay.sh on Solana (buyer CLI). Bare POST → 402.",
+            "CURB — we accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee. Bare POST → 402.",
           mimeType: "application/json",
           accepts: challenge.accepts,
         },
@@ -464,7 +464,7 @@ export async function wellKnownX402(env, origin) {
     facilitator: env.FACILITATOR || "https://api.cdp.coinbase.com/platform/v2/x402",
     paySh: {
       status: "buyer_cli",
-      note: "Buyers can pay via pay.sh on Solana (discovery/CLI). Not a seller acceptor — settlement is x402 USDC on Base and Solana.",
+      note: "We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.",
     },
   };
 }

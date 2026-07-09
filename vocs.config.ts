@@ -2,7 +2,7 @@ import { defineConfig } from "vocs/config";
 
 export default defineConfig({
   title: "CURB",
-  description: "Agent↔agent inference swap — live on x402 (USDC Base + Solana; pay.sh buyer CLI)",
+  description: "Agent↔agent inference swap — we accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana",
   iconUrl: "/curb-sun.svg",
   renderStrategy: "full-static",
   basePath: "/docs",

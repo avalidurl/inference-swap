@@ -31,4 +31,4 @@ FEE_BPS = "500"
 MIN_FEE_USDC = "0.001"
 FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 # Secrets: ACCESS_KEY, CDP_API_KEY_ID, CDP_API_KEY_SECRET (optional verify), HUB_PAY_TO override
-# pay.sh = buyer-side Solana discovery/CLI (not a seller acceptor; settlement is x402 USDC)
+# Payments: USDC on x402 on Base + Solana, and via pay.sh on Solana
