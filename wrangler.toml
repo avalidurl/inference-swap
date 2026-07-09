@@ -78,7 +78,8 @@ KEEPER_ADDRESS = "0xf26838759BC3AC7394389Ae63a9Dcea0542Ab4bB"
 PRIVY_KEEPER_WALLET_ID = "s31q2qlsu4wubxo3kketsl8g"
 # "on" enables the gated cron auto-distribute. Requires PRIVY_APP_ID + PRIVY_APP_SECRET secrets and a
 # funded, signable keeper (the app-owned server wallet above).
-KEEPER_DISTRIBUTE = "off"
+# LIVE 2026-07-10: keeper 0xf268… funded (0.0011 ETH Base) + secrets set → auto-distribute enabled.
+KEEPER_DISTRIBUTE = "on"
 # Minimum split USDC balance (raw 6dp) before the keeper spends gas on distribute(). 10000 = $0.01.
 KEEPER_DISTRIBUTE_MIN = "10000"
 # Base JSON-RPC endpoint for the keeper's balanceOf read. Optional — defaults to https://mainnet.base.org.
