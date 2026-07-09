@@ -89,8 +89,13 @@ export async function listOffers(env, { status = "open", limit = 50 } = {}) {
 }
 
 export async function createIntent(env, body, origin) {
-  const rawBuyer = body.buyer || body.buyerAddress;
-  const buyer = normAddr(rawBuyer) || normSol(rawBuyer);
+  const rawBuyer = body.buyer ?? body.buyerAddress;
+  let buyer = null;
+  if (rawBuyer != null && String(rawBuyer).trim() !== "") {
+    // buyer is optional, but a supplied non-empty value must be a real address.
+    buyer = normAddr(rawBuyer) || normSol(rawBuyer);
+    if (!buyer) return { error: "buyer_invalid", status: 400 };
+  }
   const model = String(body.model || "").trim();
   const mtok = Number(body.mtok || body.mTok || 0);
   const maxPriceUsd = Number(body.maxPriceUsd || body.maxPrice || 0);
