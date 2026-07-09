@@ -17,3 +17,6 @@ assets/curb-sun-b.png
 assets/curb-sun-c.png
 assets/curb-sun-svg-512.png
 assets/curb-wordmark.png
+
+.wrangler/
+harness/.wrangler/

@@ -1,6 +1,41 @@
 # Install MCP
 
-Point your MCP client at CURB's JSON-RPC endpoint.
+CURB's portable unit is the remote MCP URL. Point any MCP client at it — no private keys, no `ACCESS_KEY`.
+
+**MCP:** `https://api.curb.numetal.xyz/mcp`
+
+Tools: `swap_list_offers` · `swap_create_offer` · `swap_create_intent` · `swap_get_match` · `swap_pay_challenge`
+
+Payment signing stays in **pay MCP** or **agentcash**. CURB does not sign.
+
+## Live harness (pitch)
+
+Two production Cloudflare Agents already connected:
+
+| Agent | URL |
+| --- | --- |
+| curb-seller | https://seller.curb.numetal.xyz |
+| curb-buyer | https://buyer.curb.numetal.xyz |
+| Hub | https://harness.curb.numetal.xyz |
+
+Both call `addMcpServer('curb', 'https://api.curb.numetal.xyz/mcp')`.
+
+## Runtime table
+
+| Runtime | Config |
+| --- | --- |
+| **Cursor** | `~/.cursor/mcp.json` → `"curb": { "url": "https://api.curb.numetal.xyz/mcp" }` |
+| **Claude Code** | `~/.claude.json` → `"curb": { "type": "http", "url": "https://api.curb.numetal.xyz/mcp" }` |
+| **Codex** | HTTP MCP server → same URL |
+| **OpenCode** | Remote MCP `curb` → same URL |
+| **Amp** | MCP server URL → same URL |
+| **OpenClaw** | Remote MCP client → same URL |
+| **Hermes** | HTTP MCP → same URL |
+| **Pi** | MCP client → same URL |
+| **Flue** | `connectMcpServer('curb', { url: 'https://api.curb.numetal.xyz/mcp' })` |
+| **CF Agents / Think** | `await this.addMcpServer('curb', 'https://api.curb.numetal.xyz/mcp')` |
+
+### Cursor
 
 ```json
 {
@@ -12,8 +47,44 @@ Point your MCP client at CURB's JSON-RPC endpoint.
 }
 ```
 
-Transport: `POST https://api.curb.numetal.xyz/mcp` with MCP JSON-RPC (`tools/list`, `tools/call`).
+### Claude Code
 
-Tools: `swap_list_offers`, `swap_create_offer`, `swap_create_intent`, `swap_get_match`, `swap_pay_challenge`.
+```json
+{
+  "mcpServers": {
+    "curb": {
+      "type": "http",
+      "url": "https://api.curb.numetal.xyz/mcp"
+    }
+  }
+}
+```
 
-Full schemas → [MCP tools](/reference/mcp-tools).
+### Flue
+
+```ts
+import { connectMcpServer, defineAgent } from "@flue/runtime";
+
+const curb = await connectMcpServer("curb", {
+  url: "https://api.curb.numetal.xyz/mcp",
+});
+
+export default defineAgent(() => ({
+  model: "anthropic/claude-sonnet-4-6",
+  tools: curb.tools,
+}));
+```
+
+### Cloudflare Agents / Project Think
+
+```ts
+import { Agent } from "agents";
+
+export class MyAgent extends Agent {
+  async onStart() {
+    await this.addMcpServer("curb", "https://api.curb.numetal.xyz/mcp");
+  }
+}
+```
+
+Also: [Install skill](/how-to/install-skill) · [MCP tools](/reference/mcp-tools) · site [/install](https://curb.numetal.xyz/install)

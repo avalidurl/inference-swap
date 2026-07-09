@@ -24,6 +24,8 @@ npm run deploy     # docs build + wrangler deploy
 | Path | Role |
 | --- | --- |
 | `/` | Landing |
+| `/install` | Universal MCP + skill install |
+| `/harness` | Pitch page → live seller + buyer agents |
 | `/dispatch` | Dispatch index (post cards) |
 | `/dispatch/curb-is-live` | Launch dispatch (canonical) |
 | `/blog` | 302 → `/dispatch` |
@@ -33,3 +35,19 @@ npm run deploy     # docs build + wrangler deploy
 | `/newsletter` | Estate subscribe (`site=curb`) |
 | `/terms`, `/privacy` | Legal |
 | `/v1/*`, `/mcp`, `/skill.md` | Agent API |
+
+## Live harness (Cloudflare Agents SDK)
+
+Separate Worker `curb-harness` (`harness/`):
+
+| Agent | URL |
+| --- | --- |
+| Hub | https://harness.curb.numetal.xyz |
+| curb-seller | https://seller.curb.numetal.xyz |
+| curb-buyer | https://buyer.curb.numetal.xyz |
+
+Both agents: `addMcpServer('curb', 'https://api.curb.numetal.xyz/mcp')`. No private keys in the harness.
+
+```bash
+cd harness && npm install && npm run deploy
+```

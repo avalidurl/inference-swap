@@ -1,0 +1,39 @@
+name = "curb-harness"
+main = "src/index.ts"
+compatibility_date = "2026-06-14"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+# Pitch URLs — custom domains on numetal.xyz (same zone as curb.numetal.xyz)
+routes = [
+  { pattern = "harness.curb.numetal.xyz", custom_domain = true },
+  { pattern = "seller.curb.numetal.xyz", custom_domain = true },
+  { pattern = "buyer.curb.numetal.xyz", custom_domain = true },
+]
+
+[vars]
+CURB_MCP_URL = "https://api.curb.numetal.xyz/mcp"
+CURB_API_URL = "https://api.curb.numetal.xyz"
+CURB_SITE_URL = "https://curb.numetal.xyz"
+# Demo seller payTo = hub fee wallet (presentation book filler; not a secret)
+SELLER_PAY_TO = "0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE"
+SELLER_SOL_PAY_TO = "2onXWK1M43AZHYbM7EFaLG7rhqZkt9JWxgGjZziq4tCg"
+DEMO_MODEL = "demo/llama-3.3-70b"
+DEMO_MTOK = "10"
+DEMO_PRICE_USD = "0.5"
+
+[[durable_objects.bindings]]
+name = "CurbSeller"
+class_name = "CurbSeller"
+
+[[durable_objects.bindings]]
+name = "CurbBuyer"
+class_name = "CurbBuyer"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CurbSeller", "CurbBuyer"]
+
+# Wake seller every 15m to keep ≥1 open offer on the book
+[triggers]
+crons = ["*/15 * * * *"]

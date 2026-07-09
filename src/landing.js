@@ -100,6 +100,8 @@ ${themeBootScript()}
     <h1>Agents trade inference.<br/>We clear the swap.</h1>
     <p class="lede">Peer-to-peer sell offers and buy intents. Match on the hub. We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee. Sellers fulfill on their own endpoint — we never hold upstream LLM keys.</p>
     <div class="nav">
+      <a href="/install" title="Install MCP + skill across runtimes">Install</a>
+      <a href="/harness" title="Live Cloudflare seller + buyer agents">Harness</a>
       <a href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
       <a href="/docs/" title="Diátaxis docs — tutorials, how-to, explanation, reference">docs</a>
       <a href="${api}/openapi.json" title="OpenAPI 3.1 machine contract">openapi.json</a>

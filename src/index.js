@@ -5,6 +5,7 @@ import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
 import { feesHtml } from "./fees.js";
 import { termsHtml, privacyHtml } from "./legal.js";
+import { installHtml, harnessHtml } from "./install.js";
 import {
   feedXml,
   sitemapXml,
@@ -155,39 +156,29 @@ ul{padding-left:18px;margin:.3rem 0}
 <p class="m" style="margin-top:26px;border-top:1px solid #2a2a2a;padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
 </html>`;
 
-async function skillMd(env, apiOrigin, siteOrigin) {
+/** Prefer ASSETS public/skill.md (full agentskills SKILL); fallback thin banner. */
+async function skillMd(env, apiOrigin, siteOrigin, request) {
+  if (env.ASSETS) {
+    try {
+      const assetReq = new Request(new URL("/skill.md", request.url), { method: "GET" });
+      const res = await env.ASSETS.fetch(assetReq);
+      if (res.ok) {
+        const body = await res.text();
+        if (body.includes("name: curb") || body.includes("# CURB")) return body;
+      }
+    } catch {
+      /* fall through */
+    }
+  }
   return `# CURB
 
-Agent-to-agent inference swap rail (product id: \`${PRODUCT_ID}\`). API: ${apiOrigin}
+Agent-to-agent inference swap (product: \`${PRODUCT_ID}\`).
 
-- OpenAPI: ${apiOrigin}/openapi.json
-- Discovery: ${apiOrigin}/.well-known/x402
-- Probe (402): POST ${apiOrigin}/v1/pay
 - MCP: POST ${apiOrigin}/mcp
-- Docs: ${siteOrigin}/docs/
-- Token & fees: ${siteOrigin}/fees
-- Fee: ${env.FEE_BPS || 500} bps · hub does not hold upstream LLM keys
-- We accept payment in USDC on x402 on both Base (\`eip155:8453\`) and Solana (\`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp\`), and via pay.sh on Solana
-- Each swap clears seller + protocol fee
-
-## Sell
-POST ${apiOrigin}/v1/offers
-\`\`\`json
-{"sellerPayTo":"0x…","sellerSolPayTo":"<optional base58>","endpoint":"https://…/v1/chat/completions","model":"llama-3.3-70b","mtok":10,"priceUsd":0.8}
-\`\`\`
-
-## Buy
-POST ${apiOrigin}/v1/intents
-\`\`\`json
-{"model":"llama-3.3-70b","mtok":2,"maxPriceUsd":0.5,"buyer":"0x…"}
-\`\`\`
-
-## Pay
-POST ${apiOrigin}/v1/matches/{id}/pay → 402 dual accepts (seller + hub × Base and/or Solana) → retry with payment-signature / X-Payment → grant
-
-We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.
-
-Full skill: see repo skills/curb/SKILL.md
+- Skill (full): see repo \`skills/curb/SKILL.md\`
+- Docs: ${siteOrigin}/docs/how-to/install-mcp
+- Live harness: https://harness.curb.numetal.xyz
+- Fee: ${env.FEE_BPS || 500} bps · hub holds no upstream keys · CURB does not sign payments
 `;
 }
 
@@ -218,7 +209,28 @@ function llmsTxt(apiOrigin, siteOrigin) {
   ].join("\n");
 }
 
+async function seedDemoOfferIfEmpty(env, origin) {
+  const s = await stats(env);
+  if ((s.openOffers || 0) > 0) return { skipped: true, openOffers: s.openOffers };
+  const r = await createOffer(env, {
+    sellerPayTo: env.HUB_PAY_TO,
+    sellerSolPayTo: env.HUB_PAY_TO_SOLANA,
+    endpoint: "https://seller.curb.numetal.xyz/fulfill",
+    model: "demo/llama-3.3-70b",
+    mtok: 10,
+    priceUsd: 0.5,
+    attestation: "demo_seed",
+    note: "curb-api-cron demo offer",
+  });
+  return { seeded: true, offer: r.body, status: r.status };
+}
+
 export default {
+  async scheduled(_controller, env, ctx) {
+    const origin = "https://api.curb.numetal.xyz";
+    ctx.waitUntil(seedDemoOfferIfEmpty(env, origin));
+  },
+
   async fetch(request, env) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -242,6 +254,8 @@ export default {
         "/newsletter",
         "/blog",
         "/dispatch",
+        "/install",
+        "/harness",
         "/feed.xml",
         "/rss.xml",
         "/sitemap.xml",
@@ -367,7 +381,19 @@ export default {
       }
 
       if ((path === "/skill.md" || path === "/skill") && request.method === "GET") {
-        return text(await skillMd(env, apiOrigin, siteOrigin), "text/markdown; charset=utf-8", 200, request);
+        return text(
+          await skillMd(env, apiOrigin, siteOrigin, request),
+          "text/markdown; charset=utf-8",
+          200,
+          request
+        );
+      }
+
+      if (!apiHost && path === "/install" && request.method === "GET") {
+        return text(installHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
+      }
+      if (!apiHost && path === "/harness" && request.method === "GET") {
+        return text(harnessHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
       }
 
       if (path === "/mcp" && request.method === "POST") {
@@ -544,12 +570,30 @@ export default {
 
       if (path === "/v1/demo-fulfill" && request.method === "POST") {
         const parsed = await readJsonLimited(request);
+        const auth = request.headers.get("authorization") || "";
         return json(
           {
-            ok: true,
-            demo: true,
-            message: "Replace this endpoint with a real seller OpenAI-compatible API.",
-            echo: parsed.body ?? null,
+            id: `chatcmpl-curb-api-demo-${Date.now().toString(36)}`,
+            object: "chat.completion",
+            created: Math.floor(Date.now() / 1000),
+            model: "demo/llama-3.3-70b",
+            choices: [
+              {
+                index: 0,
+                message: {
+                  role: "assistant",
+                  content:
+                    "CURB API demo-fulfill stub. Prefer https://seller.curb.numetal.xyz/fulfill for the live harness seller.",
+                },
+                finish_reason: "stop",
+              },
+            ],
+            usage: { prompt_tokens: 8, completion_tokens: 20, total_tokens: 28 },
+            curb: {
+              demo: true,
+              grantPresent: /^Bearer\s+/i.test(auth),
+              echo: parsed.body ?? null,
+            },
           },
           200,
           request

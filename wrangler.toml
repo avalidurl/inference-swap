@@ -35,3 +35,7 @@ MIN_FEE_USDC = "0.001"
 FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 # Secrets: ACCESS_KEY, CDP_API_KEY_ID, CDP_API_KEY_SECRET (optional verify), HUB_PAY_TO override
 # Payments: USDC on x402 on Base + Solana, and via pay.sh on Solana
+
+# Backup book-fill if harness seller is down (primary seed = curb-harness seller cron)
+[triggers]
+crons = ["*/15 * * * *"]
