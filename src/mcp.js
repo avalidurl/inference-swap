@@ -63,12 +63,6 @@ const TOOLS = [
   },
 ];
 
-function bearerOk(request, key) {
-  if (!key) return false;
-  const m = (request.headers.get("Authorization") || "").match(/^Bearer\s+(.+)$/i);
-  return Boolean(m && m[1] === key);
-}
-
 export async function handleMcp(env, request, origin) {
   const len = Number(request.headers.get("content-length") || 0);
   if (len > 32 * 1024) {
@@ -91,13 +85,10 @@ export async function handleMcp(env, request, origin) {
     return jsonRpc(msg.id, { tools: TOOLS });
   }
 
-  // No destructive admin tools exposed via MCP without ACCESS_KEY.
-  // Reject unknown methods that look like admin.
-  if (typeof msg.method === "string" && /admin|seed|delete|drop|purge/i.test(msg.method)) {
-    if (!bearerOk(request, env.ACCESS_KEY)) {
-      return jsonRpc(msg.id, { code: -32001, message: "unauthorized" });
-    }
-  }
+  // No destructive admin tools are exposed via MCP. Admin-ish method names fall
+  // through to the SAME -32601 "Method not found" as any other unknown method — no
+  // -32001 differential — so their existence/gating is never disclosed. If a real
+  // admin method is ever added, gate it internally and still return -32601 on failure.
 
   if (msg.method === "tools/call") {
     const name = String(msg.params?.name || "").slice(0, 64);
