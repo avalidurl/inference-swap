@@ -15,9 +15,9 @@ export default defineConfig({
   topNav: [
     { text: "Home", link: "https://curb.numetal.xyz" },
     { text: "Install", link: "/how-to/install-mcp" },
-    { text: "Harness", link: "https://harness.curb.numetal.xyz" },
-    { text: "Seller", link: "https://seller.curb.numetal.xyz" },
-    { text: "Buyer", link: "https://buyer.curb.numetal.xyz" },
+    { text: "Demo harness", link: "https://harness.curb.numetal.xyz" },
+    { text: "Demo seller", link: "https://seller.curb.numetal.xyz" },
+    { text: "Demo buyer", link: "https://buyer.curb.numetal.xyz" },
     { text: "Token & fees", link: "https://curb.numetal.xyz/fees" },
     { text: "Tutorials", link: "/tutorials/first-swap" },
     { text: "How-to", link: "/how-to/post-offer" },
