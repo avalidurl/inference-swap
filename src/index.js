@@ -18,6 +18,7 @@ import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts, verifyPaym
 import { buildOpenApi, wellKnownX402 } from "./openapi.js";
 import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
+import { deckHtml, deckMarkdown } from "./deck.js"; // [deck]
 import { feesHtml } from "./fees.js";
 import { termsHtml, privacyHtml } from "./legal.js";
 import { installHtml, harnessHtml } from "./install.js";
@@ -315,6 +316,7 @@ function llmsTxt(apiOrigin, siteOrigin) {
     "",
     "## Surfaces",
     `Site: ${siteOrigin}/`,
+    `Pitch deck: ${siteOrigin}/deck (PDF ${siteOrigin}/deck.pdf · markdown ${siteOrigin}/deck.md)`,
     `API: ${agentApi}/`,
     `API (this host catalog): ${apiOrigin}/`,
     `Install: ${siteOrigin}/install`,
@@ -463,6 +465,7 @@ export default {
         path.endsWith(".woff2") ||
         path.endsWith(".png") ||
         path.endsWith(".svg") ||
+        path.endsWith(".pdf") || // [deck] serve public/deck/curb-deck.pdf
         path.endsWith(".ico"))
     ) {
       if (env.ASSETS) {
@@ -513,6 +516,21 @@ export default {
         }
         const s = await stats(env);
         return text(landingHtml(siteOrigin, s, apiOrigin), "text/html; charset=utf-8", 200, request);
+      }
+
+      // [deck] hosted 15-slide pitch deck + markdown source + PDF redirect
+      if (!apiHost && path === "/deck" && request.method === "GET") {
+        return text(deckHtml(siteOrigin, apiOrigin), "text/html; charset=utf-8", 200, request);
+      }
+      if (
+        !apiHost &&
+        (path === "/deck.md" || path === "/deck/curb/deck.md") &&
+        request.method === "GET"
+      ) {
+        return text(deckMarkdown(siteOrigin, apiOrigin), "text/markdown; charset=utf-8", 200, request);
+      }
+      if (!apiHost && path === "/deck.pdf" && request.method === "GET") {
+        return redirectTo(`${siteOrigin}/deck/curb-deck.pdf`, request);
       }
 
       if (!apiHost && path === "/fees" && request.method === "GET") {

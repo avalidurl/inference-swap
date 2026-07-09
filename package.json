@@ -9,6 +9,7 @@
     "docs:build": "vocs build && bash scripts/postbuild-docs.sh",
     "build": "npm run docs:build",
     "deploy": "npm run docs:build && wrangler deploy",
+    "deck:pdf": "node scripts/generate-curb-deck-pdf.mjs",
     "tail": "wrangler tail"
   },
   "dependencies": {
