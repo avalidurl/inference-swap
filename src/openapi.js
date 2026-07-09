@@ -11,6 +11,8 @@ import {
   baseNetwork,
   baseAsset,
   discoveryAccepts,
+  DISCOVERY_BAZAAR,
+  MATCH_PAY_BAZAAR,
 } from "./x402.js";
 
 const DISCOVERY_PRICE = "0.100000";
@@ -98,8 +100,15 @@ function exampleAccepts(env) {
   return out;
 }
 
-function pay402(env, origin, description) {
+function pay402(env, origin, description, resourcePath = "/v1/pay") {
   const accepts = exampleAccepts(env);
+  const realm = (() => {
+    try {
+      return new URL(origin).hostname;
+    } catch {
+      return "curb.numetal.xyz";
+    }
+  })();
   return {
     description,
     content: {
@@ -124,6 +133,10 @@ function pay402(env, origin, description) {
               items: paymentRequirementSchema(),
               example: accepts,
             },
+            extensions: {
+              type: "object",
+              description: "x402 v2 extensions — bazaar input/output schemas for discovery.",
+            },
           },
           required: ["x402Version", "resource", "accepts"],
         },
@@ -131,7 +144,7 @@ function pay402(env, origin, description) {
           x402Version: X402_VERSION,
           error: "payment_required",
           resource: {
-            url: `${origin}/v1/pay`,
+            url: `${origin}${resourcePath}`,
             description: "CURB discovery probe — USDC on x402 on Base + Solana (sample price)",
             mimeType: "application/json",
           },
@@ -141,8 +154,18 @@ function pay402(env, origin, description) {
     },
     headers: {
       "PAYMENT-REQUIRED": {
-        description: "Base64(JSON) x402 v2 PaymentRequired — same object as the JSON body.",
+        description: "Base64(JSON) x402 v2 PaymentRequired — same object as the JSON body (incl. extensions.bazaar).",
         schema: { type: "string" },
+      },
+      "WWW-Authenticate": {
+        description:
+          'IETF Payment challenge (draft-httpauth-payment). Example: Payment id="…", realm="' +
+          realm +
+          '", method="x402", intent="charge", expires="…", opaque="…", request="…"',
+        schema: {
+          type: "string",
+          example: `Payment id="…", realm="${realm}", method="x402", intent="charge", expires="2026-07-09T13:00:00Z", opaque="…", request="…"`,
+        },
       },
     },
   };
@@ -180,6 +203,32 @@ export function buildOpenApi(env, origin) {
     ...ownershipDiscovery(env),
     servers: [{ url: origin }],
     paths: {
+      "/openapi.json": {
+        get: {
+          operationId: "getOpenApi",
+          summary: "OpenAPI 3.1 document (free)",
+          security: [],
+          responses: {
+            "200": {
+              description: "OpenAPI 3.1 JSON",
+              content: { "application/json": { schema: { type: "object" } } },
+            },
+          },
+        },
+      },
+      "/.well-known/x402": {
+        get: {
+          operationId: "wellKnownX402",
+          summary: "x402 discovery manifest (free)",
+          security: [],
+          responses: {
+            "200": {
+              description: "x402 resources + accepts",
+              content: { "application/json": { schema: { type: "object" } } },
+            },
+          },
+        },
+      },
       "/health": {
         get: {
           operationId: "health",
@@ -199,6 +248,7 @@ export function buildOpenApi(env, origin) {
                       openOffers: { type: "number" },
                       rails: { type: "object" },
                     },
+                    required: ["ok"],
                   },
                 },
               },
@@ -219,6 +269,7 @@ export function buildOpenApi(env, origin) {
                   schema: {
                     type: "object",
                     properties: { offers: { type: "array", items: { type: "object" } } },
+                    required: ["offers"],
                   },
                 },
               },
@@ -304,7 +355,7 @@ export function buildOpenApi(env, origin) {
           operationId: "discoveryPayProbe",
           summary: "Discovery probe — bare POST returns sample dual-rail x402 402 (no side effects)",
           description:
-            "Stable URL for x402scan / AgentCash discovery. Returns HTTP 402 with accepts[] covering seller + hub_fee on Base and Solana (sample $0.10). Does not create a match. Real settlement uses POST /v1/matches/{id}/pay.",
+            "Stable URL for x402scan / AgentCash discovery. Returns HTTP 402 with accepts[] covering seller + hub_fee on Base and Solana (sample $0.10). Does not create a match. Real settlement uses POST /v1/matches/{id}/pay. Paywall runs before body validation.",
           tags: ["Payments"],
           "x-payment-info": {
             price: { mode: "fixed", currency: "USD", amount: DISCOVERY_PRICE },
@@ -317,9 +368,8 @@ export function buildOpenApi(env, origin) {
               "application/json": {
                 schema: {
                   type: "object",
-                  properties: {
-                    note: { type: "string", description: "Optional; ignored on unpaid probe." },
-                  },
+                  properties: DISCOVERY_BAZAAR.bodySchema.properties,
+                  example: DISCOVERY_BAZAAR.inputBody,
                 },
               },
             },
@@ -328,7 +378,8 @@ export function buildOpenApi(env, origin) {
             "402": pay402(
               env,
               origin,
-              "Payment Required — dual-payee x402 (seller + hub_fee) on Base and/or Solana USDC."
+              "Payment Required — dual-payee x402 (seller + hub_fee) on Base and/or Solana USDC. WWW-Authenticate carries an IETF Payment challenge; PAYMENT-REQUIRED carries the x402 v2 body (incl. extensions.bazaar).",
+              "/v1/pay"
             ),
             "200": {
               description: "Paid probe ack (demo / header present) — no grant; use match pay for real swaps.",
@@ -341,6 +392,8 @@ export function buildOpenApi(env, origin) {
                       probe: { type: "boolean" },
                       message: { type: "string" },
                     },
+                    required: ["ok", "probe", "message"],
+                    example: DISCOVERY_BAZAAR.outputExample,
                   },
                 },
               },
@@ -353,26 +406,65 @@ export function buildOpenApi(env, origin) {
           operationId: "payMatch",
           summary: "Pay match — 402 dual-payee accepts without payment header; settle with header",
           description:
-            "Match-specific price (dynamic). Bare POST → 402 with role=seller + role=hub_fee on enabled rails. Not registered as a discovery resource (path id required); use POST /v1/pay for x402scan probes.",
+            "Match-specific price (dynamic). Bare POST → 402 with role=seller + role=hub_fee on enabled rails before body validation. Retry with payment-signature / X-Payment. Discovery probe: POST /v1/pay.",
           tags: ["Payments"],
-          security: [],
+          "x-payment-info": {
+            price: { mode: "dynamic", currency: "USD", min: "0.001", max: "100.000000" },
+            protocols,
+          },
+          security: [{ x402: [] }],
           parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
           requestBody: {
             required: false,
             content: {
               "application/json": {
-                schema: { type: "object", properties: {} },
+                schema: {
+                  type: "object",
+                  properties: MATCH_PAY_BAZAAR.bodySchema.properties || {},
+                  example: MATCH_PAY_BAZAAR.inputBody,
+                },
               },
             },
           },
           responses: {
-            "402": pay402(env, origin, "Payment required (seller + hub fee on Base and/or Solana)"),
-            "200": { description: "Paid — grant issued" },
+            "402": pay402(
+              env,
+              origin,
+              "Payment required (seller + hub fee on Base and/or Solana). WWW-Authenticate: Payment …; PAYMENT-REQUIRED: base64 x402 v2.",
+              "/v1/matches/{id}/pay"
+            ),
+            "200": {
+              description: "Paid — grant issued",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      ok: { type: "boolean" },
+                      matchId: { type: "string" },
+                      grant: { type: "object" },
+                    },
+                    example: MATCH_PAY_BAZAAR.outputExample,
+                  },
+                },
+              },
+            },
             "404": { description: "Match not found" },
           },
         },
       },
       "/mcp": {
+        get: {
+          operationId: "mcpInfo",
+          summary: "MCP transport info (free)",
+          security: [],
+          responses: {
+            "200": {
+              description: "MCP JSON-RPC transport metadata",
+              content: { "application/json": { schema: { type: "object" } } },
+            },
+          },
+        },
         post: {
           operationId: "mcp",
           summary: "MCP JSON-RPC (tools/list, tools/call)",
@@ -383,6 +475,7 @@ export function buildOpenApi(env, origin) {
               "application/json": {
                 schema: {
                   type: "object",
+                  required: ["jsonrpc", "method"],
                   properties: {
                     jsonrpc: { type: "string" },
                     method: { type: "string" },

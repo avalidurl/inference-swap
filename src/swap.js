@@ -1,5 +1,14 @@
 import { uid, putJson, getJson, listIds, pushId } from "./store.js";
-import { dualAccepts, feeSplit, isSolanaAddress, hubPayToBase, hubPayToSolana, solanaEnabled } from "./x402.js";
+import {
+  dualAccepts,
+  feeSplit,
+  isSolanaAddress,
+  hubPayToBase,
+  hubPayToSolana,
+  solanaEnabled,
+  bazaarExtension,
+  MATCH_PAY_BAZAAR,
+} from "./x402.js";
 import { MAX_MTOK, MAX_PRICE_USD } from "./harden.js";
 
 const OFFER_TTL = 60 * 60 * 24 * 7; // 7d
@@ -225,5 +234,9 @@ export async function refreshMatchChallenge(env, match, origin) {
     resourceUrl,
     description: `Swap ${match.mtok} MTok ${match.model}`,
   });
+  match.challenge = {
+    ...match.challenge,
+    extensions: bazaarExtension(MATCH_PAY_BAZAAR),
+  };
   return match;
 }

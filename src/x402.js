@@ -282,19 +282,107 @@ export async function dualAccepts(
   };
 }
 
+/**
+ * x402 v2 `extensions.bazaar` — required by @agentcash/discovery / x402scan
+ * (`extensions.bazaar.schema.properties.input|output`). Shape mirrors Ishtar datebook.
+ */
+export function bazaarExtension({ description, inputBody, outputExample, bodySchema }) {
+  return {
+    bazaar: {
+      description,
+      info: {
+        input: { type: "http", method: "POST", bodyType: "json", body: inputBody },
+        output: { type: "json", example: outputExample },
+      },
+      schema: {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        properties: {
+          input: {
+            type: "object",
+            properties: {
+              type: { type: "string" },
+              method: { type: "string" },
+              bodyType: { type: "string" },
+              body: { type: "object", ...bodySchema },
+            },
+            required: ["type", "method", "body"],
+          },
+          output: {
+            type: "object",
+            properties: {
+              type: { type: "string" },
+              example: {
+                type: "object",
+                properties: Object.fromEntries(
+                  Object.keys(outputExample || {}).map((k) => {
+                    const v = outputExample[k];
+                    if (typeof v === "boolean") return [k, { type: "boolean" }];
+                    if (typeof v === "number") return [k, { type: "number" }];
+                    if (typeof v === "string") return [k, { type: "string" }];
+                    return [k, { type: "object" }];
+                  })
+                ),
+                required: Object.keys(outputExample || {}),
+              },
+            },
+            required: ["example"],
+          },
+        },
+        required: ["input", "output"],
+      },
+    },
+  };
+}
+
+export const DISCOVERY_BAZAAR = {
+  description:
+    "CURB discovery probe — sample dual-payee USDC x402 on Base + Solana. No side effects; real settlement is POST /v1/matches/{id}/pay.",
+  inputBody: { note: "optional; ignored on unpaid probe" },
+  outputExample: {
+    ok: true,
+    probe: true,
+    message: "Probe ack only — settle real swaps via POST /v1/matches/{id}/pay",
+  },
+  bodySchema: {
+    properties: {
+      note: { type: "string", description: "Optional; ignored on unpaid probe." },
+    },
+  },
+};
+
+export const MATCH_PAY_BAZAAR = {
+  description:
+    "CURB match settlement — dual-payee USDC via x402 on Base and/or Solana. Bare POST → 402; retry with payment-signature / X-Payment → grant.",
+  inputBody: {},
+  outputExample: {
+    ok: true,
+    matchId: "match_…",
+    grant: { token: "grant_…", endpoint: "https://seller.example/v1/chat/completions" },
+  },
+  bodySchema: {
+    type: "object",
+    properties: {},
+  },
+};
+
 /** Catalog/discovery probe challenge (stable URL for x402scan). */
 export async function discoveryAccepts(env, origin) {
   const resourceUrl = `${origin}/v1/pay`;
   const sampleGross = Number(env.DISCOVERY_PRICE_USD || 0.1);
   const hub = hubPayToBase(env) || "0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE";
   // Probe uses hub addresses as example seller so both roles are visible without a live match.
-  return dualAccepts(env, {
+  const challenge = await dualAccepts(env, {
     sellerPayTo: hub,
     sellerSolPayTo: solanaEnabled(env) ? hubPayToSolana(env) : null,
     grossUsd: sampleGross,
     resourceUrl,
     description: "CURB discovery probe — USDC on x402 on Base + Solana (sample price)",
   });
+  return {
+    ...challenge,
+    extensions: bazaarExtension(DISCOVERY_BAZAAR),
+  };
 }
 
 /** @deprecated alias for workstream B / pay.sh sample probes */
@@ -310,9 +398,51 @@ function utf8ToBase64(str) {
   return btoa(bin);
 }
 
+function utf8ToBase64Url(str) {
+  return utf8ToBase64(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+/**
+ * IETF draft-httpauth-payment `WWW-Authenticate: Payment …` challenge.
+ * x402scan / @agentcash/discovery require scheme "Payment" (not `X402 requirements=`).
+ * Settlement for CURB remains x402 via PAYMENT-REQUIRED + payment-signature; this header
+ * is the discoverable Payment challenge surface (mirrors Ishtar's co-resident header shape).
+ */
+export function buildPaymentChallengeHeader(body, realm) {
+  const accepts = Array.isArray(body?.accepts) ? body.accepts : [];
+  const primary =
+    accepts.find((a) => a?.extra?.role === "seller" && String(a.network || "").startsWith("eip155")) ||
+    accepts.find((a) => a?.extra?.role === "seller") ||
+    accepts[0];
+  if (!primary?.amount || !primary?.payTo || !primary?.asset) return null;
+
+  const request = utf8ToBase64Url(
+    JSON.stringify({
+      amount: String(primary.amount),
+      currency: String(primary.asset),
+      recipient: String(primary.payTo),
+      methodDetails: {
+        network: primary.network,
+        scheme: primary.scheme || "exact",
+        x402Version: body.x402Version ?? X402_VERSION,
+        role: primary.extra?.role || "seller",
+      },
+    })
+  );
+  const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
+  const opaque = utf8ToBase64Url(
+    JSON.stringify({ n: crypto.randomUUID(), r: body.resource?.url || "", s: "curb" })
+  );
+  const id = utf8ToBase64Url(crypto.randomUUID());
+  const method = String(primary.network || "").startsWith("solana") ? "solana" : "x402";
+  const hostRealm = String(realm || "curb.numetal.xyz").replace(/^https?:\/\//, "").split("/")[0];
+  return `Payment id="${id}", realm="${hostRealm}", method="${method}", intent="charge", expires="${expires}", opaque="${opaque}", request="${request}"`;
+}
+
 /**
  * HTTP 402. `PAYMENT-REQUIRED` / `payment-required` MUST be base64(JSON x402 body).
  * Literal `"true"` breaks pay.sh (`protocol: unknown`).
+ * `WWW-Authenticate` MUST use the Payment auth scheme (IETF) — never `X402 requirements=`.
  */
 export function paymentRequiredResponse(body, status = 402) {
   const x402Body = {
@@ -320,20 +450,29 @@ export function paymentRequiredResponse(body, status = 402) {
     error: body.error || "payment required",
     resource: body.resource,
     accepts: body.accepts || [],
+    ...(body.extensions ? { extensions: body.extensions } : {}),
   };
   const b64 = utf8ToBase64(JSON.stringify(x402Body));
   const full = JSON.stringify(body);
-  return new Response(full, {
-    status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Access-Control-Allow-Origin": "*",
-      "PAYMENT-REQUIRED": b64,
-      "payment-required": b64,
-      "x-payment-required": b64,
-      "WWW-Authenticate": `X402 requirements=${b64}`,
-    },
-  });
+  const realm =
+    (() => {
+      try {
+        return body.resource?.url ? new URL(body.resource.url).hostname : "curb.numetal.xyz";
+      } catch {
+        return "curb.numetal.xyz";
+      }
+    })();
+  const paymentChallenge = buildPaymentChallengeHeader(x402Body, realm);
+  const headers = {
+    "Content-Type": "application/json; charset=utf-8",
+    "Access-Control-Allow-Origin": "*",
+    "Cache-Control": "no-store, private",
+    "PAYMENT-REQUIRED": b64,
+    "payment-required": b64,
+    "x-payment-required": b64,
+  };
+  if (paymentChallenge) headers["WWW-Authenticate"] = paymentChallenge;
+  return new Response(full, { status, headers });
 }
 
 /** Lightweight payment header presence check — full CDP verify is optional when secrets set. */

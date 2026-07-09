@@ -220,8 +220,8 @@ export default {
     const apiHost = isApiHost(url.hostname);
     const apiOrigin = publicApiOrigin(url);
     const siteOrigin = publicSiteOrigin(url);
-    // Settlement / OpenAPI resource URLs always point at the public API origin on prod hosts.
-    const origin = apiHost || url.hostname === "curb.numetal.xyz" ? apiOrigin : url.origin;
+    // Discovery resource URLs must match the host being scanned (curb and api.curb both serve API).
+    const origin = apiHost ? apiOrigin : url.origin;
     const path = url.pathname.replace(/\/+$/, "") || "/";
 
     // Marketing-only surfaces on the API host → send humans to the site.

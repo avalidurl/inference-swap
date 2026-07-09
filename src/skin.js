@@ -11,11 +11,16 @@ export function isApiHost(hostname) {
   return h === "api.curb.numetal.xyz" || h.startsWith("api.");
 }
 
-/** Canonical public API origin for discovery / OpenAPI / skills on production hosts. */
+/**
+ * Public API origin for discovery / OpenAPI / skills.
+ * Prefer the host being hit so x402scan resource URLs resolve (api.curb may lag DNS).
+ * On the dedicated API host, always advertise the canonical API origin.
+ */
 export function publicApiOrigin(url) {
   const h = String(url?.hostname || "").toLowerCase();
-  if (h === "api.curb.numetal.xyz" || h === "curb.numetal.xyz") return API_ORIGIN_CANON;
-  return url?.origin || API_ORIGIN_CANON;
+  if (h === "api.curb.numetal.xyz") return API_ORIGIN_CANON;
+  if (h === "curb.numetal.xyz") return ORIGIN_CANON;
+  return url?.origin || ORIGIN_CANON;
 }
 
 /** Canonical marketing site origin. */
