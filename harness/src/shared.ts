@@ -1,3 +1,10 @@
+import {
+  THEME_CSS,
+  themeBootScript,
+  themeToggleButton,
+  themeToggleScript,
+} from "./theme";
+
 export const CURB_MCP = "https://api.curb.numetal.xyz/mcp";
 export const CURB_API = "https://api.curb.numetal.xyz";
 export const CURB_SITE = "https://curb.numetal.xyz";
@@ -68,10 +75,10 @@ export function agentSkin(opts: {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#121212;--fg:#e6e6e6;--muted:#8c8c8c;--line:#2a2a2a;--panel:#1a1a1a;--code:#0e0e0e;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--sans:"IBM Plex Sans",system-ui,sans-serif}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--sans)}
+${THEME_CSS}
 .wrap{max-width:720px;margin:0 auto;padding:1.25rem}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;font-family:var(--mono);font-size:.78rem}
+.top{display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-bottom:1rem;font-family:var(--mono);font-size:.78rem}
+.top-nav{display:flex;gap:1rem;align-items:center}
 .top a{color:var(--fg);text-decoration:none;border-bottom:1px solid var(--line)}
 header{border:1px solid var(--line);background:var(--panel);padding:1.25rem;margin-bottom:1rem}
 .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .6rem}
@@ -79,18 +86,22 @@ h1{margin:0;font-size:1.55rem;letter-spacing:-.03em}p{color:var(--muted);margin:
 .badge{display:inline-block;font-family:var(--mono);font-size:.68rem;border:1px solid var(--fg);padding:.2rem .45rem;margin-top:.75rem}
 section{border:1px solid var(--line);background:var(--panel);padding:1rem;margin:0 0 1rem}
 h2{font-family:var(--mono);font-size:.85rem;margin:0 0 .65rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-pre{background:var(--code);border:1px solid var(--line);padding:.85rem;overflow:auto;font:12px/1.45 var(--mono);margin:0}
+pre{background:var(--code-bg);border:1px solid var(--line);padding:.85rem;overflow:auto;font:12px/1.45 var(--mono);margin:0}
 .row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
-button,.btn{font-family:var(--mono);font-size:.75rem;background:transparent;color:var(--fg);border:1px solid var(--fg);padding:.45rem .7rem;cursor:pointer;text-decoration:none}
-button:hover,.btn:hover{background:var(--fg);color:var(--bg)}
+button:not(.theme-btn),.btn{font-family:var(--mono);font-size:.75rem;background:transparent;color:var(--fg);border:1px solid var(--fg);padding:.45rem .7rem;cursor:pointer;text-decoration:none}
+button:not(.theme-btn):hover,.btn:hover{background:var(--fg);color:var(--bg)}
 #out{margin-top:.75rem;min-height:3rem}
 </style>
+${themeBootScript()}
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <a href="https://harness.curb.numetal.xyz/">← harness</a>
-    <a href="https://curb.numetal.xyz/">CURB</a>
+    <div class="top-nav">
+      <a href="https://harness.curb.numetal.xyz/">← harness</a>
+      <a href="https://curb.numetal.xyz/">CURB</a>
+    </div>
+    ${themeToggleButton()}
   </div>
   <header>
     <p class="eyebrow">Numetal · CURB · Cloudflare Agents SDK</p>
@@ -121,6 +132,7 @@ async function run(path, body){
   }catch(e){out.textContent=String(e)}
 }
 </script>
+${themeToggleScript()}
 </body>
 </html>`;
 }

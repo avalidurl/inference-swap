@@ -183,11 +183,11 @@ export const SHARED_CSS = `
 `;
 
 export function themeBootScript() {
-  return `<script>(function(){try{var t=localStorage.getItem("curb-theme");if(t==="light"||t==="dim")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>`;
+  return `<script>(function(){try{var t=null;try{var m=document.cookie.match(/(?:^|; )curb-theme=(light|dim)(?:;|$)/);if(m)t=m[1];}catch(e){}if(!t){try{t=localStorage.getItem("curb-theme");}catch(e){}}if(t==="light"||t==="dim")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>`;
 }
 
 export function themeToggleScript() {
-  return `<script>(function(){var root=document.documentElement;var btn=document.getElementById("theme-toggle");if(!btn)return;function label(){btn.textContent=root.getAttribute("data-theme")==="light"?"Dim":"Light";}label();btn.addEventListener("click",function(){var next=root.getAttribute("data-theme")==="light"?"dim":"light";root.setAttribute("data-theme",next);try{localStorage.setItem("curb-theme",next);}catch(e){}label();});})();</script>`;
+  return `<script>(function(){var root=document.documentElement;var btn=document.getElementById("theme-toggle");if(!btn)return;function label(){btn.textContent=root.getAttribute("data-theme")==="light"?"Dim":"Light";}function persist(v){try{localStorage.setItem("curb-theme",v);}catch(e){}try{var host=location.hostname;var domain=host==="curb.numetal.xyz"||host.endsWith(".curb.numetal.xyz")?"; domain=.curb.numetal.xyz":"";document.cookie="curb-theme="+v+"; path=/; max-age=31536000; SameSite=Lax"+domain;}catch(e){}}label();btn.addEventListener("click",function(){var next=root.getAttribute("data-theme")==="light"?"dim":"light";root.setAttribute("data-theme",next);persist(next);label();});})();</script>`;
 }
 
 export function pageShell({

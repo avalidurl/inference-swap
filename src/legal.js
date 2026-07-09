@@ -143,7 +143,9 @@ export function privacyHtml(origin) {
     <h2>Cookies &amp; local storage</h2>
     <p>
       CURB does not use advertising cookies. Theme preference may be stored in <code>localStorage</code>
-      (<code>curb-theme</code>). Cloudflare may set strictly necessary cookies for security.
+      and a first-party cookie (<code>curb-theme</code>, Domain=<code>.curb.numetal.xyz</code>) so Light/Dim
+      stays in sync across curb, harness, seller, and buyer hosts. Cloudflare may set strictly necessary
+      cookies for security.
     </p>
 
     <h2>Data retention</h2>

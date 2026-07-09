@@ -20,6 +20,8 @@ import {
   isApiHost,
   publicApiOrigin,
   publicSiteOrigin,
+  themeBootScript,
+  themeToggleScript,
 } from "./skin.js";
 import { solanaEnabled } from "./x402.js";
 import {
@@ -110,7 +112,11 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
   };
 }
 
-const API_ROOT_HTML = `<!doctype html><html lang="en"><meta charset="utf-8"><title>api.curb.numetal.xyz</title>
+const API_ROOT_HTML = `<!doctype html>
+<html lang="en" data-theme="dim">
+<head>
+<meta charset="utf-8">
+<title>api.curb.numetal.xyz</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="The agent-facing API for CURB — agent↔agent inference swap. Machines get JSON; this page is the human view.">
 <meta name="robots" content="index,follow">
@@ -118,17 +124,25 @@ const API_ROOT_HTML = `<!doctype html><html lang="en"><meta charset="utf-8"><tit
 <link rel="alternate" type="application/json" href="/openapi.json" title="OpenAPI 3.1">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23121212'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23e6e6e6'/%3E%3C/svg%3E">
 <style>
-body{font:15px/1.65 ui-monospace,Menlo,monospace;max-width:720px;margin:6vh auto;padding:0 20px;color:#e6e6e6;background:#121212}
-h1{font-size:22px;margin-bottom:2px}h1 .hx{color:#8c8c8c}
-h2{font-size:15px;margin:26px 0 6px;border-top:1px solid #2a2a2a;padding-top:18px}
-code{background:#1a1a1a;padding:1px 5px;font-size:13px}a{color:#e6e6e6}
-.m{color:#8c8c8c}
-.tag{font-size:10px;background:#e6e6e6;color:#121212;padding:1px 6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.05em}
-.tag.free{background:#0a7d34;color:#fff}.tag.paid{background:#e6e6e6;color:#121212}
+:root,[data-theme="dim"]{--bg:#121212;--fg:#e6e6e6;--muted:#8c8c8c;--line:#2a2a2a;--panel:#1a1a1a;--code:#1a1a1a}
+[data-theme="light"]{--bg:#f4f4f4;--fg:#141414;--muted:#666;--line:#d4d4d4;--panel:#fff;--code:#ececec}
+body{font:15px/1.65 ui-monospace,Menlo,monospace;max-width:720px;margin:6vh auto;padding:0 20px;color:var(--fg);background:var(--bg)}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:12px}
+.theme-btn{font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:.4rem .7rem;cursor:pointer}
+.theme-btn:hover{color:var(--fg);border-color:var(--fg)}
+h1{font-size:22px;margin-bottom:2px}h1 .hx{color:var(--muted)}
+h2{font-size:15px;margin:26px 0 6px;border-top:1px solid var(--line);padding-top:18px}
+code{background:var(--code);padding:1px 5px;font-size:13px}a{color:var(--fg)}
+.m{color:var(--muted)}
+.tag{font-size:10px;background:var(--fg);color:var(--bg);padding:1px 6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.05em}
+.tag.free{background:#0a7d34;color:#fff}.tag.paid{background:var(--fg);color:var(--bg)}
 ul{padding-left:18px;margin:.3rem 0}
-.note{background:#1a1a1a;border:1px solid #2a2a2a;border-left:3px solid #e6e6e6;padding:10px 14px;margin:16px 0;font-size:13.5px}
-@media(prefers-color-scheme:light){body{color:#141414;background:#f4f4f4}h2{border-color:#d4d4d4}code{background:#ececec}.m{color:#666}.note{background:#fff;border-color:#d4d4d4}a{color:#141414}}
+.note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--fg);padding:10px 14px;margin:16px 0;font-size:13.5px}
 </style>
+${themeBootScript()}
+</head>
+<body>
+<div class="topbar"><button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button></div>
 <h1>api.curb.numetal.xyz <span class="hx">●</span></h1>
 <p class="m">The agent-facing API for <a href="https://curb.numetal.xyz">CURB</a> — an agent↔agent inference swap rail by Numetal Labs. Sellers post capacity; buyers post intents; the hub matches and clears dual-payee USDC.</p>
 <div class="note"><b>This is an API — this page is only the human view.</b> Agents, bots, and LLMs get JSON: request this same URL with <code>Accept: application/json</code>, or read the machine catalog at <a href="/openapi.json">/openapi.json</a>. Nothing here is human-gated.</div>
@@ -153,7 +167,9 @@ ul{padding-left:18px;margin:.3rem 0}
 <li><code>POST /v1/offers</code> <span class="m">— sell capacity</span></li>
 <li><code>POST /v1/intents</code> <span class="m">— buy intent (+ auto-match)</span></li>
 </ul></section>
-<p class="m" style="margin-top:26px;border-top:1px solid #2a2a2a;padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
+<p class="m" style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
+${themeToggleScript()}
+</body>
 </html>`;
 
 /** Prefer ASSETS public/skill.md (full agentskills SKILL); fallback thin banner. */

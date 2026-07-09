@@ -2,6 +2,12 @@ import { routeAgentRequest, getAgentByName } from "agents";
 import { CurbSeller } from "./seller";
 import { CurbBuyer } from "./buyer";
 import { type HarnessEnv, CURB_MCP, CURB_API, CURB_SITE, html, json } from "./shared";
+import {
+  THEME_CSS,
+  themeBootScript,
+  themeToggleButton,
+  themeToggleScript,
+} from "./theme";
 
 export { CurbSeller, CurbBuyer };
 
@@ -12,17 +18,20 @@ function harnessLanding(origin: string): string {
   const seller = "https://seller.curb.numetal.xyz";
   const buyer = "https://buyer.curb.numetal.xyz";
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dim">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>CURB harness — live seller + buyer</title>
 <meta name="description" content="Presentation-ready Cloudflare Agents SDK harness: live curb-seller and curb-buyer connected to CURB MCP."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#121212;--fg:#e6e6e6;--muted:#8c8c8c;--line:#2a2a2a;--panel:#1a1a1a;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--sans:"IBM Plex Sans",system-ui,sans-serif}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--sans)}
+${THEME_CSS}
 .wrap{max-width:820px;margin:0 auto;padding:1.5rem}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.top a{color:var(--fg);font-family:var(--mono);font-size:.78rem;text-decoration:none;border-bottom:1px solid var(--line)}
 .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 h1{font-size:clamp(1.6rem,4vw,2.2rem);letter-spacing:-.03em;margin:.4rem 0}
 .lede{color:var(--muted);max-width:40rem}
@@ -32,14 +41,17 @@ h1{font-size:clamp(1.6rem,4vw,2.2rem);letter-spacing:-.03em;margin:.4rem 0}
 .card p{margin:0 0 .8rem;color:var(--muted);font-size:.95rem}
 a.btn{display:inline-block;font-family:var(--mono);font-size:.75rem;border:1px solid var(--fg);padding:.45rem .7rem;color:var(--fg);text-decoration:none;margin:.2rem .35rem .2rem 0}
 a.btn:hover{background:var(--fg);color:var(--bg)}
-pre{background:#0e0e0e;border:1px solid var(--line);padding:.85rem;font:12px/1.45 var(--mono);overflow:auto}
+pre{background:var(--code-bg);border:1px solid var(--line);padding:.85rem;font:12px/1.45 var(--mono);overflow:auto}
 @media(max-width:720px){.grid{grid-template-columns:1fr}}
-.top a{color:var(--fg);font-family:var(--mono);font-size:.78rem}
 </style>
+${themeBootScript()}
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><a href="${CURB_SITE}">← CURB</a></div>
+  <div class="top">
+    <a href="${CURB_SITE}">← CURB</a>
+    ${themeToggleButton()}
+  </div>
   <p class="eyebrow">Numetal · CURB · live harness</p>
   <h1>Two agents. One MCP. Live.</h1>
   <p class="lede">Cloudflare Agents SDK harness for the pitch. Both agents call <code>addMcpServer('curb', '${CURB_MCP}')</code>. Seller keeps the book filled; buyer lists, intents, and surfaces the pay challenge. No private keys in the harness — settle with pay / agentcash.</p>
@@ -63,6 +75,7 @@ Buyer DO:  ${origin}/agents/curb-buyer/default
 CURB API:  ${CURB_API}
 CURB MCP:  ${CURB_MCP}</pre>
 </div>
+${themeToggleScript()}
 </body>
 </html>`;
 }
