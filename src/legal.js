@@ -42,21 +42,39 @@ export function termsHtml(origin) {
 
     <h2>Restricted jurisdictions &amp; sanctions</h2>
     <p>
-      You may not use the Services if you are located in, ordinarily resident in, or accessing them from a
-      jurisdiction subject to comprehensive sanctions, or if you are a person or entity on a restricted-party
-      or sanctions list administered by OFAC, the UN Security Council, the EU, the UK, or a comparable authority.
-      By using the Services, you represent that you are not a Restricted Person.
+      By accessing or using the Services, you represent and warrant that, at all times, you are
+      <strong>not</strong> located in, ordinarily resident in, or accessing the Services from a country or
+      region subject to comprehensive sanctions or embargo; you are <strong>not</strong> a person or entity
+      on any sanctions or restricted-party list, including the OFAC Specially Designated Nationals (SDN) list
+      or any list administered by OFAC, the UN Security Council, the EU, the UK, or a comparable authority; and
+      you are <strong>not</strong> owned or controlled by, and are <strong>not</strong> acting for or on behalf
+      of, any such sanctioned or restricted party. You further represent that no wallet address you submit to
+      or use with the Services is subject to sanctions. You may not use the Services in breach of any of the
+      foregoing.
     </p>
     <p>
-      Access to the Services is <strong>geo-restricted and blocked entirely</strong> for the following
-      jurisdictions: the OFAC comprehensively-sanctioned jurisdictions
-      <strong>Cuba, Iran, North Korea (DPRK), Syria</strong>, and the occupied
-      <strong>Crimea, Donetsk, and Luhansk</strong> regions of Ukraine, as well as
-      <strong>China, Hong Kong, and Macau</strong> (export-control compliance). We enforce this at the network
-      edge using approximate connection geolocation; requests from these regions receive an HTTP 451 response.
-      This list may change as sanctions and export-control programs evolve. Geo-blocking is a good-faith
-      compliance control and does not substitute for your own obligation not to use the Services as a
-      Restricted Person or from a restricted location.
+      CURB applies <strong>best-effort sanctions screening and geographic restrictions</strong> as good-faith
+      controls. This means: (a) we screen submitted wallet addresses (seller payout, buyer, and settlement
+      addresses) against a maintained mirror of the OFAC SDN sanctioned digital-currency address list and reject
+      matches (HTTP 451); and (b) we block access at the network edge from certain jurisdictions using approximate
+      connection geolocation. Access is blocked entirely for the OFAC comprehensively-sanctioned jurisdictions
+      <strong>Cuba, Iran, North Korea (DPRK), Syria</strong>, the occupied <strong>Crimea, Donetsk, and Luhansk</strong>
+      regions of Ukraine, and <strong>China, Hong Kong, and Macau</strong> (export-control compliance); requests from
+      these regions receive an HTTP 451 response. This list may change as sanctions and export-control programs evolve.
+    </p>
+    <p>
+      These are <strong>best-effort measures only</strong>. They are <strong>not</strong> a guarantee of
+      compliance. We do <strong>not</strong> represent that CURB is “OFAC compliant” or “sanctions compliant”,
+      that users are identity-verified or “KYC’d”, or that CURB is a registered or licensed money transmitter or
+      money-services business. Wallet-address screening and edge geolocation can be evaded (for example via VPNs,
+      proxies, or fresh addresses) and may produce false negatives. You remain solely responsible for your own
+      compliance and for not using the Services as a Restricted Person or from a restricted location.
+    </p>
+    <p>
+      <strong>Regulatory note.</strong> Whether the Services or your use of them implicate money-transmitter or
+      money-services-business (MSB) registration, or export-control / re-export questions arising from the resale
+      of model inference capacity, depends on facts and jurisdictions we cannot assess for you. These questions
+      require your own qualified <strong>legal counsel</strong>; nothing here is legal advice.
     </p>
 
     <h2>No warranty</h2>
