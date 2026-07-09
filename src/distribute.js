@@ -20,13 +20,18 @@
  *   body { method:"eth_sendTransaction", caip2:"eip155:8453", chain_type:"ethereum",
  *          params:{ transaction:{ to:<split>, data:<distribute calldata>, value:"0x0" } } }
  *   auth: HTTP Basic PRIVY_APP_ID:PRIVY_APP_SECRET + header `privy-app-id`.
- *   If the keeper wallet is owned by a key-quorum (owner_id set), the request ALSO needs a
- *   `privy-authorization-signature` header signed with the owner's authorization key
- *   (secret PRIVY_AUTHORIZATION_KEY). Server wallets with no owner need only app auth.
+ *   PREFERRED / DEFAULT: an APP-OWNED Privy server wallet (no user owner) — the Worker signs with
+ *   app auth alone, no extra header. FALLBACK: if the keeper wallet is owned by a key-quorum
+ *   (owner_id set), the request ALSO needs a `privy-authorization-signature` header signed with the
+ *   owner's authorization key; supply it as the secret PRIVY_AUTHORIZATION_SIGNATURE (sent verbatim).
+ *
+ * All Privy responses are treated as untrusted: we only accept a 2xx + a 0x-prefixed hash string.
  *
  * Required Worker config to make auto-distribute live:
- *   vars    : KEEPER_ADDRESS, PRIVY_KEEPER_WALLET_ID, KEEPER_DISTRIBUTE="on", (BASE_RPC optional)
- *   secrets : PRIVY_APP_ID, PRIVY_APP_SECRET, [PRIVY_AUTHORIZATION_KEY if the keeper is quorum-owned]
+ *   vars    : KEEPER_ADDRESS, PRIVY_KEEPER_WALLET_ID, KEEPER_DISTRIBUTE="on", (BASE_RPC_URL optional)
+ *   secrets : PRIVY_APP_ID, PRIVY_APP_SECRET, [PRIVY_AUTHORIZATION_SIGNATURE if keeper is quorum-owned]
+ *   binding : SWAP KV (idempotency lock `keeper:lock`, ~120s TTL, so overlapping crons/manual runs
+ *             never double-submit distribute()).
  */
 
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
@@ -100,7 +105,7 @@ export function buildDistributeTx(env) {
 /** Read the split's USDC balance (raw 6dp) via a Base JSON-RPC eth_call. Fail-soft → null. */
 export async function getSplitUsdcBalance(env) {
   try {
-    const rpc = String(env.BASE_RPC || DEFAULT_RPC);
+    const rpc = String(env.BASE_RPC_URL || DEFAULT_RPC);
     const split = String(env.SPLIT_ADDRESS_BASE || "").trim();
     const token = String(env.USDC || USDC_BASE).trim();
     const data = "0x" + BALANCEOF_SELECTOR + addrWord(split);
@@ -156,29 +161,79 @@ export async function distributeViaKeeper(env) {
       }),
     });
     const j = await res.json().catch(() => ({}));
-    if (!res.ok || !j?.data?.hash) {
-      return { ok: false, error: j?.error || j?.message || `privy_${res.status}` };
+    // Untrusted response: accept ONLY a 2xx + a well-formed 0x tx hash.
+    const hash = j?.data?.hash;
+    if (!res.ok || typeof hash !== "string" || !/^0x[0-9a-fA-F]{64}$/.test(hash)) {
+      const err = typeof j?.error === "string" ? j.error : typeof j?.message === "string" ? j.message : `privy_${res.status}`;
+      return { ok: false, error: err };
     }
-    return { ok: true, hash: j.data.hash, txId: j.data.transaction_id };
+    const txId = typeof j?.data?.transaction_id === "string" ? j.data.transaction_id : undefined;
+    return { ok: true, hash, txId };
   } catch (e) {
     return { ok: false, error: String(e?.message || e) };
   }
 }
 
+/** True when the app-owned Privy signer secrets needed to sign distribute() are all present. */
+export function keeperSignerReady(env) {
+  return (
+    !!String(env.PRIVY_APP_ID || "").trim() &&
+    !!String(env.PRIVY_APP_SECRET || "").trim() &&
+    !!String(env.PRIVY_KEEPER_WALLET_ID || "").trim()
+  );
+}
+
 /**
- * Gated auto-distribute for the scheduled() cron. No-op unless KEEPER_DISTRIBUTE === "on" and the
- * split holds at least KEEPER_DISTRIBUTE_MIN (raw 6dp, default 10000 = $0.01). Fail-soft.
+ * Best-effort idempotency lock in SWAP KV so overlapping crons / a manual run never double-submit
+ * distribute(). KV has no atomic CAS, but a get-then-put with a short TTL is sufficient here (single
+ * keeper, low frequency): the lock is left to expire naturally so a second invocation within the
+ * window is refused. Returns true if we acquired it. Fail-open on KV errors is intentionally NOT
+ * done — if KV is unavailable we refuse to submit (return false) rather than risk a double-send.
+ */
+async function acquireKeeperLock(env, ttlSec = 120) {
+  try {
+    if (!env.SWAP) return false;
+    const existing = await env.SWAP.get("keeper:lock");
+    if (existing) return false;
+    await env.SWAP.put("keeper:lock", new Date().toISOString(), { expirationTtl: ttlSec });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Gated auto-distribute for the scheduled() cron. Fail-soft: never throws, and logs the failure
+ * marker `curb_distribute_cron` on any unexpected error. No-op unless ALL of:
+ *   1. KEEPER_DISTRIBUTE === "on",
+ *   2. the app-owned Privy signer secrets are present (keeperSignerReady),
+ *   3. the split holds at least KEEPER_DISTRIBUTE_MIN USDC (raw 6dp, default 10000 = $0.01),
+ *   4. we win the SWAP KV `keeper:lock` (idempotency — overlapping runs won't double-submit).
  */
 export async function maybeAutoDistribute(env) {
-  if (String(env.KEEPER_DISTRIBUTE || "").toLowerCase() !== "on") {
-    return { ran: false, reason: "disabled" };
+  try {
+    if (String(env.KEEPER_DISTRIBUTE || "").toLowerCase() !== "on") {
+      return { ran: false, reason: "disabled" };
+    }
+    if (!keeperSignerReady(env)) {
+      return { ran: false, reason: "signer_secrets_missing" };
+    }
+    const min = BigInt(String(env.KEEPER_DISTRIBUTE_MIN || "10000"));
+    const bal = await getSplitUsdcBalance(env);
+    if (bal == null) return { ran: false, reason: "balance_unknown" };
+    if (bal < min) return { ran: false, reason: "below_threshold", balance: bal.toString() };
+
+    // Take the lock only once we actually intend to submit; leave it to expire so a near-simultaneous
+    // second invocation is refused for the TTL window.
+    const locked = await acquireKeeperLock(env);
+    if (!locked) return { ran: false, reason: "locked", balance: bal.toString() };
+
+    const r = await distributeViaKeeper(env);
+    if (!r.ok) console.error("curb_distribute_failed", { error: r.error, balance: bal.toString() });
+    else console.log("curb_distribute_ok", { hash: r.hash, balance: bal.toString() });
+    return { ran: r.ok, ...r, balance: bal.toString() };
+  } catch (err) {
+    console.error("curb_distribute_cron", String(err?.message || err));
+    return { ran: false, reason: "error", error: String(err?.message || err) };
   }
-  const min = BigInt(String(env.KEEPER_DISTRIBUTE_MIN || "10000"));
-  const bal = await getSplitUsdcBalance(env);
-  if (bal == null) return { ran: false, reason: "balance_unknown" };
-  if (bal < min) return { ran: false, reason: "below_threshold", balance: bal.toString() };
-  const r = await distributeViaKeeper(env);
-  if (!r.ok) console.error("curb_distribute_failed", { error: r.error });
-  else console.log("curb_distribute_ok", { hash: r.hash, balance: bal.toString() });
-  return { ran: r.ok, ...r, balance: bal.toString() };
 }
