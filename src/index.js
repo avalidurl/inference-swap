@@ -10,7 +10,7 @@ import {
   sitemapXml,
   newsletterHtml,
   dispatchLaunchHtml,
-  blogIndexHtml,
+  dispatchIndexHtml,
   DISPATCH_LAUNCH,
 } from "./blog.js";
 import {
@@ -209,6 +209,7 @@ function llmsTxt(apiOrigin, siteOrigin) {
     `Offers: GET ${apiOrigin}/v1/offers`,
     `Feed: ${siteOrigin}/feed.xml`,
     `Sitemap: ${siteOrigin}/sitemap.xml`,
+    `Dispatches: ${siteOrigin}/dispatch`,
     `Dispatch: ${siteOrigin}${DISPATCH_LAUNCH.path}`,
     `Newsletter: ${siteOrigin}/newsletter`,
     `Payments: We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.`,
@@ -239,6 +240,8 @@ export default {
         "/terms",
         "/privacy",
         "/newsletter",
+        "/blog",
+        "/dispatch",
         "/feed.xml",
         "/rss.xml",
         "/sitemap.xml",
@@ -250,7 +253,9 @@ export default {
             ? `${siteOrigin}${url.pathname}${url.search}`
             : path === "/token"
               ? `${siteOrigin}/fees`
-              : `${siteOrigin}${path}${url.search}`;
+              : path === "/blog"
+                ? `${siteOrigin}/dispatch${url.search}`
+                : `${siteOrigin}${path}${url.search}`;
         return new Response(null, {
           status: 302,
           headers: { Location: dest, ...corsHeaders(request), ...securityHeaders({ "Content-Security-Policy": undefined }) },
@@ -322,8 +327,18 @@ export default {
       if (!apiHost && path === "/newsletter" && request.method === "GET") {
         return text(newsletterHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
       }
-      if (!apiHost && (path === "/blog" || path === "/blog/") && request.method === "GET") {
-        return text(blogIndexHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
+      if (!apiHost && path === "/blog" && request.method === "GET") {
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `/dispatch${url.search}`,
+            ...corsHeaders(request),
+            ...securityHeaders({ "Content-Security-Policy": undefined }),
+          },
+        });
+      }
+      if (!apiHost && path === "/dispatch" && request.method === "GET") {
+        return text(dispatchIndexHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
       }
       if (
         !apiHost &&

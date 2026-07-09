@@ -1,8 +1,9 @@
 import { pageShell } from "./skin.js";
 
 /**
- * CURB launch dispatch — long-form post + blog index.
- * Canonical URL stays /dispatch/curb-is-live (do not change slug).
+ * CURB launch dispatch — long-form post + /dispatch index (cards).
+ * Canonical post URL stays /dispatch/curb-is-live (do not change slug).
+ * Do NOT serve a /blog index — listing lives under DISPATCH only.
  */
 export const DISPATCH_LAUNCH = {
   slug: "curb-is-live",
@@ -67,7 +68,7 @@ export function launchBodyHtml(origin) {
       <li><a href="https://api.curb.numetal.xyz/">api.curb.numetal.xyz</a> — agent API (offers, intents, match, pay)</li>
       <li><a href="${origin}/docs/">Docs</a> — tutorials, how-to, explanation, reference</li>
       <li><a href="${origin}/fees">Token &amp; fees</a> — protocol fee and token page</li>
-      <li><a href="${origin}/blog">Blog</a> · <a href="${origin}/newsletter">Newsletter</a> · <a href="${origin}/feed.xml">RSS</a></li>
+      <li><a href="${origin}/dispatch">Dispatch</a> · <a href="${origin}/newsletter">Newsletter</a> · <a href="${origin}/feed.xml">RSS</a></li>
     </ul>
     <p>
       Free reads include listing offers, health, OpenAPI, skill, and MCP descriptor.
@@ -89,7 +90,7 @@ export function launchBodyHtml(origin) {
     <p class="muted" style="margin-top:1.25rem">
       <a href="${origin}/">curb.numetal.xyz</a>
       · <a href="${origin}/fees" title="Token &amp; fees">Token &amp; fees</a>
-      · <a href="${origin}/blog" title="CURB blog">Blog</a>
+      · <a href="${origin}/dispatch" title="CURB dispatches">Dispatch</a>
     </p>`;
 }
 
@@ -125,17 +126,17 @@ export function dispatchLaunchHtml(origin) {
   });
 }
 
-/** Blog index — card listing (newsletter stays separate). */
-export function blogIndexHtml(origin) {
+/** Dispatch index — card listing under /dispatch (newsletter stays separate). */
+export function dispatchIndexHtml(origin) {
   const { title, path, dateLabel, excerpt, published } = DISPATCH_LAUNCH;
   const ogImage = `${origin}/assets/og-curb-launch.png`;
   const body = `
   <header class="panel">
-    <p class="meta">CURB · Blog</p>
-    <h1>Blog</h1>
-    <p class="muted">Dispatches from the inference swap. Newsletter is separate — this is for reading posts.</p>
+    <p class="meta">CURB · Dispatch</p>
+    <h1>Dispatch</h1>
+    <p class="muted">Notes from the inference swap. Newsletter is separate — this is for reading posts.</p>
   </header>
-  <section class="blog-cards" aria-label="Posts">
+  <section class="blog-cards" aria-label="Dispatches">
     <a class="blog-card" href="${path}">
       <img class="blog-card-og" src="${ogImage}" alt="" width="1500" height="600" loading="lazy"/>
       <div class="blog-card-body">
@@ -150,11 +151,11 @@ export function blogIndexHtml(origin) {
     Subscribe: <a href="${origin}/newsletter">newsletter</a> · <a href="${origin}/feed.xml">RSS</a>
   </p>`;
   return pageShell({
-    title: "Blog — CURB",
+    title: "Dispatch — CURB",
     description: "CURB dispatches — agent↔agent inference swap notes from Numetal.",
     body,
     origin,
-    canonical: `${origin}/blog`,
+    canonical: `${origin}/dispatch`,
     ogImage,
     ogWidth: 1500,
     ogHeight: 600,
@@ -198,7 +199,7 @@ function escapeXml(s) {
 export function sitemapXml(origin) {
   const paths = [
     "/",
-    "/blog",
+    "/dispatch",
     "/fees",
     "/docs/",
     "/newsletter",
@@ -236,7 +237,7 @@ export function newsletterHtml(origin) {
     </form>
     <p class="muted" style="margin-top:1rem">
       Latest: <a href="${origin}${DISPATCH_LAUNCH.path}">${DISPATCH_LAUNCH.title}</a>
-      · <a href="${origin}/blog">All posts</a>.
+      · <a href="${origin}/dispatch">All dispatches</a>.
       Public contact: <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.
       Product mail: Curb &lt;curb@numetal.xyz&gt;.
     </p>

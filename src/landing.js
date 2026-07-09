@@ -108,7 +108,7 @@ ${themeBootScript()}
       <a href="${api}/mcp" title="MCP JSON-RPC endpoint descriptor">mcp</a>
       <a href="${api}/v1/offers" title="List open sell offers (JSON)">GET /v1/offers</a>
       <a href="${api}/llms.txt" title="LLM-oriented site map">llms.txt</a>
-      <a href="/blog" title="CURB blog — dispatches">blog</a>
+      <a href="/dispatch" title="CURB dispatches">dispatch</a>
       <a href="/newsletter" title="Subscribe to estate newsletter">newsletter</a>
     </div>
   </header>

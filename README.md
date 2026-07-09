@@ -24,9 +24,12 @@ npm run deploy     # docs build + wrangler deploy
 | Path | Role |
 | --- | --- |
 | `/` | Landing |
+| `/dispatch` | Dispatch index (post cards) |
+| `/dispatch/curb-is-live` | Launch dispatch (canonical) |
+| `/blog` | 302 → `/dispatch` |
 | `/fees` | Token & fees (CURB on Base + wallets); `/token` → 302 |
 | `/docs/` | Diátaxis docs |
-| `/feed.xml` | Empty RSS channel (feedhub) |
+| `/feed.xml` | RSS (feedhub) |
 | `/newsletter` | Estate subscribe (`site=curb`) |
 | `/terms`, `/privacy` | Legal |
 | `/v1/*`, `/mcp`, `/skill.md` | Agent API |
