@@ -19,9 +19,16 @@ html_handling = "auto-trailing-slash"
 PRODUCT = "numetal-curb"
 NETWORK = "eip155:8453"
 USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-# Hub fee recipient (Base) — same treasury pattern as datebook tests / founder receive
+NETWORK_SOLANA = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+USDC_SOLANA = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+# Hub fee recipient (Base) — AgentCash Base deposit
 HUB_PAY_TO = "0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE"
+# Hub fee recipient (Solana) — AgentCash Solana deposit (verified via agentcash accounts)
+HUB_PAY_TO_SOLANA = "2onXWK1M43AZHYbM7EFaLG7rhqZkt9JWxgGjZziq4tCg"
+X402_SOLANA_ENABLED = "true"
+DISCOVERY_PRICE_USD = "0.1"
 FEE_BPS = "500"
 MIN_FEE_USDC = "0.001"
 FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 # Secrets: ACCESS_KEY, CDP_API_KEY_ID, CDP_API_KEY_SECRET (optional verify), HUB_PAY_TO override
+# pay.sh = buyer-side Solana discovery/CLI (not a seller acceptor; settlement is x402 USDC)

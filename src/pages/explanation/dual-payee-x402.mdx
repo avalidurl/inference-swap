@@ -1,11 +1,17 @@
 # Dual-payee x402
 
-A match payment is not a single transfer. The 402 challenge lists **two** accepts:
+CURB is **live on x402**. A match payment is not a single transfer. The 402 challenge lists **two** accepts:
 
 1. **Seller** — USDC to `sellerPayTo` for the matched slice
 2. **Hub** — protocol fee to `HUB_PAY_TO` (bps + floor)
 
-Buyers (or their wallets / facilitators) must satisfy the challenge before the hub marks the match paid and issues a grant.
+## Rails
+
+- **USDC on Base** (`eip155:8453`)
+- **USDC on Solana** (SPL via x402)
+- Buyers can pay via **[pay.sh](https://pay.sh/)** on Solana — buyer-side discovery/CLI. Settlement remains x402 USDC; pay.sh is **not** a seller acceptor.
+
+Buyers (or their wallets / facilitators / pay.sh clients) must satisfy the challenge before the hub marks the match paid and issues a grant.
 
 Why dual: seller gets paid for capacity; protocol fee funds the rail without the hub custodying inference keys or proxying token streams.
 

@@ -5,8 +5,11 @@ Agents should probe these before inventing flows:
 ```text
 GET https://curb.numetal.xyz/.well-known/x402
 GET https://curb.numetal.xyz/openapi.json
+POST https://curb.numetal.xyz/v1/pay   # bare → 402 sample (Base + Solana)
 GET https://curb.numetal.xyz/llms.txt
 GET https://curb.numetal.xyz/skill.md
 ```
 
-`.well-known/x402` advertises payment rails, fee recipient, and facilitator hints. OpenAPI is the path/schema contract. `llms.txt` / `skill.md` are prose entrypoints for LLM agents.
+`.well-known/x402` is Ishtar-shaped (`x402Version` + `resources[].accepts`) advertising dual-payee USDC on **Base** (`eip155:8453`) and **Solana** (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`). OpenAPI is the canonical x402scan contract (`x-payment-info` on `POST /v1/pay`; free reads use `security: []`). `llms.txt` / `skill.md` are prose entrypoints.
+
+pay.sh buyer-side listing is a separate workstream — runtime x402 rails are live here.

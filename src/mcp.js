@@ -16,6 +16,10 @@ const TOOLS = [
       required: ["sellerPayTo", "endpoint", "model", "mtok", "priceUsd"],
       properties: {
         sellerPayTo: { type: "string" },
+        sellerSolPayTo: {
+          type: "string",
+          description: "Optional Solana USDC payTo for full dual-rail seller+hub",
+        },
         endpoint: { type: "string" },
         model: { type: "string" },
         mtok: { type: "number" },

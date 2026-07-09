@@ -1,5 +1,5 @@
-import { createOffer, listOffers, createIntent, getMatch, markPaid, stats } from "./swap.js";
-import { paymentRequiredResponse, hasPaymentHeader } from "./x402.js";
+import { createOffer, listOffers, createIntent, getMatch, markPaid, stats, refreshMatchChallenge } from "./swap.js";
+import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts } from "./x402.js";
 import { buildOpenApi, wellKnownX402 } from "./openapi.js";
 import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
@@ -52,14 +52,17 @@ Agent-to-agent inference swap rail (product id: \`${PRODUCT_ID}\`). Base: ${orig
 
 - OpenAPI: ${origin}/openapi.json
 - Discovery: ${origin}/.well-known/x402
+- Probe (402): POST ${origin}/v1/pay
 - MCP: POST ${origin}/mcp
 - Docs: ${origin}/docs/
 - Fee: ${env.FEE_BPS || 500} bps · hub does not hold upstream LLM keys
+- Live on x402 — USDC on Base (\`eip155:8453\`) + Solana (\`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp\`)
+- Buyers can pay via pay.sh on Solana (buyer-side discovery/CLI; not a seller acceptor)
 
 ## Sell
 POST ${origin}/v1/offers
 \`\`\`json
-{"sellerPayTo":"0x…","endpoint":"https://…/v1/chat/completions","model":"llama-3.3-70b","mtok":10,"priceUsd":0.8}
+{"sellerPayTo":"0x…","sellerSolPayTo":"<optional base58>","endpoint":"https://…/v1/chat/completions","model":"llama-3.3-70b","mtok":10,"priceUsd":0.8}
 \`\`\`
 
 ## Buy
@@ -69,7 +72,9 @@ POST ${origin}/v1/intents
 \`\`\`
 
 ## Pay
-POST ${origin}/v1/matches/{id}/pay → 402 dual accepts (seller + hub) → retry with X-Payment → grant
+POST ${origin}/v1/matches/{id}/pay → 402 dual accepts (seller + hub × Base and/or Solana) → retry with payment-signature / X-Payment → grant
+
+Buyers can settle via pay.sh on Solana. Settlement is x402 USDC on Base and Solana.
 
 Full skill: see repo skills/curb/SKILL.md
 `;
@@ -78,18 +83,20 @@ Full skill: see repo skills/curb/SKILL.md
 function llmsTxt(origin) {
   return [
     "# CURB",
-    `> Agent↔agent inference swap. Dual-payee x402. No upstream keys on hub. Product: ${PRODUCT_ID}`,
+    `> Agent↔agent inference swap. Live on x402 — USDC on Base and Solana. Buyers can pay via pay.sh on Solana. Dual-payee (seller + hub fee). No upstream keys on hub. Product: ${PRODUCT_ID}`,
     "",
     `Home: ${origin}/`,
     `Docs: ${origin}/docs/`,
     `OpenAPI: ${origin}/openapi.json`,
     `Discovery: ${origin}/.well-known/x402`,
+    `Pay probe: POST ${origin}/v1/pay`,
     `Skill: ${origin}/skill.md`,
     `MCP: POST ${origin}/mcp`,
     `Offers: GET ${origin}/v1/offers`,
     `Feed: ${origin}/feed.xml`,
     `Sitemap: ${origin}/sitemap.xml`,
     `Newsletter: ${origin}/newsletter`,
+    `Payments: x402 USDC on Base + Solana; pay.sh = buyer-side Solana CLI (not a seller acceptor)`,
     `Contact: contact@numetal.xyz`,
     "",
   ].join("\n");
@@ -163,7 +170,7 @@ export default {
       }
 
       if (path === "/.well-known/x402" && request.method === "GET") {
-        return json(wellKnownX402(env, origin), 200, request);
+        return json(await wellKnownX402(env, origin), 200, request);
       }
 
       if (path === "/llms.txt" && request.method === "GET") {
@@ -239,6 +246,38 @@ export default {
         return json(m, 200, request);
       }
 
+      // Discovery probe — bare POST always 402 before body validation (x402scan requirement).
+      if (path === "/v1/pay" && request.method === "POST") {
+        const rl = await rateLimit(env, request, "pay");
+        if (!rl.ok) return json({ error: rl.error }, rl.status, request);
+        if (hasPaymentHeader(request)) {
+          return json(
+            {
+              ok: true,
+              probe: true,
+              message: "Probe ack only — settle real swaps via POST /v1/matches/{id}/pay",
+            },
+            200,
+            request
+          );
+        }
+        const challenge = await discoveryAccepts(env, origin);
+        return paymentRequiredResponse({
+          error: "payment_required",
+          message:
+            "CURB discovery probe. Attach payment covering seller + hub_fee accepts on one network (Base or Solana), or use POST /v1/matches/{id}/pay for a real match.",
+          price: { amount: String(challenge.split.grossUsd), currency: "USD" },
+          paymentInfo: {
+            networks: challenge.rails?.solana
+              ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
+              : ["eip155:8453"],
+            asset: "USDC",
+            x402Version: 2,
+          },
+          ...challenge,
+        });
+      }
+
       const matchPay = path.match(/^\/v1\/matches\/([^/]+)\/pay$/);
       if (matchPay && request.method === "POST") {
         const rl = await rateLimit(env, request, "pay");
@@ -254,12 +293,20 @@ export default {
         }
 
         if (!hasPaymentHeader(request)) {
+          const fresh = await refreshMatchChallenge(env, m, origin);
           return paymentRequiredResponse({
             error: "payment_required",
-            message: "Attach X-Payment covering seller + hub fee accepts, then retry.",
-            price: { amount: String(m.split.grossUsd), currency: "USD" },
-            paymentInfo: { network: env.NETWORK || "eip155:8453", asset: "USDC", x402Version: 2 },
-            ...m.challenge,
+            message:
+              "Attach payment-signature / X-Payment covering seller + hub_fee accepts on one network (Base or Solana), then retry.",
+            price: { amount: String(fresh.split.grossUsd), currency: "USD" },
+            paymentInfo: {
+              networks: fresh.challenge?.rails?.solana
+                ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
+                : ["eip155:8453"],
+              asset: "USDC",
+              x402Version: 2,
+            },
+            ...fresh.challenge,
           });
         }
 
@@ -274,6 +321,7 @@ export default {
         const body = parsed.body;
         const r = await createOffer(env, {
           sellerPayTo: body.sellerPayTo || env.HUB_PAY_TO,
+          sellerSolPayTo: body.sellerSolPayTo || body.solanaPayTo || env.HUB_PAY_TO_SOLANA,
           endpoint: body.endpoint || `${origin}/v1/demo-fulfill`,
           model: body.model || "demo/llama-3.3-70b",
           mtok: body.mtok || 10,

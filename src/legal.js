@@ -33,7 +33,8 @@ export function termsHtml(origin) {
 
     <h2>Payments &amp; fees</h2>
     <p>
-      Matched swaps settle in USDC on Base via x402. Protocol fees are disclosed in
+      Matched swaps settle in USDC via x402 on Base and Solana. Buyers may use pay.sh on Solana as a
+      buyer-side discovery/CLI — it is not a seller acceptor. Protocol fees are disclosed in
       <code>/.well-known/x402</code> and on the payment challenge. On-chain payments are final subject to
       network rules. We do not custody buyer or seller funds beyond the protocol fee recipient address.
     </p>

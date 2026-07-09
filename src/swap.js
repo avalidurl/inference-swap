@@ -1,5 +1,5 @@
 import { uid, putJson, getJson, listIds, pushId } from "./store.js";
-import { dualAccepts, feeSplit } from "./x402.js";
+import { dualAccepts, feeSplit, isSolanaAddress, hubPayToBase, hubPayToSolana, solanaEnabled } from "./x402.js";
 import { MAX_MTOK, MAX_PRICE_USD } from "./harden.js";
 
 const OFFER_TTL = 60 * 60 * 24 * 7; // 7d
@@ -9,6 +9,12 @@ function normAddr(a) {
   const s = String(a || "").trim();
   if (!/^0x[a-fA-F0-9]{40}$/.test(s)) return null;
   return s.toLowerCase();
+}
+
+function normSol(a) {
+  const s = String(a || "").trim();
+  if (!isSolanaAddress(s)) return null;
+  return s;
 }
 
 function httpsOnly(url) {
@@ -24,6 +30,7 @@ function httpsOnly(url) {
 
 export async function createOffer(env, body) {
   const sellerPayTo = normAddr(body.sellerPayTo || body.payTo);
+  const sellerSolPayTo = normSol(body.sellerSolPayTo || body.solanaPayTo || body.solPayTo);
   const endpoint = httpsOnly(body.endpoint);
   const model = String(body.model || "").trim().slice(0, 128);
   const mtok = Number(body.mtok || body.mTok || 0);
@@ -34,6 +41,9 @@ export async function createOffer(env, body) {
   if (!model) return { error: "model_required", status: 400 };
   if (!(mtok > 0) || mtok > MAX_MTOK) return { error: "mtok_out_of_range", status: 400 };
   if (!(priceUsd > 0) || priceUsd > MAX_PRICE_USD) return { error: "priceUsd_out_of_range", status: 400 };
+  if ((body.sellerSolPayTo || body.solanaPayTo || body.solPayTo) && !sellerSolPayTo) {
+    return { error: "sellerSolPayTo_invalid", status: 400 };
+  }
 
   const id = uid("offer");
   const offer = {
@@ -41,6 +51,7 @@ export async function createOffer(env, body) {
     type: "sell",
     status: "open",
     sellerPayTo,
+    sellerSolPayTo: sellerSolPayTo || null,
     endpoint,
     model,
     mtok,
@@ -69,7 +80,8 @@ export async function listOffers(env, { status = "open", limit = 50 } = {}) {
 }
 
 export async function createIntent(env, body, origin) {
-  const buyer = normAddr(body.buyer || body.buyerAddress);
+  const rawBuyer = body.buyer || body.buyerAddress;
+  const buyer = normAddr(rawBuyer) || normSol(rawBuyer);
   const model = String(body.model || "").trim();
   const mtok = Number(body.mtok || body.mTok || 0);
   const maxPriceUsd = Number(body.maxPriceUsd || body.maxPrice || 0);
@@ -121,8 +133,9 @@ async function createMatch(env, { offer, intent, origin }) {
   const gross = offer.priceUsd * (intent.mtok / offer.mtok);
   const split = feeSplit(env, gross);
   const resourceUrl = `${origin}/v1/matches/${id}/pay`;
-  const challenge = dualAccepts(env, {
+  const challenge = await dualAccepts(env, {
     sellerPayTo: offer.sellerPayTo,
+    sellerSolPayTo: offer.sellerSolPayTo || null,
     grossUsd: split.grossUsd,
     resourceUrl,
     description: `Swap ${intent.mtok} MTok ${offer.model}`,
@@ -136,6 +149,7 @@ async function createMatch(env, { offer, intent, origin }) {
     model: offer.model,
     mtok: intent.mtok,
     sellerPayTo: offer.sellerPayTo,
+    sellerSolPayTo: offer.sellerSolPayTo || null,
     sellerEndpoint: offer.endpoint,
     buyer: intent.buyer,
     split,
@@ -192,6 +206,24 @@ export async function stats(env) {
     openOffers: offers.length,
     matches: matchIds.length,
     feeBps: Number(env.FEE_BPS || 500),
-    hubPayTo: env.HUB_PAY_TO || null,
+    hubPayTo: hubPayToBase(env) || null,
+    hubPayToSolana: solanaEnabled(env) ? hubPayToSolana(env) : null,
+    rails: {
+      base: Boolean(hubPayToBase(env)),
+      solana: solanaEnabled(env),
+    },
   };
+}
+
+/** Rebuild challenge for an existing match (e.g. after Solana feePayer refresh). */
+export async function refreshMatchChallenge(env, match, origin) {
+  const resourceUrl = `${origin}/v1/matches/${match.id}/pay`;
+  match.challenge = await dualAccepts(env, {
+    sellerPayTo: match.sellerPayTo,
+    sellerSolPayTo: match.sellerSolPayTo || null,
+    grossUsd: match.split?.grossUsd ?? 0,
+    resourceUrl,
+    description: `Swap ${match.mtok} MTok ${match.model}`,
+  });
+  return match;
 }

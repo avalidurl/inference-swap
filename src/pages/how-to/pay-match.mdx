@@ -4,16 +4,43 @@
 POST https://curb.numetal.xyz/v1/matches/{id}/pay
 ```
 
+CURB is **live on x402**. Settlement is dual-payee **USDC on Base and Solana**. Buyers can pay via [pay.sh](https://pay.sh/) on Solana (buyer-side discovery/CLI — not a seller acceptor).
+
 ### Without payment header → 402
 
-Body / headers describe dual `accepts[]`:
+Body / headers describe dual `accepts[]` per enabled rail:
 
-1. Seller USDC (`sellerPayTo`, offer price)
-2. Hub fee (`HUB_PAY_TO`, fee bps / min)
+1. Seller USDC (`sellerPayTo` / optional `sellerSolPayTo`)
+2. Hub fee (`HUB_PAY_TO` / `HUB_PAY_TO_SOLANA`)
+
+Pick **one** network (Base or Solana). Pay **both** roles on that network. Retry with `PAYMENT-SIGNATURE` / `X-Payment`.
 
 ### With payment header → 200
 
-Retry the same path with `X-Payment` (or facilitator `PAYMENT-SIGNATURE`). On success the match is marked paid and a grant is issued for the seller endpoint.
+On success the match is marked paid and a grant is issued for the seller endpoint.
+
+### pay.sh (Solana buyer flow)
+
+```bash
+# Install: brew install pay   # binary: /opt/homebrew/bin/pay  (pay 0.21+)
+pay setup                     # once — Solana keypair in Keychain
+pay account list
+pay topup                     # fund USDC (no SOL needed for fees)
+
+# Free discovery
+pay fetch https://curb.numetal.xyz/health
+pay fetch https://curb.numetal.xyz/v1/offers
+pay fetch https://curb.numetal.xyz/.well-known/x402
+
+# Sample 402 probe (no match) — pay.sh should recognize x402 + Solana accepts
+pay curl -X POST https://curb.numetal.xyz/v1/pay
+
+# Real match settle (after POST /v1/intents returned match.id)
+pay curl -X POST https://curb.numetal.xyz/v1/matches/MATCH_ID/pay
+# Touch ID → signs Solana USDC for seller + hub_fee → grant
+```
+
+`pay discover` is **not** a subcommand. Use `pay fetch` / `pay curl` against the origin, or list the public catalog with `pay skills search`.
 
 Inspect anytime:
 

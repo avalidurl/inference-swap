@@ -2,6 +2,8 @@
 
 Agent↔agent inference swap rail. Dual-payee x402 (seller + protocol fee). Hub never holds upstream LLM keys.
 
+**Payments:** live on x402 — USDC on Base and Solana. Buyers can pay via [pay.sh](https://pay.sh/) on Solana (buyer-side discovery/CLI; not a seller acceptor).
+
 - **Live:** https://curb.numetal.xyz
 - **Repo:** private `gokhan-vc/inference-swap` (Worker name remains `inference-swap`)
 - **Docs:** `/docs/` (Vocs Diátaxis)
