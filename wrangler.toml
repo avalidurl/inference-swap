@@ -38,8 +38,8 @@ FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 #            (no on-chain verification). Keeps the public pitch working without secrets.
 #   verify → ONLY a CDP-facilitator-verified+settled payment mints a grant; a fake/bare
 #            header is re-challenged with 402. Requires the CDP secrets below.
-# Default when unset: verify if CDP creds present, else demo. Pinned to demo here.
-SETTLE_MODE = "demo"
+# Default when unset: verify if CDP creds present, else demo. Pinned to verify (CDP secrets wired).
+SETTLE_MODE = "verify"
 # Secrets (NOT in repo): ACCESS_KEY; CDP_API_KEY_ID + CDP_API_KEY_SECRET enable verify mode.
 #   Set via: wrangler secret put CDP_API_KEY_ID / CDP_API_KEY_SECRET, then SETTLE_MODE=verify.
 # Payments: USDC on x402 on Base + Solana, and via pay.sh on Solana
