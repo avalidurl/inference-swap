@@ -366,9 +366,13 @@ export const MATCH_PAY_BAZAAR = {
   },
 };
 
-/** Catalog/discovery probe challenge (stable URL for x402scan). */
-export async function discoveryAccepts(env, origin) {
-  const resourceUrl = `${origin}/v1/pay`;
+/**
+ * Catalog/discovery probe challenge (stable URL for x402scan).
+ * Optional `resourceUrl` lets match-pay probes (`/v1/matches/{id}/pay` with unknown id)
+ * return the same dual-rail sample while advertising the probed resource.
+ */
+export async function discoveryAccepts(env, origin, resourceUrl = null) {
+  const url = resourceUrl || `${origin}/v1/pay`;
   const sampleGross = Number(env.DISCOVERY_PRICE_USD || 0.1);
   const hub = hubPayToBase(env) || "0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE";
   // Probe uses hub addresses as example seller so both roles are visible without a live match.
@@ -376,7 +380,7 @@ export async function discoveryAccepts(env, origin) {
     sellerPayTo: hub,
     sellerSolPayTo: solanaEnabled(env) ? hubPayToSolana(env) : null,
     grossUsd: sampleGross,
-    resourceUrl,
+    resourceUrl: url,
     description: "CURB discovery probe — USDC on x402 on Base + Solana (sample price)",
   });
   return {

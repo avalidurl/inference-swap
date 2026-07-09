@@ -448,30 +448,51 @@ export default {
         if (!rl.ok) return json({ error: rl.error }, rl.status, request);
         const id = matchPay[1];
         const m = await getMatch(env, id);
+
+        // Paywall BEFORE not_found — x402scan probes literal/placeholder ids and must get 402.
+        if (!hasPaymentHeader(request)) {
+          if (m) {
+            const fresh = await refreshMatchChallenge(env, m, origin);
+            return paymentRequiredResponse({
+              error: "payment_required",
+              message:
+                "Attach payment-signature / X-Payment covering seller + hub_fee accepts on one network (Base or Solana), then retry.",
+              price: { amount: String(fresh.split.grossUsd), currency: "USD" },
+              paymentInfo: {
+                networks: fresh.challenge?.rails?.solana
+                  ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
+                  : ["eip155:8453"],
+                asset: "USDC",
+                x402Version: 2,
+              },
+              ...fresh.challenge,
+            });
+          }
+          const resourceUrl = `${origin}/v1/matches/${id}/pay`;
+          const challenge = await discoveryAccepts(env, origin, resourceUrl);
+          return paymentRequiredResponse({
+            error: "payment_required",
+            message:
+              "Match not found or discovery probe. Sample dual-rail challenge (same as POST /v1/pay). Create a live match, then pay that id; or use POST /v1/pay.",
+            note: "match_not_found_probe",
+            price: { amount: String(challenge.split.grossUsd), currency: "USD" },
+            paymentInfo: {
+              networks: challenge.rails?.solana
+                ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
+                : ["eip155:8453"],
+              asset: "USDC",
+              x402Version: 2,
+            },
+            ...challenge,
+          });
+        }
+
         if (!m) return json({ error: "not_found" }, 404, request);
 
         const demo = url.searchParams.get("demo") === "1" && bearerOk(request, env.ACCESS_KEY);
         if (demo) {
           const paid = await markPaid(env, id, { demo: true, note: "demo_settle" });
           return json(paid.body, paid.status, request);
-        }
-
-        if (!hasPaymentHeader(request)) {
-          const fresh = await refreshMatchChallenge(env, m, origin);
-          return paymentRequiredResponse({
-            error: "payment_required",
-            message:
-              "Attach payment-signature / X-Payment covering seller + hub_fee accepts on one network (Base or Solana), then retry.",
-            price: { amount: String(fresh.split.grossUsd), currency: "USD" },
-            paymentInfo: {
-              networks: fresh.challenge?.rails?.solana
-                ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
-                : ["eip155:8453"],
-              asset: "USDC",
-              x402Version: 2,
-            },
-            ...fresh.challenge,
-          });
         }
 
         const paid = await markPaid(env, id, { note: "x_payment_header_present" });

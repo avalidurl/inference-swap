@@ -197,7 +197,7 @@ export function buildOpenApi(env, origin) {
       description:
         "CURB — agent-to-agent inference swap rail. We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee. Hub does not hold upstream LLM keys.",
       "x-guidance":
-        "1) GET /v1/offers (free) to browse capacity. 2) POST /v1/offers to sell (include sellerPayTo Base 0x…; optional sellerSolPayTo for full Solana dual-payee). 3) POST /v1/intents to buy — hub auto-matches. 4) POST /v1/matches/{id}/pay bare → 402 with accepts[] (role=seller + role=hub_fee on eip155:8453 and, when enabled, solana:…). Pick ONE network; pay BOTH roles on that network; retry with payment-signature / X-Payment. 5) Discovery probe: bare POST /v1/pay → sample 402 (no side effects). Refunds/billing: contact@numetal.xyz.",
+        "1) GET /v1/offers (free) to browse capacity. 2) POST /v1/offers to sell (include sellerPayTo Base 0x…; optional sellerSolPayTo for full Solana dual-payee). 3) POST /v1/intents to buy — hub auto-matches. 4) POST /v1/matches/{id}/pay bare → 402 with accepts[] (role=seller + role=hub_fee on eip155:8453 and, when enabled, solana:…). Unknown/placeholder ids still 402 with a catalog sample (paywall before not_found). Pick ONE network; pay BOTH roles on that network; retry with payment-signature / X-Payment. 5) Discovery probe: bare POST /v1/pay → sample 402 (no side effects). Refunds/billing: contact@numetal.xyz.",
       contact: { email: "contact@numetal.xyz", name: "Numetal Labs", url: "https://curb.numetal.xyz" },
     },
     ...ownershipDiscovery(env),
@@ -406,14 +406,24 @@ export function buildOpenApi(env, origin) {
           operationId: "payMatch",
           summary: "Pay match — 402 dual-payee accepts without payment header; settle with header",
           description:
-            "Match-specific price (dynamic). Bare POST → 402 with role=seller + role=hub_fee on enabled rails before body validation. Retry with payment-signature / X-Payment. Discovery probe: POST /v1/pay.",
+            "Match-specific price (dynamic). Paywall runs before not_found: bare POST always returns 402 (live match challenge, or catalog sample when id is unknown/placeholder — same dual-rail shape as POST /v1/pay). Retry with payment-signature / X-Payment. 404 only when a payment header is present and the match id does not exist.",
           tags: ["Payments"],
           "x-payment-info": {
             price: { mode: "dynamic", currency: "USD", min: "0.001", max: "100.000000" },
             protocols,
           },
           security: [{ x402: [] }],
-          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              description:
+                "Match id from POST /v1/intents. Discovery scanners may probe with `probe` or `{id}`; unpaid unknown ids still return HTTP 402 with a catalog sample challenge.",
+              schema: { type: "string", minLength: 1, example: "probe" },
+              example: "probe",
+            },
+          ],
           requestBody: {
             required: false,
             content: {
@@ -430,8 +440,8 @@ export function buildOpenApi(env, origin) {
             "402": pay402(
               env,
               origin,
-              "Payment required (seller + hub fee on Base and/or Solana). WWW-Authenticate: Payment …; PAYMENT-REQUIRED: base64 x402 v2.",
-              "/v1/matches/{id}/pay"
+              "Payment required (seller + hub fee on Base and/or Solana). WWW-Authenticate: Payment …; PAYMENT-REQUIRED: base64 x402 v2. Unknown match ids still 402 (catalog sample) when unpaid.",
+              "/v1/matches/probe/pay"
             ),
             "200": {
               description: "Paid — grant issued",
@@ -449,7 +459,9 @@ export function buildOpenApi(env, origin) {
                 },
               },
             },
-            "404": { description: "Match not found" },
+            "404": {
+              description: "Match not found — only when payment-signature / X-Payment is present and the id does not exist. Unpaid probes never 404.",
+            },
           },
         },
       },
