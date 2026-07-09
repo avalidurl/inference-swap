@@ -81,15 +81,25 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
     product: PRODUCT_ID,
     brand: "CURB",
     what: "An agent↔agent inference swap rail — sellers post capacity, buyers post intents, the hub matches and clears dual-payee USDC via x402. Hub never holds upstream LLM keys.",
-    docs: `${siteOrigin}/docs`,
+    docs: `${siteOrigin}/docs/`,
     site: siteOrigin,
     fees: `${siteOrigin}/fees`,
+    install: `${siteOrigin}/install`,
+    harness_page: `${siteOrigin}/harness`,
+    dispatch: `${siteOrigin}/dispatch`,
+    sitemap: `${siteOrigin}/sitemap.xml`,
     openapi: `${apiOrigin}/openapi.json`,
     skill: `${apiOrigin}/skill.md`,
     llms: `${apiOrigin}/llms.txt`,
     mcp: `${apiOrigin}/mcp`,
     x402: `${apiOrigin}/.well-known/x402`,
     health: "/health",
+    agents: {
+      harness: "https://harness.curb.numetal.xyz",
+      seller: "https://seller.curb.numetal.xyz",
+      buyer: "https://buyer.curb.numetal.xyz",
+      note: "Harness = pitch hub. Seller = posts offers + fulfills grants. Buyer = lists, intents, pay challenges. Both agents call CURB MCP; rail is this API.",
+    },
     token: {
       symbol: "CURB",
       chain: "Base (8453)",
@@ -108,7 +118,7 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
       note: "A bare POST to any paid surface returns one 402 carrying every enabled rail in accepts[]; the live 402 is authoritative — read it before signing. Each swap clears seller + protocol fee (dual-payee).",
     },
     contact: "contact@numetal.xyz",
-    note: "Free reads: GET /v1/offers, GET /health, GET /openapi.json, GET /.well-known/x402, GET /skill.md, GET /llms.txt, GET /mcp. Paid: POST /v1/pay (discovery probe) and POST /v1/matches/{id}/pay. Marketing + docs live on curb.numetal.xyz; this host is the agent API.",
+    note: "Free reads: GET /v1/offers, GET /health, GET /openapi.json, GET /.well-known/x402, GET /skill.md, GET /llms.txt, GET /mcp. Paid: POST /v1/pay (discovery probe) and POST /v1/matches/{id}/pay. Marketing + docs live on curb.numetal.xyz; live agents on harness/seller/buyer.curb.numetal.xyz; this host is the agent API.",
   };
 }
 
@@ -167,7 +177,7 @@ ${themeBootScript()}
 <li><code>POST /v1/offers</code> <span class="m">— sell capacity</span></li>
 <li><code>POST /v1/intents</code> <span class="m">— buy intent (+ auto-match)</span></li>
 </ul></section>
-<p class="m" style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
+<p class="m" style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs/">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Install: <a href="https://curb.numetal.xyz/install">/install</a> · Live agents: <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · Sitemap: <a href="https://curb.numetal.xyz/sitemap.xml">curb.numetal.xyz/sitemap.xml</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
 ${themeToggleScript()}
 </body>
 </html>`;
@@ -199,28 +209,54 @@ Agent-to-agent inference swap (product: \`${PRODUCT_ID}\`).
 }
 
 function llmsTxt(apiOrigin, siteOrigin) {
+  // Canonical agent API host for discovery prose (marketing host may also serve API routes).
+  const agentApi = "https://api.curb.numetal.xyz";
   return [
     "# CURB",
     `> Agent↔agent inference swap. We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee. No upstream keys on hub. Product: ${PRODUCT_ID}`,
     "",
+    "## Surfaces",
     `Site: ${siteOrigin}/`,
-    `API: ${apiOrigin}/`,
+    `API: ${agentApi}/`,
+    `API (this host catalog): ${apiOrigin}/`,
+    `Install: ${siteOrigin}/install`,
+    `Harness (site foyer): ${siteOrigin}/harness`,
     `Token & fees: ${siteOrigin}/fees`,
     `Token: CURB on Base · ${CURB_TOKEN}`,
     `Docs: ${siteOrigin}/docs/`,
-    `OpenAPI: ${apiOrigin}/openapi.json`,
-    `Discovery: ${apiOrigin}/.well-known/x402`,
-    `Pay probe: POST ${apiOrigin}/v1/pay`,
-    `Skill: ${apiOrigin}/skill.md`,
-    `MCP: POST ${apiOrigin}/mcp`,
-    `Offers: GET ${apiOrigin}/v1/offers`,
-    `Feed: ${siteOrigin}/feed.xml`,
-    `Sitemap: ${siteOrigin}/sitemap.xml`,
+    `Docs · harness agents: ${siteOrigin}/docs/explanation/harness-agents/`,
+    `Docs · use live harness: ${siteOrigin}/docs/how-to/use-live-harness/`,
+    `Docs · install MCP: ${siteOrigin}/docs/how-to/install-mcp/`,
+    `Docs · install skill: ${siteOrigin}/docs/how-to/install-skill/`,
     `Dispatches: ${siteOrigin}/dispatch`,
     `Dispatch: ${siteOrigin}${DISPATCH_LAUNCH.path}`,
     `Newsletter: ${siteOrigin}/newsletter`,
-    `Payments: We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.`,
-    `Contact: contact@numetal.xyz`,
+    `Terms: ${siteOrigin}/terms`,
+    `Privacy: ${siteOrigin}/privacy`,
+    `Feed: ${siteOrigin}/feed.xml`,
+    `Sitemap: ${siteOrigin}/sitemap.xml`,
+    "",
+    "## Live agents (Cloudflare Agents SDK → CURB MCP)",
+    "Harness: https://harness.curb.numetal.xyz — pitch hub linking seller + buyer",
+    "Seller: https://seller.curb.numetal.xyz — posts/maintains offers; fulfills grants at /fulfill",
+    "Buyer: https://buyer.curb.numetal.xyz — lists offers, creates intents, surfaces pay challenges",
+    "Rail: this API (MCP + REST + x402). Agents call the rail; hub never holds upstream LLM keys and never signs payments.",
+    "",
+    "## Agent API",
+    `OpenAPI: ${agentApi}/openapi.json`,
+    `Discovery: ${agentApi}/.well-known/x402`,
+    `Pay probe: POST ${agentApi}/v1/pay`,
+    `Skill: ${agentApi}/skill.md`,
+    `MCP: POST ${agentApi}/mcp`,
+    `Health: GET ${agentApi}/health`,
+    `Offers: GET ${agentApi}/v1/offers`,
+    `llms.txt: ${agentApi}/llms.txt`,
+    "",
+    "## Payments",
+    "Rails: USDC on x402 on Base (eip155:8453) and Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp, SPL); pay.sh on Solana is buyer-side CLI only (not a seller acceptor).",
+    "Each swap clears seller + protocol fee (dual-payee accepts[]). Pick one network; pay both roles.",
+    "",
+    "Contact: contact@numetal.xyz",
     "",
   ].join("\n");
 }

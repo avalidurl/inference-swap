@@ -202,13 +202,19 @@ function escapeXml(s) {
 }
 
 export function sitemapXml(origin) {
-  const paths = [
+  const sitePaths = [
     "/",
     "/dispatch",
-    "/fees",
-    "/docs/",
-    "/newsletter",
     DISPATCH_LAUNCH.path,
+    "/fees",
+    "/install",
+    "/harness",
+    "/docs/",
+    "/docs/explanation/harness-agents/",
+    "/docs/how-to/use-live-harness/",
+    "/docs/how-to/install-mcp/",
+    "/docs/how-to/install-skill/",
+    "/newsletter",
     "/terms",
     "/privacy",
     "/llms.txt",
@@ -216,11 +222,18 @@ export function sitemapXml(origin) {
     "/openapi.json",
     "/skill.md",
   ];
-  const urls = paths
-    .map(
+  const absolute = [
+    "https://harness.curb.numetal.xyz/",
+    "https://seller.curb.numetal.xyz/",
+    "https://buyer.curb.numetal.xyz/",
+    "https://api.curb.numetal.xyz/",
+  ];
+  const urls = [
+    ...sitePaths.map(
       (p) => `  <url><loc>${origin}${p === "/" ? "" : p}</loc><changefreq>weekly</changefreq></url>`
-    )
-    .join("\n");
+    ),
+    ...absolute.map((loc) => `  <url><loc>${loc}</loc><changefreq>weekly</changefreq></url>`),
+  ].join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
