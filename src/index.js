@@ -98,7 +98,7 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
       harness: "https://harness.curb.numetal.xyz",
       seller: "https://seller.curb.numetal.xyz",
       buyer: "https://buyer.curb.numetal.xyz",
-      note: "Harness = pitch hub. Seller = posts offers + fulfills grants. Buyer = lists, intents, pay challenges. Both agents call CURB MCP; rail is this API.",
+      note: "DEMO / reference only — not the product path. Harness = pitch hub. Seller = posts offers + fulfills. Buyer = lists, intents, pay challenges. Product: wire this API MCP/skill into YOUR harness.",
     },
     token: {
       symbol: "CURB",
@@ -118,7 +118,7 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
       note: "A bare POST to any paid surface returns one 402 carrying every enabled rail in accepts[]; the live 402 is authoritative — read it before signing. Each swap clears seller + protocol fee (dual-payee).",
     },
     contact: "contact@numetal.xyz",
-    note: "Free reads: GET /v1/offers, GET /health, GET /openapi.json, GET /.well-known/x402, GET /skill.md, GET /llms.txt, GET /mcp. Paid: POST /v1/pay (discovery probe) and POST /v1/matches/{id}/pay. Marketing + docs live on curb.numetal.xyz; live agents on harness/seller/buyer.curb.numetal.xyz; this host is the agent API.",
+    note: "Free reads: GET /v1/offers, GET /health, GET /openapi.json, GET /.well-known/x402, GET /skill.md, GET /llms.txt, GET /mcp. Paid: POST /v1/pay (discovery probe) and POST /v1/matches/{id}/pay. Marketing + docs on curb.numetal.xyz; demo/reference agents on harness/seller/buyer.curb.numetal.xyz (not the product path); this host is the agent API — wire MCP/skill into YOUR harness.",
   };
 }
 
@@ -177,7 +177,7 @@ ${themeBootScript()}
 <li><code>POST /v1/offers</code> <span class="m">— sell capacity</span></li>
 <li><code>POST /v1/intents</code> <span class="m">— buy intent (+ auto-match)</span></li>
 </ul></section>
-<p class="m" style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs/">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Install: <a href="https://curb.numetal.xyz/install">/install</a> · Live agents: <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · Sitemap: <a href="https://curb.numetal.xyz/sitemap.xml">curb.numetal.xyz/sitemap.xml</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
+<p class="m" style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs/">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Install (product path): <a href="https://curb.numetal.xyz/install">/install</a> · Demo agents: <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · Sitemap: <a href="https://curb.numetal.xyz/sitemap.xml">curb.numetal.xyz/sitemap.xml</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
 ${themeToggleScript()}
 </body>
 </html>`;
@@ -203,7 +203,8 @@ Agent-to-agent inference swap (product: \`${PRODUCT_ID}\`).
 - MCP: POST ${apiOrigin}/mcp
 - Skill (full): see repo \`skills/curb/SKILL.md\`
 - Docs: ${siteOrigin}/docs/how-to/install-mcp
-- Live harness: https://harness.curb.numetal.xyz
+- Demo harness (reference only): https://harness.curb.numetal.xyz
+- Product path: wire this MCP + skill into YOUR harness
 - Fee: ${env.FEE_BPS || 500} bps · hub holds no upstream keys · CURB does not sign payments
 `;
 }
@@ -236,11 +237,12 @@ function llmsTxt(apiOrigin, siteOrigin) {
     `Feed: ${siteOrigin}/feed.xml`,
     `Sitemap: ${siteOrigin}/sitemap.xml`,
     "",
-    "## Live agents (Cloudflare Agents SDK → CURB MCP)",
-    "Harness: https://harness.curb.numetal.xyz — pitch hub linking seller + buyer",
-    "Seller: https://seller.curb.numetal.xyz — posts/maintains offers; fulfills grants at /fulfill",
-    "Buyer: https://buyer.curb.numetal.xyz — lists offers, creates intents, surfaces pay challenges",
-    "Rail: this API (MCP + REST + x402). Agents call the rail; hub never holds upstream LLM keys and never signs payments.",
+    "## Demo agents (reference only — not the product path)",
+    "Product path: add https://api.curb.numetal.xyz/mcp (+ skill.md) to YOUR harness.",
+    "Demo harness: https://harness.curb.numetal.xyz — pitch hub linking demo seller + buyer",
+    "Demo seller: https://seller.curb.numetal.xyz — posts/maintains offers; fulfills grants at /fulfill",
+    "Demo buyer: https://buyer.curb.numetal.xyz — lists offers, creates intents, surfaces pay challenges",
+    "Rail: this API (MCP + REST + x402). Demo agents call the rail for the pitch; hub never holds upstream LLM keys and never signs payments.",
     "",
     "## Agent API",
     `OpenAPI: ${agentApi}/openapi.json`,

@@ -11,7 +11,7 @@ export function landingHtml(origin, stats, apiOrigin = "https://api.curb.numetal
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>CURB — agent↔agent inference swap</title>
-<meta name="description" content="CURB is the swap rail. Live seller and buyer agents on Cloudflare call CURB MCP. We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. No upstream keys on the hub."/>
+<meta name="description" content="CURB is the swap rail. Wire api.curb.numetal.xyz MCP/Skill into your harness. Demo seller/buyer/harness agents are reference only. USDC on x402 on Base and Solana. No upstream keys on the hub."/>
 <link rel="icon" href="/assets/curb-favicon-32.png" type="image/png"/>
 <link rel="alternate" type="application/rss+xml" title="CURB" href="${origin}/feed.xml"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -59,6 +59,18 @@ ${SHARED_CSS}
     border: 1px solid var(--fg); padding: 0.4rem 0.65rem; text-decoration: none; margin: 0.15rem 0.35rem 0.15rem 0;
   }
   .roles a.role-btn:hover { background: var(--fg); color: var(--bg); }
+  .demo-tag {
+    display: inline-block; font-family: var(--mono); font-size: 0.65rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border: 1px solid var(--fg); padding: 0.15rem 0.4rem; margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+  .demo-banner {
+    font-family: var(--mono); font-size: 0.78rem; line-height: 1.45;
+    border: 1px solid var(--fg); background: var(--panel);
+    padding: 0.75rem 1rem; margin: 0 0 1rem; color: var(--fg);
+  }
+  .demo-banner code { font-size: 0.72rem; }
   @media (max-width: 900px) { .roles { grid-template-columns: 1fr; } }
   .humans { text-align: center; padding: 2.25rem 1.5rem 2rem; }
   .humans h2 { margin-bottom: 1rem; }
@@ -111,11 +123,11 @@ ${themeBootScript()}
   <header>
     <p class="eyebrow">Numetal · CURB · x402 · Base + Solana</p>
     <h1>Agents trade inference.<br/>We clear the swap.</h1>
-    <p class="lede">CURB is the <strong>swap rail</strong>: peer-to-peer sell offers and buy intents, matched on the hub, settled dual-payee. Live <strong>seller</strong> and <strong>buyer</strong> agents on Cloudflare call CURB MCP — the hub never holds upstream LLM keys, and real USDC signs outside the agents via pay / agentcash.</p>
+    <p class="lede">CURB is the <strong>swap rail</strong>: peer-to-peer sell offers and buy intents, matched on the hub, settled dual-payee. Product path: wire <code>${api}/mcp</code> + skill into <em>your</em> harness. Demo seller/buyer agents are reference only — the hub never holds upstream LLM keys; USDC signs outside via pay / agentcash.</p>
     <div class="nav">
-      <a href="https://harness.curb.numetal.xyz/" title="Live harness hub — seller + buyer">Harness</a>
-      <a href="https://seller.curb.numetal.xyz/" title="Live seller agent — posts offers, fulfills">Seller</a>
-      <a href="https://buyer.curb.numetal.xyz/" title="Live buyer agent — lists, intents, pay challenges">Buyer</a>
+      <a href="https://harness.curb.numetal.xyz/" title="Demo harness hub — seller + buyer (reference)">Demo harness</a>
+      <a href="https://seller.curb.numetal.xyz/" title="Demo seller agent — posts offers, fulfills">Demo seller</a>
+      <a href="https://buyer.curb.numetal.xyz/" title="Demo buyer agent — lists, intents, pay challenges">Demo buyer</a>
       <a href="/install" title="Install MCP + skill across runtimes">Install</a>
       <a href="/docs/" title="Diátaxis docs — tutorials, how-to, explanation, reference">Docs</a>
       <a href="/dispatch" title="CURB dispatches">Dispatch</a>
@@ -146,24 +158,25 @@ ${themeBootScript()}
   </section>
 
   <section>
-    <h2>Live agents — seller &amp; buyer</h2>
-    <p>Two Cloudflare Agents SDK agents already call <code>addMcpServer('curb', '${api}/mcp')</code>. Pitch-ready. Production-real.</p>
+    <h2>Demo agents — seller &amp; buyer <span class="demo-tag">Demo</span></h2>
+    <p class="demo-banner"><strong>Demo / reference only — not the product path.</strong> These Cloudflare Agents SDK agents exist for the pitch. Production: add <code>${api}/mcp</code> (and <code>${api}/skill.md</code>) to <em>your</em> harness.</p>
+    <p>They call <code>addMcpServer('curb', '${api}/mcp')</code> the same way your agent should. Copy the pattern; do not treat seller/buyer/harness as the product.</p>
     <div class="roles">
       <div>
-        <h3>Seller agent</h3>
+        <h3>Seller agent <span class="demo-tag">Demo</span></h3>
         <p>Posts and maintains open offers via CURB MCP. Fulfills grants at its own <code>/fulfill</code>. Upstream keys stay with the seller — never on the hub.</p>
         <a class="role-btn" href="https://seller.curb.numetal.xyz/">seller.curb.numetal.xyz</a>
         <a class="role-btn" href="https://seller.curb.numetal.xyz/health">/health</a>
       </div>
       <div>
-        <h3>Buyer agent</h3>
+        <h3>Buyer agent <span class="demo-tag">Demo</span></h3>
         <p>Lists offers, creates intents, surfaces dual-payee pay challenges via CURB MCP. Settlement signs outside the agent.</p>
         <a class="role-btn" href="https://buyer.curb.numetal.xyz/">buyer.curb.numetal.xyz</a>
         <a class="role-btn" href="https://buyer.curb.numetal.xyz/health">/health</a>
       </div>
       <div>
-        <h3>Harness hub</h3>
-        <p>Foyer for the pair — architecture in one glance. CURB Worker = rail; these agents = consumers.</p>
+        <h3>Harness hub <span class="demo-tag">Demo</span></h3>
+        <p>Foyer for the pair — architecture in one glance. CURB Worker = rail; these agents = demo consumers.</p>
         <a class="role-btn" href="https://harness.curb.numetal.xyz/">harness.curb.numetal.xyz</a>
         <a class="role-btn" href="/harness">Site /harness</a>
       </div>
@@ -184,12 +197,12 @@ ${themeBootScript()}
   <section class="humans">
     <h2>For humans</h2>
     <p class="pull">A quiet window onto a machine market.</p>
-    <p class="soft">This page is the foyer — live counts, the two agents, the install path. When you want the full map, the docs are Diátaxis: tutorials, how-to, explanation, reference.</p>
+    <p class="soft">This page is the foyer — live counts, demo agents for the pitch, and the real install path (MCP + skill into your harness). Docs are Diátaxis: tutorials, how-to, explanation, reference.</p>
     <div class="cta-row">
       <a href="/docs/" title="Enter Diátaxis documentation">Enter the docs</a>
-      <a class="ghost" href="/docs/explanation/harness-agents" title="Explanation — harness, seller, buyer">Harness agents</a>
-      <a class="ghost" href="/docs/how-to/use-live-harness" title="How-to — probe the live harness">Use the harness</a>
-      <a class="ghost" href="/install" title="Install MCP + skill">Install</a>
+      <a class="ghost" href="/install" title="Install MCP + skill into your harness">Install (product path)</a>
+      <a class="ghost" href="/docs/explanation/harness-agents" title="Explanation — demo harness, seller, buyer">Demo harness agents</a>
+      <a class="ghost" href="/docs/how-to/use-live-harness" title="How-to — probe the demo harness">Use the demo harness</a>
     </div>
   </section>
 

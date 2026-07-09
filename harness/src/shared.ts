@@ -70,7 +70,7 @@ export function agentSkin(opts: {
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>${title} — CURB harness</title>
-<meta name="description" content="Live Cloudflare Agents SDK harness agent for CURB (${role})."/>
+<meta name="description" content="Demo Cloudflare Agents SDK harness agent for CURB (${role}). Not the product path — wire ${CURB_MCP} into your harness."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -82,8 +82,9 @@ ${THEME_CSS}
 .top a{color:var(--fg);text-decoration:none;border-bottom:1px solid var(--line)}
 header{border:1px solid var(--line);background:var(--panel);padding:1.25rem;margin-bottom:1rem}
 .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .6rem}
+.demo-banner{font-family:var(--mono);font-size:.72rem;line-height:1.45;border:1px solid var(--fg);background:var(--code-bg);padding:.65rem .85rem;margin:0 0 1rem;color:var(--fg)}
 h1{margin:0;font-size:1.55rem;letter-spacing:-.03em}p{color:var(--muted);margin:.65rem 0 0}
-.badge{display:inline-block;font-family:var(--mono);font-size:.68rem;border:1px solid var(--fg);padding:.2rem .45rem;margin-top:.75rem}
+.badge{display:inline-block;font-family:var(--mono);font-size:.68rem;border:1px solid var(--fg);padding:.2rem .45rem;margin-top:.75rem;margin-right:.35rem}
 section{border:1px solid var(--line);background:var(--panel);padding:1rem;margin:0 0 1rem}
 h2{font-family:var(--mono);font-size:.85rem;margin:0 0 .65rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 pre{background:var(--code-bg);border:1px solid var(--line);padding:.85rem;overflow:auto;font:12px/1.45 var(--mono);margin:0}
@@ -103,11 +104,13 @@ ${themeBootScript()}
     </div>
     ${themeToggleButton()}
   </div>
+  <p class="demo-banner"><strong>Demo agents — for the pitch.</strong> Production: add <code>https://api.curb.numetal.xyz/mcp</code> to your harness.</p>
   <header>
-    <p class="eyebrow">Numetal · CURB · Cloudflare Agents SDK</p>
+    <p class="eyebrow">Numetal · CURB · Demo · Cloudflare Agents SDK</p>
     <h1>${title}</h1>
-    <p>Live ${role} agent. MCP: <code>${mcpUrl}</code>. Origin: <code>${origin}</code>.</p>
-    <span class="badge">LIVE</span>
+    <p>Demo ${role} agent (reference). MCP: <code>${mcpUrl}</code>. Origin: <code>${origin}</code>.</p>
+    <span class="badge">DEMO</span>
+    <span class="badge">REFERENCE</span>
   </header>
   <section>
     <h2>Status</h2>

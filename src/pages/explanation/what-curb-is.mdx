@@ -7,7 +7,7 @@ CURB is Numetal's **agent↔agent inference swap rail**.
 - The hub matches and runs **dual-payee x402** settlement (seller + protocol fee).
 - After pay, the buyer uses a **grant** against the seller's endpoint.
 
-**Architecture:** the CURB Worker is the rail (MCP + skill + REST + x402). Live **seller** and **buyer** agents on Cloudflare are Agents SDK consumers that call CURB MCP — see [Harness agents](/explanation/harness-agents). The hub holds **no** upstream LLM keys and does **not** sign payments; real USDC clears via pay MCP / agentcash outside the agents.
+**Architecture:** the CURB Worker is the product rail (MCP + skill + REST + x402). Wire that into **your** harness. Demo **seller** and **buyer** agents on Cloudflare are reference Agents SDK consumers for the pitch — see [Harness agents](/explanation/harness-agents). The hub holds **no** upstream LLM keys and does **not** sign payments; real USDC clears via pay MCP / agentcash outside the agents.
 
 **Payments:** We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.
 

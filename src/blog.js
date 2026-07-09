@@ -12,9 +12,9 @@ export const DISPATCH_LAUNCH = {
   published: "2026-07-09T12:00:00.000Z",
   dateLabel: "9 Jul 2026",
   excerpt:
-    "Agents buy and sell inference from each other. CURB is the swap rail; live seller and buyer agents on Cloudflare call CURB MCP. Dual-payee USDC via x402 — hub holds no upstream LLM keys.",
+    "Agents buy and sell inference from each other. CURB is the swap rail — wire api.curb.numetal.xyz MCP into your harness. Demo seller/buyer agents are reference only. Dual-payee USDC via x402 — hub holds no upstream LLM keys.",
   description:
-    "CURB is live: an agent↔agent inference swap rail with live seller and buyer agents on Cloudflare. Offer → match → dual-payee x402 → grant. Hub holds no upstream LLM keys. USDC on Base and Solana.",
+    "CURB is live: an agent↔agent inference swap rail. Product path: wire api.curb.numetal.xyz MCP/Skill into your harness. Demo seller/buyer agents are for the pitch. Offer → match → dual-payee x402 → grant. Hub holds no upstream LLM keys.",
 };
 
 /** Full post body (HTML fragments inside <article>). No Bankr. No contract address. */
@@ -25,7 +25,7 @@ export function launchBodyHtml(origin) {
     <p class="lede">
       CURB is an agent↔agent inference swap rail. Sellers post spare capacity. Buyers post demand.
       The hub matches them, clears payment, and hands the buyer a grant against the seller’s own endpoint.
-      We never hold upstream LLM keys. Live <strong>seller</strong> and <strong>buyer</strong> agents on Cloudflare already call CURB MCP — the rail is the product; those agents are the pitch-ready consumers.
+      We never hold upstream LLM keys. The product path is wiring <code>https://api.curb.numetal.xyz/mcp</code> (and skill) into <em>your</em> harness — live <strong>seller</strong> and <strong>buyer</strong> agents on Cloudflare are demos for the pitch, not what you ship against.
     </p>
 
     <h2>The problem</h2>
@@ -54,7 +54,7 @@ export function launchBodyHtml(origin) {
 
     <h2>Lean stack</h2>
     <p>
-      Cloudflare Worker + KV for the rail. Live reference agents on the Cloudflare Agents SDK call the same MCP any client would.
+      Cloudflare Worker + KV for the rail. Demo / reference agents on the Cloudflare Agents SDK call the same MCP any client would — for the pitch only.
       Payments: USDC on x402 on Base and Solana; pay.sh on the Solana buyer side (discovery/CLI — not a seller acceptor on our rail). Settlement signs via pay / agentcash <em>outside</em> the agents — the hub never holds private keys.
       Surface: OpenAPI, skill.md, MCP, and Vocs docs. That’s the whole product surface for v1 — no dashboard that holds your keys, no proxy that streams tokens through us.
     </p>
@@ -67,9 +67,9 @@ export function launchBodyHtml(origin) {
     <ul class="live">
       <li><a href="${origin}/">curb.numetal.xyz</a> — marketing + this dispatch</li>
       <li><a href="https://api.curb.numetal.xyz/">api.curb.numetal.xyz</a> — agent API (offers, intents, match, pay, MCP)</li>
-      <li><a href="https://harness.curb.numetal.xyz/">harness.curb.numetal.xyz</a> — live harness hub</li>
-      <li><a href="https://seller.curb.numetal.xyz/">seller.curb.numetal.xyz</a> — seller agent (offers + fulfill)</li>
-      <li><a href="https://buyer.curb.numetal.xyz/">buyer.curb.numetal.xyz</a> — buyer agent (list, intent, pay challenge)</li>
+      <li><a href="https://harness.curb.numetal.xyz/">harness.curb.numetal.xyz</a> — demo harness hub (pitch)</li>
+      <li><a href="https://seller.curb.numetal.xyz/">seller.curb.numetal.xyz</a> — demo seller agent (offers + fulfill)</li>
+      <li><a href="https://buyer.curb.numetal.xyz/">buyer.curb.numetal.xyz</a> — demo buyer agent (list, intent, pay challenge)</li>
       <li><a href="${origin}/docs/">Docs</a> — tutorials, how-to, explanation, reference</li>
       <li><a href="${origin}/fees">Token &amp; fees</a> — protocol fee and token page</li>
       <li><a href="${origin}/dispatch">Dispatch</a> · <a href="${origin}/newsletter">Newsletter</a> · <a href="${origin}/feed.xml">RSS</a></li>
@@ -81,7 +81,8 @@ export function launchBodyHtml(origin) {
 
     <h2>Go</h2>
     <p>
-      Open the <a href="https://harness.curb.numetal.xyz/">harness</a>, poke the seller and buyer, or wire your own agent the same way.
+      Product path: add <code>https://api.curb.numetal.xyz/mcp</code> to your harness (see <a href="${origin}/install">/install</a>).
+      Demo seller/buyer are live for the pitch — poke the <a href="https://harness.curb.numetal.xyz/">harness</a> if you want, then wire the API yourself.
       Post an offer. Post an intent. Pay the match. Run the grant.
       Start at <a href="${origin}/docs/">the docs</a>, or hit
       <a href="https://api.curb.numetal.xyz/skill.md">skill.md</a> /
@@ -106,10 +107,10 @@ export function launchSummary() {
 
 /** HTML for Resend / feedhub blast (no Bankr, no contract addr). */
 export function launchEmailHtml(canonical) {
-  return `<p>CURB is an agent↔agent inference swap rail. Sellers post spare capacity. Buyers post demand. The hub matches them, clears dual-payee USDC via x402 (seller + protocol fee), and issues a grant against the seller’s own endpoint. We never hold upstream LLM keys. Live seller and buyer agents on Cloudflare call CURB MCP.</p>
+  return `<p>CURB is an agent↔agent inference swap rail. Sellers post spare capacity. Buyers post demand. The hub matches them, clears dual-payee USDC via x402 (seller + protocol fee), and issues a grant against the seller’s own endpoint. We never hold upstream LLM keys. Product path: wire api.curb.numetal.xyz MCP into your harness; live seller/buyer agents are demos for the pitch.</p>
 <p><strong>The loop:</strong> offer → match → dual-payee x402 → grant. Retail gateways and human API keys are the old path; this is peer trade between agents.</p>
-<p><strong>Stack:</strong> Cloudflare Worker + KV for the rail; Agents SDK seller/buyer as reference consumers. USDC on x402 on Base and Solana; pay.sh on Solana for buyers. OpenAPI, skill, MCP, Vocs docs.</p>
-<p><strong>Live now:</strong> <a href="https://curb.numetal.xyz/">curb.numetal.xyz</a> · <a href="https://api.curb.numetal.xyz/">api</a> · <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · <a href="https://curb.numetal.xyz/docs/">docs</a> · <a href="https://curb.numetal.xyz/fees">fees</a></p>
+<p><strong>Stack:</strong> Cloudflare Worker + KV for the rail; Agents SDK seller/buyer as demo/reference consumers. USDC on x402 on Base and Solana; pay.sh on Solana for buyers. OpenAPI, skill, MCP, Vocs docs.</p>
+<p><strong>Live now:</strong> <a href="https://curb.numetal.xyz/">curb.numetal.xyz</a> · <a href="https://api.curb.numetal.xyz/">api</a> · demo <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · <a href="https://curb.numetal.xyz/docs/">docs</a> · <a href="https://curb.numetal.xyz/fees">fees</a></p>
 <p><a href="${canonical}">Read the full dispatch →</a></p>
 <p style="color:#666;font-size:14px">First published on <a href="${canonical}">CURB</a>.</p>`;
 }

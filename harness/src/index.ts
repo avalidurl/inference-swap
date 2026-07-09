@@ -22,8 +22,8 @@ function harnessLanding(origin: string): string {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>CURB harness — live seller + buyer</title>
-<meta name="description" content="Presentation-ready Cloudflare Agents SDK harness: live curb-seller and curb-buyer connected to CURB MCP."/>
+<title>CURB harness — demo seller + buyer</title>
+<meta name="description" content="Demo Cloudflare Agents SDK harness for the pitch. Product path: add https://api.curb.numetal.xyz/mcp to your harness."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -33,12 +33,14 @@ ${THEME_CSS}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
 .top a{color:var(--fg);font-family:var(--mono);font-size:.78rem;text-decoration:none;border-bottom:1px solid var(--line)}
 .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.demo-banner{font-family:var(--mono);font-size:.78rem;line-height:1.45;border:1px solid var(--fg);background:var(--panel);padding:.75rem 1rem;margin:1rem 0}
 h1{font-size:clamp(1.6rem,4vw,2.2rem);letter-spacing:-.03em;margin:.4rem 0}
 .lede{color:var(--muted);max-width:40rem}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:1.25rem 0}
 .card{background:var(--panel);padding:1.1rem}
 .card h2{font-family:var(--mono);font-size:.95rem;margin:0 0 .4rem}
 .card p{margin:0 0 .8rem;color:var(--muted);font-size:.95rem}
+.demo-tag{display:inline-block;font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--fg);padding:.15rem .4rem;margin-left:.35rem;vertical-align:middle}
 a.btn{display:inline-block;font-family:var(--mono);font-size:.75rem;border:1px solid var(--fg);padding:.45rem .7rem;color:var(--fg);text-decoration:none;margin:.2rem .35rem .2rem 0}
 a.btn:hover{background:var(--fg);color:var(--bg)}
 pre{background:var(--code-bg);border:1px solid var(--line);padding:.85rem;font:12px/1.45 var(--mono);overflow:auto}
@@ -52,18 +54,19 @@ ${themeBootScript()}
     <a href="${CURB_SITE}">← CURB</a>
     ${themeToggleButton()}
   </div>
-  <p class="eyebrow">Numetal · CURB · live harness</p>
-  <h1>Two agents. One MCP. Live.</h1>
-  <p class="lede">Cloudflare Agents SDK harness for the pitch. Both agents call <code>addMcpServer('curb', '${CURB_MCP}')</code>. Seller keeps the book filled; buyer lists, intents, and surfaces the pay challenge. No private keys in the harness — settle with pay / agentcash.</p>
+  <p class="eyebrow">Numetal · CURB · Demo harness · not the product path</p>
+  <h1>Two demo agents. One MCP.</h1>
+  <p class="demo-banner"><strong>Demo agents — for the pitch.</strong> Production: add <code>https://api.curb.numetal.xyz/mcp</code> to your harness.</p>
+  <p class="lede">Cloudflare Agents SDK reference consumers. Both call <code>addMcpServer('curb', '${CURB_MCP}')</code> — copy that into <em>your</em> harness. Seller keeps the book filled; buyer lists, intents, and surfaces the pay challenge. No private keys here — settle with pay / agentcash.</p>
   <div class="grid">
     <div class="card">
-      <h2>curb-seller</h2>
+      <h2>curb-seller <span class="demo-tag">Demo</span></h2>
       <p>Posts &amp; maintains open offers. Fulfills at <code>/fulfill</code>.</p>
       <a class="btn" href="${seller}/">Open seller</a>
       <a class="btn" href="${seller}/health">/health</a>
     </div>
     <div class="card">
-      <h2>curb-buyer</h2>
+      <h2>curb-buyer <span class="demo-tag">Demo</span></h2>
       <p>Lists offers, creates intents, fetches dual-payee challenges.</p>
       <a class="btn" href="${buyer}/">Open buyer</a>
       <a class="btn" href="${buyer}/health">/health</a>
@@ -132,6 +135,8 @@ export default {
       return json({
         ok: true,
         service: "curb-harness",
+        demo: true,
+        note: "Demo / reference agents for the pitch — not the product path. Production: add https://api.curb.numetal.xyz/mcp to your harness.",
         agents: {
           seller: "https://seller.curb.numetal.xyz",
           buyer: "https://buyer.curb.numetal.xyz",
