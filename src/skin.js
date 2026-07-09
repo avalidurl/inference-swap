@@ -5,9 +5,16 @@ export const CONTACT = "contact@numetal.xyz";
 export const ORIGIN_CANON = "https://curb.numetal.xyz";
 export const API_ORIGIN_CANON = "https://api.curb.numetal.xyz";
 
+/** True when this request is on the operator/admin host. Checked BEFORE isApiHost. */
+export function isAdminHost(hostname) {
+  const h = String(hostname || "").toLowerCase();
+  return h === "admin.curb.numetal.xyz" || h.startsWith("admin.");
+}
+
 /** True when this request is on the dedicated API host (or a local/workers stand-in). */
 export function isApiHost(hostname) {
   const h = String(hostname || "").toLowerCase();
+  if (isAdminHost(h)) return false;
   return h === "api.curb.numetal.xyz" || h.startsWith("api.");
 }
 

@@ -1,4 +1,16 @@
-import { createOffer, listOffers, createIntent, getMatch, markPaid, stats, refreshMatchChallenge } from "./swap.js";
+import {
+  createOffer,
+  listOffers,
+  createIntent,
+  getMatch,
+  markPaid,
+  stats,
+  refreshMatchChallenge,
+  purgeBook,
+  reseedDemoOffer,
+} from "./swap.js";
+import { adminHtml, adminSnapshot } from "./admin.js";
+import { accessOk } from "./cfaccess.js";
 import { isValidId } from "./store.js";
 import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts, verifyPayment, settleMode } from "./x402.js";
 import { buildOpenApi, wellKnownX402 } from "./openapi.js";
@@ -19,6 +31,7 @@ import {
   corsHeaders,
   securityHeaders,
   isApiHost,
+  isAdminHost,
   publicApiOrigin,
   publicSiteOrigin,
   themeBootScript,
@@ -65,6 +78,94 @@ function bearerOk(request, key) {
   if (!key) return false;
   const m = (request.headers.get("Authorization") || "").match(/^Bearer\s+(.+)$/i);
   return Boolean(m && m[1] === key);
+}
+
+function redirectTo(dest, request, status = 302) {
+  return new Response(null, {
+    status,
+    headers: {
+      Location: dest,
+      ...corsHeaders(request),
+      ...securityHeaders({ "Content-Security-Policy": undefined }),
+    },
+  });
+}
+
+/**
+ * Operator host (admin.curb.numetal.xyz). /health is public; everything else is fail-closed
+ * behind a verified Cloudflare Access email JWT OR Bearer ACCESS_KEY (accessOk). The console +
+ * its actions can NEVER be reached off this Access-gated host (see the redirect in fetch()).
+ */
+async function handleAdminHost(request, env, url, path) {
+  // Public liveness — geo/edge only, NOT operator-gated (parity with other hosts).
+  if (path === "/health" && request.method === "GET") {
+    const s = await stats(env);
+    return json(
+      { ok: true, product: PRODUCT_ID, brand: "CURB", host: "admin.curb.numetal.xyz", settle: { mode: settleMode(env) }, ...s },
+      200,
+      request
+    );
+  }
+
+  // Bare root → the console.
+  if (path === "/") return redirectTo("https://admin.curb.numetal.xyz/admin", request);
+
+  // Operator gate. Fail-closed: no valid Access JWT AND no matching bearer → 403 (never the console).
+  const gate = await accessOk(request, env);
+  if (!gate.ok) {
+    const wantsHtml = (request.headers.get("accept") || "").includes("text/html");
+    const msg =
+      "locked — admin.curb.numetal.xyz is Cloudflare-Access gated (email login) or Bearer ACCESS_KEY.";
+    return wantsHtml
+      ? text(
+          `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>403 · CURB ops</title></head><body style="font:14px ui-monospace,Menlo,monospace;background:#121212;color:#e6e6e6;max-width:640px;margin:12vh auto;padding:0 20px"><h1 style="font-size:18px">403 · locked</h1><p>${msg}</p></body></html>`,
+          "text/html; charset=utf-8",
+          403,
+          request
+        )
+      : json({ error: "unauthorized", hint: msg }, 403, request);
+  }
+
+  // Throttle gated mutations so a leaked ACCESS_KEY can't be looped.
+  if (request.method === "POST") {
+    const rl = await rateLimit(env, request, "admin");
+    if (!rl.ok) return json({ error: rl.error }, rl.status, request);
+  }
+
+  if (path === "/admin" && request.method === "GET") {
+    return text(await adminHtml(env, { via: gate.via }), "text/html; charset=utf-8", 200, request);
+  }
+  if (path === "/admin.json" && request.method === "GET") {
+    return json(await adminSnapshot(env), 200, request);
+  }
+  if (path === "/admin/purge" && request.method === "POST") {
+    const purged = await purgeBook(env);
+    return json({ ok: true, purged }, 200, request);
+  }
+  if (path === "/admin/reseed" && request.method === "POST") {
+    const r = await reseedDemoOffer(env);
+    if (r.error) return json({ error: r.error }, r.status || 400, request);
+    return json({ ok: true, offer: r.body }, r.status || 201, request);
+  }
+  if (path === "/admin/seed" && request.method === "POST") {
+    const parsed = await readJsonLimited(request);
+    if (parsed.error) return json({ error: parsed.error }, parsed.status, request);
+    const b = parsed.body || {};
+    const r = await createOffer(env, {
+      sellerPayTo: b.sellerPayTo || env.HUB_PAY_TO,
+      sellerSolPayTo: b.sellerSolPayTo || b.solanaPayTo || env.HUB_PAY_TO_SOLANA,
+      endpoint: b.endpoint || "https://seller.curb.numetal.xyz/fulfill",
+      model: b.model || "demo/llama-3.3-70b",
+      mtok: b.mtok || 10,
+      priceUsd: b.priceUsd || 0.5,
+      attestation: "demo_seed",
+      note: b.note || "admin seed",
+    });
+    if (r.error) return json({ error: r.error }, r.status || 400, request);
+    return json(r.body, r.status || 201, request);
+  }
+
+  return json({ error: "not_found", path }, 404, request);
 }
 
 function paymentRails(env) {
@@ -292,12 +393,26 @@ export default {
     }
 
     const url = new URL(request.url);
+    const adminHost = isAdminHost(url.hostname);
     const apiHost = isApiHost(url.hostname);
     const apiOrigin = publicApiOrigin(url);
     const siteOrigin = publicSiteOrigin(url);
     // Discovery resource URLs must match the host being scanned (curb and api.curb both serve API).
     const origin = apiHost ? apiOrigin : url.origin;
     const path = url.pathname.replace(/\/+$/, "") || "/";
+
+    // Operator console lives ONLY on the Cloudflare-Access admin host. Serve it there; redirect
+    // any /admin* hitting another host over so the console can never be reached off the gate.
+    try {
+      if (adminHost) return await handleAdminHost(request, env, url, path);
+    } catch (err) {
+      console.error("curb_admin_error", { path, method: request.method, err: String(err?.message || err) });
+      return json({ error: "internal" }, 500, request);
+    }
+    const isAdminPath = path === "/admin" || path === "/admin.json" || path.startsWith("/admin/");
+    if (isAdminPath) {
+      return redirectTo(`https://admin.curb.numetal.xyz${url.pathname}${url.search}`, request);
+    }
 
     // Marketing-only surfaces on the API host → send humans to the site.
     if (apiHost) {
@@ -659,24 +774,6 @@ export default {
           settlement: verdict.settlement || null,
         });
         return json(paid.body, paid.status, request);
-      }
-
-      if (path === "/admin/seed" && request.method === "POST") {
-        if (!bearerOk(request, env.ACCESS_KEY)) return json({ error: "unauthorized" }, 401, request);
-        const parsed = await readJsonLimited(request);
-        if (parsed.error) return json({ error: parsed.error }, parsed.status, request);
-        const body = parsed.body;
-        const r = await createOffer(env, {
-          sellerPayTo: body.sellerPayTo || env.HUB_PAY_TO,
-          sellerSolPayTo: body.sellerSolPayTo || body.solanaPayTo || env.HUB_PAY_TO_SOLANA,
-          endpoint: body.endpoint || `${origin}/v1/demo-fulfill`,
-          model: body.model || "demo/llama-3.3-70b",
-          mtok: body.mtok || 10,
-          priceUsd: body.priceUsd || 0.5,
-          attestation: "demo_seed",
-          note: "seed offer for smoke",
-        });
-        return json(r.body || r, r.status || 500, request);
       }
 
       if (path === "/v1/demo-fulfill" && request.method === "POST") {

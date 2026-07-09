@@ -37,6 +37,19 @@ function httpsOnly(url) {
   }
 }
 
+/**
+ * Model-name guard for the PUBLIC offer book. Rejects obvious junk that would repollute the
+ * live book — empty, control/non-printable chars, or HTML angle brackets (< >) — while keeping
+ * legit slash/dot/dash names like "meta-llama/llama-3.3-70b". Length is capped upstream (128).
+ */
+export function isCleanModel(m) {
+  const s = String(m || "");
+  if (!s) return false;
+  if (/[<>]/.test(s)) return false; // no HTML angle brackets (XSS / junk marker)
+  if (/[\u0000-\u001F\u007F-\u009F]/.test(s)) return false; // no control / non-printable
+  return true;
+}
+
 export async function createOffer(env, body) {
   const sellerPayTo = normAddr(body.sellerPayTo || body.payTo);
   const sellerSolPayTo = normSol(body.sellerSolPayTo || body.solanaPayTo || body.solPayTo);
@@ -48,6 +61,7 @@ export async function createOffer(env, body) {
   if (!sellerPayTo) return { error: "sellerPayTo_required", status: 400 };
   if (!endpoint) return { error: "endpoint_https_required", status: 400 };
   if (!model) return { error: "model_required", status: 400 };
+  if (!isCleanModel(model)) return { error: "model_invalid", status: 400 };
   if (!(mtok > 0) || mtok > MAX_MTOK) return { error: "mtok_out_of_range", status: 400 };
   if (!(priceUsd > 0) || priceUsd > MAX_PRICE_USD) return { error: "priceUsd_out_of_range", status: 400 };
   if ((body.sellerSolPayTo || body.solanaPayTo || body.solPayTo) && !sellerSolPayTo) {
@@ -258,6 +272,86 @@ export async function stats(env) {
       solana: solanaEnabled(env),
     },
   };
+}
+
+/** Recent matches (newest first) resolved from idx:matches, for the operator console. */
+export async function listMatches(env, { limit = 25 } = {}) {
+  const ids = await listIds(env, "idx:matches");
+  const out = [];
+  for (const id of ids.slice(0, Math.min(200, limit))) {
+    const m = await getJson(env, `match:${id}`);
+    if (m) out.push(m);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/** Active (unexpired) grants derived from matches — grant:* has no index of its own. */
+export async function activeGrants(env, { limit = 200 } = {}) {
+  const now = Date.now();
+  const matches = await listMatches(env, { limit });
+  const grants = [];
+  for (const m of matches) {
+    if (!m.grant || !m.grant.token) continue;
+    const exp = Date.parse(m.grant.expiresAt || "");
+    if (Number.isFinite(exp) && exp <= now) continue;
+    grants.push({
+      token: m.grant.token,
+      matchId: m.id,
+      model: m.grant.model,
+      mtok: m.grant.mtok,
+      endpoint: m.grant.endpoint,
+      expiresAt: m.grant.expiresAt,
+    });
+  }
+  return grants;
+}
+
+/**
+ * Purge the test/fuzz-polluted book. KV has no cheap prefix-delete via the binding, so we walk
+ * every index id list, delete each offer/match/intent (+ each match's grant), then reset the
+ * indexes to []. Safe + idempotent — re-running on an already-clean book just resets to [].
+ */
+export async function purgeBook(env) {
+  const deleted = { offers: 0, intents: 0, matches: 0, grants: 0 };
+
+  for (const id of await listIds(env, "idx:offers:open")) {
+    await env.SWAP.delete(`offer:${id}`);
+    deleted.offers++;
+  }
+  for (const id of await listIds(env, "idx:intents")) {
+    await env.SWAP.delete(`intent:${id}`);
+    deleted.intents++;
+  }
+  for (const id of await listIds(env, "idx:matches")) {
+    const m = await getJson(env, `match:${id}`);
+    if (m?.grant?.token) {
+      await env.SWAP.delete(`grant:${m.grant.token}`);
+      deleted.grants++;
+    }
+    await env.SWAP.delete(`match:${id}`);
+    deleted.matches++;
+  }
+
+  await env.SWAP.put("idx:offers:open", "[]");
+  await env.SWAP.put("idx:intents", "[]");
+  await env.SWAP.put("idx:matches", "[]");
+
+  return deleted;
+}
+
+/** Reseed ONE clean demo offer (hub as seller payTo, harness fulfill endpoint). */
+export async function reseedDemoOffer(env) {
+  return createOffer(env, {
+    sellerPayTo: env.HUB_PAY_TO,
+    sellerSolPayTo: env.HUB_PAY_TO_SOLANA,
+    endpoint: "https://seller.curb.numetal.xyz/fulfill",
+    model: "demo/llama-3.3-70b",
+    mtok: 10,
+    priceUsd: 0.5,
+    attestation: "demo_seed",
+    note: "curb-seller-harness clean demo",
+  });
 }
 
 /** Rebuild challenge for an existing match (e.g. after Solana feePayer refresh). */
