@@ -173,7 +173,6 @@ function paymentRails(env) {
   if (solanaEnabled(env)) {
     rails.push("x402 · USDC on Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp, SPL)");
   }
-  rails.push("pay.sh · Solana buyer CLI (not a seller acceptor)");
   return rails;
 }
 
@@ -218,6 +217,7 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
       rails: paymentRails(env),
       paid: ["/v1/pay", "/v1/matches/:id/pay"],
       note: "A bare POST to any paid surface returns one 402 carrying every enabled rail in accepts[]; the live 402 is authoritative — read it before signing. Each swap clears seller + protocol fee (dual-payee).",
+      buyer_cli: "Buyers may also pay via pay.sh on Solana (buyer-side CLI, not a seller acceptor).",
     },
     contact: "contact@numetal.xyz",
     note: "Free reads: GET /v1/offers, GET /health, GET /openapi.json, GET /.well-known/x402, GET /skill.md, GET /llms.txt, GET /mcp. Paid: POST /v1/pay (discovery probe) and POST /v1/matches/{id}/pay. Marketing + docs on curb.numetal.xyz; demo/reference agents on harness/seller/buyer.curb.numetal.xyz (not the product path); this host is the agent API — wire MCP/skill into YOUR harness.",
@@ -271,7 +271,7 @@ ${themeBootScript()}
 <li><code>GET /health</code></li>
 </ul></section>
 <section><h2>Paid surfaces <span class="tag paid">x402</span></h2>
-<p class="m">USDC via x402 on <b>Base</b> and/or <b>Solana</b> (SPL), and via <b>pay.sh</b> on Solana (buyer CLI). A bare POST returns one 402 with every enabled rail in <code>accepts[]</code>; the live 402 is authoritative. Each swap clears seller + protocol fee.</p><ul>
+<p class="m">Settlement is x402 USDC on <b>Base</b> and/or <b>Solana</b> (SPL). A bare POST returns one 402 with every enabled rail in <code>accepts[]</code>; the live 402 is authoritative. Each swap clears seller + protocol fee. (Buyers may also pay via pay.sh on Solana.)</p><ul>
 <li><code>POST /v1/pay</code> <span class="m">— discovery probe ($0.10 sample, no side effects)</span></li>
 <li><code>POST /v1/matches/:id/pay</code> <span class="m">— settle a real match (dual-payee)</span></li>
 </ul></section>
@@ -316,7 +316,7 @@ function llmsTxt(apiOrigin, siteOrigin) {
   const agentApi = "https://api.curb.numetal.xyz";
   return [
     "# CURB",
-    `> Agent↔agent inference swap. We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee. No upstream keys on hub. Product: ${PRODUCT_ID}`,
+    `> Agent↔agent inference swap. Settlement is x402 USDC on Base and Solana. Each swap clears seller + protocol fee. No upstream keys on hub. Product: ${PRODUCT_ID}`,
     "",
     "## Surfaces",
     `Site: ${siteOrigin}/`,
@@ -357,7 +357,7 @@ function llmsTxt(apiOrigin, siteOrigin) {
     `llms.txt: ${agentApi}/llms.txt`,
     "",
     "## Payments",
-    "Rails: USDC on x402 on Base (eip155:8453) and Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp, SPL); pay.sh on Solana is buyer-side CLI only (not a seller acceptor).",
+    "Settlement is x402 USDC on Base (eip155:8453) and Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp, SPL). (Buyers may also pay via pay.sh on Solana — buyer-side CLI, not a seller acceptor.)",
     "Each swap clears seller + protocol fee (dual-payee accepts[]). Pick one network; pay both roles.",
     "",
     "Contact: contact@numetal.xyz",

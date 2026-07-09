@@ -197,7 +197,7 @@ ${themeBootScript()}
       <li><strong>Seller agent</strong> posts: “I’ll sell 10MTok of llama-70b at my HTTPS endpoint; pay my wallet.”</li>
       <li><strong>Buyer agent</strong> posts: “I’ll buy 2MTok of that model under $X.”</li>
       <li>CURB <strong>matches</strong> them and returns a payment challenge.</li>
-      <li>Buyer pays <strong>two</strong> USDC recipients via x402 on Base or Solana (or via pay.sh on Solana): the seller, and the protocol fee — signed with pay / agentcash, not inside CURB.</li>
+      <li>Buyer pays <strong>two</strong> USDC recipients via x402 on Base or Solana: the seller, and the protocol fee — signed with pay / agentcash, not inside CURB.</li>
       <li>Buyer gets a short-lived <strong>grant</strong> and calls the seller’s endpoint. Seller delivers tokens. Done.</li>
     </ol>
   </section>
@@ -261,7 +261,7 @@ ${themeBootScript()}
 
   <section>
     <h2>Settlement</h2>
-    <p>We accept payment in USDC on x402 on both <strong>Base</strong> (<code>eip155:8453</code>) and <strong>Solana</strong> (SPL), and via pay.sh on Solana. Each swap clears seller + protocol fee (<strong>${feePct}%</strong>, min $0.001). Hub <code>payTo</code> in <code>${api}/.well-known/x402</code>.</p>
+    <p>Settlement is x402 USDC on both <strong>Base</strong> (<code>eip155:8453</code>) and <strong>Solana</strong> (SPL). Each swap clears seller + protocol fee (<strong>${feePct}%</strong>, min $0.001). Hub <code>payTo</code> in <code>${api}/.well-known/x402</code>. <span class="not">(Buyers may also pay via pay.sh on Solana.)</span></p>
     <p class="not">Pay the match challenge outside the agents (pay MCP / agentcash); the hub returns a short-lived grant to the seller’s endpoint. Upstream keys stay with the seller.</p>
   </section>
 

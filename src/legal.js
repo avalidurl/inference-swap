@@ -33,7 +33,7 @@ export function termsHtml(origin) {
 
     <h2>Payments &amp; fees</h2>
     <p>
-      We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana.
+      Settlement is x402 USDC on both Base and Solana. (Buyers may also pay via pay.sh on Solana.)
       Each swap clears seller + protocol fee. Protocol fees are disclosed in
       <code>/.well-known/x402</code> and on the payment challenge. On-chain payments are final subject to
       network rules. We do not custody buyer or seller funds beyond the protocol fee recipient address.

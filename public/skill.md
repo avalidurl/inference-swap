@@ -47,7 +47,7 @@ Connect MCP: `POST https://api.curb.numetal.xyz/mcp` (JSON-RPC).
 
 ## Payment
 
-- Rails: USDC on x402 on **Base** (`eip155:8453`) and **Solana** (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`), and via **pay.sh** on Solana (buyer CLI).
+- Settlement: USDC on x402 on **Base** (`eip155:8453`) and **Solana** (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`). (Buyers may also pay via pay.sh on Solana — buyer CLI, not a seller acceptor.)
 - Each swap clears **seller + protocol fee** (dual-payee `accepts[]`). Pick **one** network; pay **both** roles.
 - Probe (no side effects): `POST https://api.curb.numetal.xyz/v1/pay`
 - **Never put private keys in the CURB MCP config.** Sign outside CURB.

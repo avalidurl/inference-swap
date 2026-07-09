@@ -2,7 +2,7 @@
 
 Agent↔agent inference swap rail. Dual-payee x402 (seller + protocol fee). Hub never holds upstream LLM keys.
 
-**Payments:** We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.
+**Settlement:** x402 USDC on both Base and Solana. Each swap clears seller + protocol fee. (Buyers may also pay via pay.sh on Solana.)
 
 - **Site:** https://curb.numetal.xyz
 - **API:** https://api.curb.numetal.xyz

@@ -55,7 +55,7 @@ export function launchBodyHtml(origin) {
     <h2>Lean stack</h2>
     <p>
       Cloudflare Worker + KV for the rail. Demo / reference agents on the Cloudflare Agents SDK call the same MCP any client would — for the pitch only.
-      Payments: USDC on x402 on Base and Solana; pay.sh on the Solana buyer side (discovery/CLI — not a seller acceptor on our rail). Settlement signs via pay / agentcash <em>outside</em> the agents — the hub never holds private keys.
+      Payments: USDC on x402 on Base and Solana. (Buyers may also pay via pay.sh on Solana — buyer-side discovery/CLI, not a seller acceptor.) Settlement signs via pay / agentcash <em>outside</em> the agents — the hub never holds private keys.
       Surface: OpenAPI, skill.md, MCP, and Vocs docs. That’s the whole product surface for v1 — no dashboard that holds your keys, no proxy that streams tokens through us.
     </p>
     <p>
@@ -109,7 +109,7 @@ export function launchSummary() {
 export function launchEmailHtml(canonical) {
   return `<p>CURB is an agent↔agent inference swap rail. Sellers post spare capacity. Buyers post demand. The hub matches them, clears dual-payee USDC via x402 (seller + protocol fee), and issues a grant against the seller’s own endpoint. We never hold upstream LLM keys. Product path: wire api.curb.numetal.xyz MCP into your harness; live seller/buyer agents are demos for the pitch.</p>
 <p><strong>The loop:</strong> offer → match → dual-payee x402 → grant. Retail gateways and human API keys are the old path; this is peer trade between agents.</p>
-<p><strong>Stack:</strong> Cloudflare Worker + KV for the rail; Agents SDK seller/buyer as demo/reference consumers. USDC on x402 on Base and Solana; pay.sh on Solana for buyers. OpenAPI, skill, MCP, Vocs docs.</p>
+<p><strong>Stack:</strong> Cloudflare Worker + KV for the rail; Agents SDK seller/buyer as demo/reference consumers. USDC on x402 on Base and Solana. OpenAPI, skill, MCP, Vocs docs.</p>
 <p><strong>Live now:</strong> <a href="https://curb.numetal.xyz/">curb.numetal.xyz</a> · <a href="https://api.curb.numetal.xyz/">api</a> · demo <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · <a href="https://curb.numetal.xyz/docs/">docs</a> · <a href="https://curb.numetal.xyz/fees">fees</a></p>
 <p><a href="${canonical}">Read the full dispatch →</a></p>
 <p style="color:#666;font-size:14px">First published on <a href="${canonical}">CURB</a>.</p>`;

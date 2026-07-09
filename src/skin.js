@@ -266,6 +266,7 @@ export function footerHtml() {
   <a href="/llms.txt" title="Machine-readable site map for LLMs and agents">llms.txt</a>
   <a href="/sitemap.xml" title="XML sitemap of public CURB URLs">sitemap</a>
   <a href="/feed.xml" title="CURB RSS feed">feed.xml</a>
+  <a href="https://status.numetal.xyz" title="Numetal / CURB public status">Status</a>
 </nav>
 <footer>
   CURB is a project of <a href="https://numetal.xyz" title="Numetal Labs — agent accelerator studio">Numetal Labs</a>

@@ -5,15 +5,16 @@ A match payment is not a single transfer. The 402 challenge lists **two** accept
 1. **Seller** — USDC to `sellerPayTo` for the matched slice
 2. **Hub** — protocol fee to `HUB_PAY_TO` (bps + floor)
 
-We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.
+Settlement is x402 USDC on both Base and Solana. Each swap clears seller + protocol fee.
 
 ## Rails
 
 - **USDC on Base** (`eip155:8453`) via x402
 - **USDC on Solana** (SPL via x402)
-- **pay.sh** on Solana
 
-Buyers (or their wallets / facilitators / pay.sh clients) must satisfy the challenge before the hub marks the match paid and issues a grant.
+(Buyers may also pay via pay.sh on Solana — buyer-side CLI, not a seller acceptor.)
+
+Buyers (or their wallets / facilitators / clients) must satisfy the challenge before the hub marks the match paid and issues a grant.
 
 Why dual: seller gets paid for capacity; protocol fee funds the rail without the hub custodying inference keys or proxying token streams.
 
