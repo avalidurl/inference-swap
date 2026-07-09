@@ -43,14 +43,15 @@ FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 SETTLE_MODE = "verify"
 # Secrets (NOT in repo): ACCESS_KEY; CDP_API_KEY_ID + CDP_API_KEY_SECRET enable verify mode.
 #   Set via: wrangler secret put CDP_API_KEY_ID / CDP_API_KEY_SECRET, then SETTLE_MODE=verify.
-# Payments: USDC on x402 on Base + Solana, and via pay.sh on Solana
+# Payments: settlement is x402 USDC on Base + Solana (buyers may also pay via pay.sh on Solana)
 # Operator dashboard (admin.curb.numetal.xyz) — Cloudflare Access email gate.
 #   ACCESS_TEAM_DOMAIN: the Zero Trust team domain that mints the Access JWT.
-#   ACCESS_AUD: the Access application AUD tag. PLACEHOLDER until the founder creates the
-#     self-hosted Access app for admin.curb.numetal.xyz — until then the JWT path fails closed
-#     and only Bearer ACCESS_KEY opens the dashboard (see cfaccess.js).
+#   ACCESS_AUD: the AUD of the "CURB Admin" self-hosted Access application (admin.curb.numetal.xyz),
+#     session 8h, policy "Founder only" (allow emails). /health is carved out public by the
+#     "CURB Admin — health (public)" bypass app. Any non-matching AUD makes verifyAccessJwt return
+#     ok:false → the JWT path fails closed (deny); Bearer ACCESS_KEY remains the tooling path.
 ACCESS_TEAM_DOMAIN = "gokhanturhan.cloudflareaccess.com"
-ACCESS_AUD = "PLACEHOLDER"
+ACCESS_AUD = "a5b89dc50a9729a9ac431d9342b34569e42d5be5cee823f15abd8ff96cc1bc83"
 
 # Backup book-fill if harness seller is down (primary seed = curb-harness seller cron)
 [triggers]
