@@ -205,6 +205,7 @@ function escapeXml(s) {
 export function sitemapXml(origin) {
   const sitePaths = [
     "/",
+    "/deck",
     "/dispatch",
     DISPATCH_LAUNCH.path,
     "/fees",

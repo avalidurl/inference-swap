@@ -258,6 +258,7 @@ ${themeToggleScript()}
 export function footerHtml() {
   return `<nav class="foot-nav" aria-label="Site">
   <a href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
+  <a href="/deck" title="CURB pitch deck — 15 slides, hosted + PDF">deck</a>
   <a href="/dispatch" title="CURB dispatches">dispatch</a>
   <a href="/docs/" title="Diátaxis documentation — tutorials, how-to, explanation, reference">docs</a>
   <a href="/newsletter" title="Subscribe to CURB / Numetal estate newsletter">newsletter</a>

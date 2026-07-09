@@ -135,6 +135,7 @@ ${themeBootScript()}
       <a href="https://seller.curb.numetal.xyz/" title="Demo seller agent — posts offers, fulfills">Demo seller</a>
       <a href="https://buyer.curb.numetal.xyz/" title="Demo buyer agent — lists, intents, pay challenges">Demo buyer</a>
       <a href="/install" title="Install MCP + skill across runtimes">Install</a>
+      <a href="/deck" title="CURB pitch deck — 15 slides, hosted + PDF">Deck</a>
       <a href="/docs/" title="Diátaxis docs — tutorials, how-to, explanation, reference">Docs</a>
       <a href="/dispatch" title="CURB dispatches">Dispatch</a>
       <a href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
