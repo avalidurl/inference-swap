@@ -1,4 +1,4 @@
-import { uid, putJson, getJson, listIds, pushId } from "./store.js";
+import { uid, putJson, getJson, listIds, pushId, isValidId } from "./store.js";
 import {
   dualAccepts,
   feeSplit,
@@ -117,8 +117,22 @@ export async function createIntent(env, body, origin) {
 
   // Auto-match
   let offer = null;
+  let constraintsUnmet = false;
   if (offerId) {
-    offer = await getJson(env, `offer:${offerId}`);
+    offer = isValidId(offerId) ? await getJson(env, `offer:${offerId}`) : null;
+    // An explicit offerId must satisfy the SAME guards as auto-match; otherwise a
+    // buyer could be matched to a closed / model-mismatched / undersized / overpriced
+    // offer and overcharged. Fail closed (no match) instead of minting a bad match.
+    if (
+      offer &&
+      (offer.status !== "open" ||
+        (model && String(offer.model).toLowerCase() !== model.toLowerCase()) ||
+        !(offer.mtok >= mtok) ||
+        (maxPriceUsd && offer.priceUsd > maxPriceUsd))
+    ) {
+      constraintsUnmet = true;
+      offer = null;
+    }
   } else {
     const opens = await listOffers(env, { status: "open", limit: 100 });
     offer = opens.find(
@@ -130,16 +144,29 @@ export async function createIntent(env, body, origin) {
   }
 
   if (!offer || offer.status !== "open") {
-    return { status: 201, body: { intent, match: null, hint: "no_open_offer_matched" } };
+    return {
+      status: 201,
+      body: {
+        intent,
+        match: null,
+        hint: constraintsUnmet ? "offer_constraints_unmet" : "no_open_offer_matched",
+      },
+    };
   }
 
   const match = await createMatch(env, { offer, intent, origin });
+  if (match.error) {
+    return { status: 201, body: { intent, match: null, hint: match.error } };
+  }
   return { status: 201, body: { intent, match: match.body } };
 }
 
 async function createMatch(env, { offer, intent, origin }) {
   const id = uid("match");
-  const gross = offer.priceUsd * (intent.mtok / offer.mtok);
+  if (!(offer.mtok > 0)) return { error: "offer_mtok_invalid", status: 400 };
+  // Clamp so a match can never bill more than the offer's capacity/price.
+  const mtok = Math.min(Number(intent.mtok) || 0, offer.mtok);
+  const gross = offer.priceUsd * (mtok / offer.mtok);
   const split = feeSplit(env, gross);
   const resourceUrl = `${origin}/v1/matches/${id}/pay`;
   const challenge = await dualAccepts(env, {
@@ -147,7 +174,7 @@ async function createMatch(env, { offer, intent, origin }) {
     sellerSolPayTo: offer.sellerSolPayTo || null,
     grossUsd: split.grossUsd,
     resourceUrl,
-    description: `Swap ${intent.mtok} MTok ${offer.model}`,
+    description: `Swap ${mtok} MTok ${offer.model}`,
   });
 
   const match = {
@@ -156,7 +183,7 @@ async function createMatch(env, { offer, intent, origin }) {
     offerId: offer.id,
     intentId: intent.id,
     model: offer.model,
-    mtok: intent.mtok,
+    mtok,
     sellerPayTo: offer.sellerPayTo,
     sellerSolPayTo: offer.sellerSolPayTo || null,
     sellerEndpoint: offer.endpoint,
