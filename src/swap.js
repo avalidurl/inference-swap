@@ -93,8 +93,9 @@ export async function createIntent(env, body, origin) {
   const rawBuyer = body.buyer ?? body.buyerAddress;
   let buyer = null;
   if (rawBuyer != null && String(rawBuyer).trim() !== "") {
-    // buyer is optional, but a supplied non-empty value must be a real address.
-    buyer = normAddr(rawBuyer) || normSol(rawBuyer);
+    // buyer is optional, but a supplied non-empty value must be a real EVM address.
+    // (CURB is Base-only; a prior Solana branch called an undefined normSol → 500.)
+    buyer = normAddr(rawBuyer);
     if (!buyer) return { error: "buyer_invalid", status: 400 };
   }
   const model = String(body.model || "").trim();
