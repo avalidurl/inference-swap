@@ -4,7 +4,7 @@ import { buildOpenApi, wellKnownX402 } from "./openapi.js";
 import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
 import { termsHtml, privacyHtml } from "./legal.js";
-import { blogIndexHtml, blogPostHtml, feedXml, sitemapXml, newsletterHtml } from "./blog.js";
+import { feedXml, sitemapXml, newsletterHtml } from "./blog.js";
 import { corsHeaders, securityHeaders } from "./skin.js";
 import {
   readJsonLimited,
@@ -87,9 +87,9 @@ function llmsTxt(origin) {
     `Skill: ${origin}/skill.md`,
     `MCP: POST ${origin}/mcp`,
     `Offers: GET ${origin}/v1/offers`,
-    `Blog: ${origin}/blog`,
     `Feed: ${origin}/feed.xml`,
     `Sitemap: ${origin}/sitemap.xml`,
+    `Newsletter: ${origin}/newsletter`,
     `Contact: contact@numetal.xyz`,
     "",
   ].join("\n");
@@ -150,15 +150,6 @@ export default {
       }
       if (path === "/newsletter" && request.method === "GET") {
         return text(newsletterHtml(origin), "text/html; charset=utf-8", 200, request);
-      }
-      if (path === "/blog" && request.method === "GET") {
-        return text(blogIndexHtml(origin), "text/html; charset=utf-8", 200, request);
-      }
-      const blogPost = path.match(/^\/blog\/([^/]+)$/);
-      if (blogPost && request.method === "GET") {
-        const html = blogPostHtml(origin, blogPost[1]);
-        if (!html) return json({ error: "not_found" }, 404, request);
-        return text(html, "text/html; charset=utf-8", 200, request);
       }
       if ((path === "/feed.xml" || path === "/rss.xml") && request.method === "GET") {
         return text(feedXml(origin), "application/rss+xml; charset=utf-8", 200, request);

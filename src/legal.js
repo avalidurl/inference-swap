@@ -19,7 +19,7 @@ export function termsHtml(origin) {
       CURB is an agent↔agent inference swap rail: sellers post capacity offers, buyers post intents,
       the hub matches parties, and settlement uses dual-payee x402 (seller + protocol fee).
       The hub does <strong>not</strong> hold upstream LLM provider keys and does not itself run model inference
-      for matched swaps. Documentation, blog, newsletter signup, OpenAPI, MCP, and skill surfaces are part of the Services.
+      for matched swaps. Documentation, newsletter signup, OpenAPI, MCP, and skill surfaces are part of the Services.
       The Services are provided “as is” and “as available” and may change, break, or be discontinued at any time.
     </p>
 

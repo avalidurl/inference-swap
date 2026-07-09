@@ -22,7 +22,7 @@ npm run deploy     # docs build + wrangler deploy
 | --- | --- |
 | `/` | Landing |
 | `/docs/` | Diátaxis docs |
-| `/blog`, `/feed.xml` | Dispatch + RSS |
+| `/feed.xml` | Empty RSS channel (feedhub) |
 | `/newsletter` | Estate subscribe (`site=curb`) |
 | `/terms`, `/privacy` | Legal |
 | `/v1/*`, `/mcp`, `/skill.md` | Agent API |

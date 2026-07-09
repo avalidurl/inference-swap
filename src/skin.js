@@ -1,4 +1,4 @@
-/** Shared B&W skin for CURB HTML pages (landing, legal, blog, newsletter). */
+/** Shared B&W skin for CURB HTML pages (landing, legal, newsletter). */
 
 export const PRODUCT = "CURB";
 export const CONTACT = "contact@numetal.xyz";
@@ -162,7 +162,6 @@ ${themeToggleScript()}
 export function footerHtml() {
   return `<nav class="foot-nav" aria-label="Site">
   <a href="/docs/" title="Diátaxis documentation — tutorials, how-to, explanation, reference">docs</a>
-  <a href="/blog" title="CURB dispatch — product notes and launch posts">blog</a>
   <a href="/newsletter" title="Subscribe to CURB / Numetal estate newsletter">newsletter</a>
   <a href="/terms" title="Terms of Service for CURB">terms</a>
   <a href="/privacy" title="Privacy Policy for CURB">privacy</a>
@@ -174,6 +173,6 @@ export function footerHtml() {
   CURB is a project of <a href="https://numetal.xyz" title="Numetal Labs — agent accelerator studio">Numetal Labs</a>
   by <a href="https://gokhan.vc" title="Atelier Gökhan Turhan VC — venture studio">Atelier Gökhan Turhan VC</a><br/>
   <a href="mailto:${CONTACT}" title="Public contact for Numetal / CURB">${CONTACT}</a>
-  · product mail <span title="Resend FROM for CURB newsletter when domain verified">Curb &lt;curb@numetal.xyz&gt;</span>
+  · product mail Curb &lt;curb@numetal.xyz&gt;
 </footer>`;
 }
