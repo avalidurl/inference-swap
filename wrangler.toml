@@ -38,6 +38,20 @@ SPLIT_ADDRESS_BASE = "0x546217c24617bCF9faD565E8ECABe5dE2D41326b"
 SPLIT_RECIPIENTS_BASE = "0x8f49d4d782488e8576c8c54288027c57f4acf521:950000,0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE:50000"
 # Distinct demo seller (Bankr) so a real settle + distribute proves seller-side movement (≠ hub 0x3eee)
 DEMO_SELLER_PAY_TO = "0x8f49d4d782488e8576c8c54288027c57f4acf521"
+# ── Distribute keeper (0xSplits distribute() submitter) ────────────────────
+# Privy EVM server wallet that calls the split's distribute() to fan the gross out on-chain
+# (seller 95% / hub 5%). distribute() is permissionless — the keeper only pays gas; the immutable
+# split fixes where funds go. Signs via Privy REST (see src/distribute.js). PROVEN 2026-07-09:
+#   deploy 0x25f17c0a…aafc0163 · settle 0xdd2ad482…cd005768 (verified) · distribute 0x748a6470…a5d387e3.
+# NOTE: wallet y1v7ph4oly0mlbf02qax1zfb is currently owned by a Privy key-quorum (user), so REST
+#   eth_sendTransaction needs a privy-authorization-signature (PRIVY_AUTHORIZATION_SIGNATURE) OR
+#   the keeper must be re-provisioned as an app-owned server wallet. Until then KEEPER_DISTRIBUTE
+#   stays "off" and the proof run above was submitted from an authorized local wallet.
+KEEPER_ADDRESS = "0xfcB6a8C978fF83F0cE622fd45A5dbd1c55d94649"
+PRIVY_KEEPER_WALLET_ID = "y1v7ph4oly0mlbf02qax1zfb"
+# "on" enables the gated cron auto-distribute (needs PRIVY_APP_ID/SECRET secrets + a signable keeper).
+KEEPER_DISTRIBUTE = "off"
+KEEPER_DISTRIBUTE_MIN = "10000"
 FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 # Settlement mode: "demo" | "verify".
 #   demo   → a present payment header settles but grants are marked verified:false

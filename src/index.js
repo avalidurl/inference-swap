@@ -10,6 +10,7 @@ import {
   reseedDemoOffer,
 } from "./swap.js";
 import { adminHtml, adminSnapshot } from "./admin.js";
+import { maybeAutoDistribute } from "./distribute.js";
 import { accessOk } from "./cfaccess.js";
 import { isValidId } from "./store.js";
 import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts, verifyPayment, settleMode } from "./x402.js";
@@ -377,6 +378,8 @@ export default {
   async scheduled(_controller, env, ctx) {
     const origin = "https://api.curb.numetal.xyz";
     ctx.waitUntil(seedDemoOfferIfEmpty(env, origin));
+    // Gated on-chain fee fan-out: no-op unless KEEPER_DISTRIBUTE="on" + signable keeper. Fail-soft.
+    ctx.waitUntil(maybeAutoDistribute(env).catch((err) => console.error("curb_distribute_cron", String(err?.message || err))));
   },
 
   async fetch(request, env) {
