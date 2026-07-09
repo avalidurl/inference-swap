@@ -5,7 +5,14 @@ import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
 import { feesHtml } from "./fees.js";
 import { termsHtml, privacyHtml } from "./legal.js";
-import { feedXml, sitemapXml, newsletterHtml, dispatchLaunchHtml, DISPATCH_LAUNCH } from "./blog.js";
+import {
+  feedXml,
+  sitemapXml,
+  newsletterHtml,
+  dispatchLaunchHtml,
+  blogIndexHtml,
+  DISPATCH_LAUNCH,
+} from "./blog.js";
 import {
   corsHeaders,
   securityHeaders,
@@ -314,6 +321,9 @@ export default {
       }
       if (!apiHost && path === "/newsletter" && request.method === "GET") {
         return text(newsletterHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
+      }
+      if (!apiHost && (path === "/blog" || path === "/blog/") && request.method === "GET") {
+        return text(blogIndexHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
       }
       if (
         !apiHost &&

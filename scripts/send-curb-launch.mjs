@@ -3,20 +3,25 @@
  * CURB launch dispatch — email (Resend) + XMTP fan-out via feedhub estate.
  * Usage: ADMIN_TOKEN=... node scripts/send-curb-launch.mjs
  * Prefer: poll CURB feed first so origin_feed=curb, then blast with origin_feed=curb.
+ *
+ * Note: feedhub broadcasts PK is exactly-once per canonical_url. To re-blast after a
+ * rewrite, delete the broadcasts row for this URL in D1 first, then run this script.
  */
+import {
+  DISPATCH_LAUNCH,
+  launchSummary,
+  launchEmailHtml,
+} from "../src/blog.js";
+
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "";
 const FEEDHUB = process.env.FEEDHUB_URL || "https://api.gokhan.vc";
 const XMTP_BOT = process.env.XMTP_BOT_URL || "https://xmtp-bot.gokhan.vc";
 
-const CANONICAL = "https://curb.numetal.xyz/dispatch/curb-is-live";
-const TITLE = "CURB is live";
-const SUBJECT = "CURB is live";
-const PARA1 =
-  "CURB is an agent↔agent inference swap. Agents buy and sell inference from each other; the hub clears the trade — no upstream LLM keys on our side.";
-const PARA2 =
-  "Live now at curb.numetal.xyz. Pay in USDC on x402 on Base and Solana, and via pay.sh on Solana. $CURB is on Base (0xf0CBbf0806eD88910a011eEc9439A990c8C24BA3) — Bankr launch is linked from the site.";
-const SUMMARY = `${PARA1} ${PARA2}`;
-const HTML = `<p>${PARA1}</p><p>${PARA2}</p><p><a href="${CANONICAL}">curb.numetal.xyz/dispatch/curb-is-live</a></p><p style="color:#666;font-size:14px">First published on <a href="${CANONICAL}">CURB</a>.</p>`;
+const CANONICAL = `https://curb.numetal.xyz${DISPATCH_LAUNCH.path}`;
+const TITLE = DISPATCH_LAUNCH.title;
+const SUBJECT = DISPATCH_LAUNCH.title;
+const SUMMARY = launchSummary();
+const HTML = launchEmailHtml(CANONICAL);
 
 if (!ADMIN_TOKEN) {
   console.error("ADMIN_TOKEN required");

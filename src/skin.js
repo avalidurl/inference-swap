@@ -143,6 +143,43 @@ export const SHARED_CSS = `
   .post-list a { font-family: var(--mono); text-decoration: none; }
   .post-list a:hover { text-decoration: underline; }
   .meta { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); letter-spacing: 0.06em; }
+  article.post h1 { margin-bottom: 0.5rem; }
+  article.post .lede { font-size: 1.05rem; color: var(--fg); margin-bottom: 1.1rem; }
+  article.post h2 {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted); margin: 1.6rem 0 0.65rem;
+    padding-top: 0.85rem; border-top: 1px solid var(--line); font-weight: 500;
+  }
+  article.post ol.flow, article.post ul.live {
+    margin: 0 0 0.85rem; padding-left: 1.2rem;
+  }
+  article.post ol.flow li, article.post ul.live li { margin: 0.35rem 0; }
+  article.post code {
+    font-family: var(--mono); font-size: 0.85em;
+    background: var(--code-bg); padding: 0.1em 0.35em; border: 1px solid var(--line);
+  }
+  article.post .sign { margin-top: 1.5rem; font-family: var(--mono); font-size: 0.85rem; }
+  .blog-cards { display: flex; flex-direction: column; gap: 1rem; margin: 0 0 1rem; }
+  .blog-card {
+    display: block; border: 1px solid var(--line); background: var(--panel);
+    text-decoration: none; color: var(--fg); overflow: hidden;
+  }
+  .blog-card:hover { border-color: var(--fg); }
+  .blog-card-og {
+    display: block; width: 100%; height: auto; aspect-ratio: 5 / 2;
+    object-fit: cover; border-bottom: 1px solid var(--line); background: var(--code-bg);
+  }
+  .blog-card-body { padding: 1.1rem 1.2rem 1.25rem; }
+  .blog-card-title {
+    font-family: var(--mono); font-size: 1.15rem; letter-spacing: -0.03em;
+    margin: 0.35rem 0 0.5rem; font-weight: 600; text-transform: none;
+    color: var(--fg);
+  }
+  .blog-card-excerpt { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem; }
+  .blog-card-more {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--fg);
+  }
 `;
 
 export function themeBootScript() {
@@ -214,6 +251,7 @@ ${themeToggleScript()}
 export function footerHtml() {
   return `<nav class="foot-nav" aria-label="Site">
   <a href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
+  <a href="/blog" title="CURB blog — dispatches">blog</a>
   <a href="/docs/" title="Diátaxis documentation — tutorials, how-to, explanation, reference">docs</a>
   <a href="/newsletter" title="Subscribe to CURB / Numetal estate newsletter">newsletter</a>
   <a href="/terms" title="Terms of Service for CURB">terms</a>
