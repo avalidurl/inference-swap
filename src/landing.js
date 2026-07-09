@@ -1,10 +1,10 @@
-/** Black/white one-pager — explorer grammar, not a clone of x402scan. */
+/** Dimmed B&W one-pager + light toggle — explorer grammar, not a clone of x402scan. */
 
 export function landingHtml(origin, stats) {
   const feeBps = stats.feeBps ?? 500;
   const feePct = (feeBps / 100).toFixed(1);
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dim">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -14,14 +14,23 @@ export function landingHtml(origin, stats) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #000;
-    --fg: #f2f2f2;
-    --muted: #8a8a8a;
-    --line: #222;
-    --panel: #0a0a0a;
+  :root, [data-theme="dim"] {
+    --bg: #121212;
+    --fg: #e6e6e6;
+    --muted: #8c8c8c;
+    --line: #2a2a2a;
+    --panel: #1a1a1a;
+    --code-bg: #0e0e0e;
     --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     --sans: "IBM Plex Sans", system-ui, sans-serif;
+  }
+  [data-theme="light"] {
+    --bg: #f4f4f4;
+    --fg: #141414;
+    --muted: #666;
+    --line: #d4d4d4;
+    --panel: #fff;
+    --code-bg: #ececec;
   }
   * { box-sizing: border-box; }
   body {
@@ -32,9 +41,20 @@ export function landingHtml(origin, stats) {
       linear-gradient(90deg, var(--line) 1px, transparent 1px);
     background-size: 48px 48px;
     background-position: -1px -1px;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
   a { color: var(--fg); text-underline-offset: 3px; }
   .wrap { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .topbar {
+    display: flex; justify-content: flex-end; margin-bottom: 0.75rem;
+  }
+  .theme-btn {
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted);
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 0.4rem 0.7rem; cursor: pointer;
+  }
+  .theme-btn:hover { color: var(--fg); border-color: var(--fg); }
   header {
     border: 1px solid var(--line); background: var(--panel);
     padding: 1.5rem 1.25rem; margin-bottom: 1rem;
@@ -66,13 +86,14 @@ export function landingHtml(origin, stats) {
   }
   h3 { font-family: var(--mono); font-size: 0.95rem; margin: 1rem 0 0.4rem; font-weight: 500; }
   p { margin: 0 0 0.75rem; }
+  p:last-child { margin-bottom: 0; }
   ol.eli5 { margin: 0; padding-left: 1.2rem; color: var(--fg); }
   ol.eli5 li { margin-bottom: 0.45rem; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
   @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
   pre, code { font-family: var(--mono); }
   pre {
-    background: #000; border: 1px solid var(--line); padding: 0.9rem 1rem;
+    background: var(--code-bg); border: 1px solid var(--line); padding: 0.9rem 1rem;
     overflow-x: auto; font-size: 0.78rem; line-height: 1.5; margin: 0.5rem 0 0;
   }
   .nav {
@@ -89,9 +110,20 @@ export function landingHtml(origin, stats) {
   }
   .not { color: var(--muted); }
 </style>
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem("nis-theme");
+    if (t === "light" || t === "dim") document.documentElement.setAttribute("data-theme", t);
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 <div class="wrap">
+  <div class="topbar">
+    <button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button>
+  </div>
   <header>
     <p class="eyebrow">Numetal · inference swap · x402</p>
     <h1>Agents trade inference.<br/>We clear the swap.</h1>
@@ -115,7 +147,7 @@ export function landingHtml(origin, stats) {
   <section>
     <h2>Problem</h2>
     <p>Agents that need inference (or have spare capacity) still go through <strong>retail gateways</strong> or human API keys. There is no machine-native loop to <em>offer → match → pay seller + hub → fulfill</em> between agents.</p>
-    <p class="not">We are not Blockrun (we don’t resell models). We are not a human explorer board. We are the <strong>swap rail</strong>.</p>
+    <p class="not">We are not a model reseller. We are not a human explorer board. We are the <strong>swap rail</strong>.</p>
   </section>
 
   <section>
@@ -183,15 +215,30 @@ export function landingHtml(origin, stats) {
 
   <section>
     <h2>Settlement</h2>
-    <p>Network <code>eip155:8453</code> · asset USDC · fee <strong>${feePct}%</strong> (min $0.001) · hub <code>payTo</code> published in <code>/.well-known/x402</code>.</p>
-    <p class="not">v0.1 issues a grant when an <code>X-Payment</code> header is present (or <code>?demo=1</code> with ACCESS_KEY for smoke). Wire full CDP verify before production volume.</p>
+    <p>Network <code>eip155:8453</code> · asset USDC · fee <strong>${feePct}%</strong> (min $0.001) · hub <code>payTo</code> in <code>/.well-known/x402</code>.</p>
+    <p class="not">Pay the match challenge with x402; the hub returns a short-lived grant to the seller’s endpoint. Upstream keys stay with the seller.</p>
   </section>
 
   <footer>
-    Numetal · contact@numetal.xyz · ${origin}<br/>
-    Register this origin on x402scan / x402Scout as an <em>agent compute</em> venue — not as a model proxy.
+    Numetal · contact@numetal.xyz · ${origin}
   </footer>
 </div>
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById("theme-toggle");
+  function label() {
+    btn.textContent = root.getAttribute("data-theme") === "light" ? "Dim" : "Light";
+  }
+  label();
+  btn.addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "light" ? "dim" : "light";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("nis-theme", next); } catch (e) {}
+    label();
+  });
+})();
+</script>
 </body>
 </html>`;
 }
