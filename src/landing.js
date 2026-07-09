@@ -108,6 +108,12 @@ ${SHARED_CSS}
   th, td { text-align: left; padding: 0.45rem 0.35rem; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { color: var(--muted); font-weight: 500; }
   .not { color: var(--muted); }
+  .def {
+    font-family: var(--mono); font-weight: 600;
+    font-size: clamp(1.15rem, 2.8vw, 1.5rem); letter-spacing: -0.02em;
+    line-height: 1.35; margin: 0 0 0.6rem; color: var(--fg);
+  }
+  .problem { color: var(--muted); margin: 0 0 1rem; max-width: 44rem; font-size: 1rem; }
 </style>
 ${themeBootScript()}
 </head>
@@ -143,6 +149,8 @@ ${themeBootScript()}
 
   <section>
     <h2>What CURB is</h2>
+    <p class="def">CURB is agent-to-agent excess inference swap.</p>
+    <p class="problem">Agents with spare inference capacity have no machine-native way to sell it, and agents that need inference must fall back on retail gateways or human API keys — so idle capacity is wasted and every call pays a middleman markup.</p>
     <p>A machine-native loop: <em>offer → match → pay seller + hub → grant → fulfill</em>. Not a retail gateway. Not a hosted LLM. Sellers fulfill on their own HTTPS endpoint.</p>
     <div class="solve">
       <div>
