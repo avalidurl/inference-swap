@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg:#0e0e0e; --fg:#f2f2f2; --mut:#8a8a8a; --line:#2a2a2a; }
+  * { box-sizing:border-box; margin:0; }
+  html,body { background:#000; }
+  /* 1500×600 (5:2) — CURB dim B&W launch OG */
+  .og {
+    width:1500px; height:600px; background:var(--bg); color:var(--fg);
+    position:relative; overflow:hidden;
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:48px 48px; background-position:-1px -1px;
+  }
+  .frame { position:absolute; inset:28px; border:1px solid var(--line); }
+  .pad {
+    position:absolute; inset:28px; padding:48px 64px 56px;
+    display:flex; flex-direction:column;
+  }
+  .top { display:flex; justify-content:space-between; align-items:center; }
+  .brand { display:flex; align-items:center; gap:16px; }
+  .brand img {
+    width:56px; height:56px; display:block;
+    filter: invert(1);
+  }
+  .wm {
+    font-family:"IBM Plex Mono",monospace; font-weight:700;
+    font-size:28px; letter-spacing:.18em;
+  }
+  .kick {
+    font-family:"IBM Plex Mono",monospace; font-size:16px;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--mut);
+  }
+  .mid { margin-top:auto; display:flex; align-items:flex-end; justify-content:space-between; gap:48px; }
+  .title {
+    font-family:"IBM Plex Mono",monospace; font-weight:600;
+    font-size:92px; line-height:.95; letter-spacing:-.04em;
+  }
+  .body {
+    font-size:24px; line-height:1.4; color:#c8c8c8; max-width:480px;
+    padding-bottom:6px;
+  }
+  .foot {
+    position:absolute; left:92px; right:92px; bottom:52px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .url {
+    font-family:"IBM Plex Mono",monospace; font-weight:600;
+    font-size:22px; letter-spacing:.02em;
+  }
+  .tags {
+    font-family:"IBM Plex Mono",monospace; font-size:15px;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--mut);
+  }
+  .stripe {
+    position:absolute; left:0; right:0; bottom:0; height:10px;
+    background: repeating-linear-gradient(90deg, #f2f2f2 0 18px, #0e0e0e 18px 36px);
+  }
+</style></head>
+<body>
+<div class="og">
+  <div class="frame"></div>
+  <div class="pad">
+    <div class="top">
+      <div class="brand">
+        <img src="/assets/curb-sun.png" alt="" width="56" height="56"/>
+        <span class="wm">CURB</span>
+      </div>
+      <div class="kick">Agent ↔ agent inference swap</div>
+    </div>
+    <div class="mid">
+      <div class="title">CURB<br/>is live.</div>
+      <div class="body">Agents buy and sell inference. The hub clears the swap. USDC on x402 — Base + Solana.</div>
+    </div>
+  </div>
+  <div class="foot">
+    <span class="url">curb.numetal.xyz</span>
+    <span class="tags">Numetal Labs · $CURB</span>
+  </div>
+  <div class="stripe"></div>
+</div>
+</body></html>
