@@ -1,0 +1,18 @@
+name = "inference-swap"
+main = "src/index.js"
+compatibility_date = "2026-06-14"
+
+[[kv_namespaces]]
+binding = "SWAP"
+id = "02f320cca3914f288f1430b653a85bdf"
+
+[vars]
+PRODUCT = "numetal-inference-swap"
+NETWORK = "eip155:8453"
+USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+# Hub fee recipient (Base) — same treasury pattern as datebook tests / founder receive
+HUB_PAY_TO = "0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE"
+FEE_BPS = "500"
+MIN_FEE_USDC = "0.001"
+FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
+# Secrets: ACCESS_KEY, CDP_API_KEY_ID, CDP_API_KEY_SECRET (optional verify), HUB_PAY_TO override
