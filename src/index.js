@@ -12,6 +12,8 @@ import {
 import { adminHtml, adminSnapshot } from "./admin.js";
 import { maybeAutoDistribute } from "./distribute.js";
 import { geoBlockResponse } from "./geo.js";
+import { isSanctionedAddress, refreshOfacList } from "./ofac.js"; // [compliance]
+import { audit } from "./audit.js"; // [compliance]
 import { accessOk } from "./cfaccess.js";
 import { isValidId } from "./store.js";
 import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts, verifyPayment, settleMode } from "./x402.js";
@@ -79,6 +81,39 @@ function bearerOk(request, key) {
   if (!key) return false;
   const m = (request.headers.get("Authorization") || "").match(/^Bearer\s+(.+)$/i);
   return Boolean(m && m[1] === key);
+}
+
+// [compliance] OFAC SDN wallet screening — fail-closed on a positive match.
+// Screens each provided address; on a hit writes an audit event and returns a 451
+// Response (JSON {error:"sanctioned_address",...}) for the caller to return. Returns
+// null when every address clears — OR when the list has never loaded, in which case
+// isSanctionedAddress() allows + console.warns (fail-open on a cold cache; we do not
+// take the rail down on a fetch outage).
+// NOTE: settlement is ALSO OFAC-screened by the Coinbase CDP facilitator at settle
+// time, so verified on-chain payments inherit facilitator screening on top of this.
+async function screenSanctions(env, request, addrs, context) {
+  for (const a of addrs) {
+    if (!a) continue;
+    if (await isSanctionedAddress(env, a)) {
+      await audit(env, "sanction_hit", {
+        context,
+        address: String(a).toLowerCase(),
+        path: new URL(request.url).pathname,
+        country: (request.cf && request.cf.country) || null,
+      }).catch(() => {});
+      return json(
+        {
+          error: "sanctioned_address",
+          message:
+            "This wallet address appears on the OFAC SDN sanctioned digital-currency list. CURB performs best-effort sanctions screening and cannot process this request.",
+          contact: "contact@numetal.xyz",
+        },
+        451,
+        request
+      );
+    }
+  }
+  return null;
 }
 
 function redirectTo(dest, request, status = 302) {
@@ -381,6 +416,8 @@ export default {
     ctx.waitUntil(seedDemoOfferIfEmpty(env, origin));
     // Gated on-chain fee fan-out: no-op unless KEEPER_DISTRIBUTE="on" + signable keeper. Fail-soft.
     ctx.waitUntil(maybeAutoDistribute(env).catch((err) => console.error("curb_distribute_cron", String(err?.message || err))));
+    // [compliance] refresh the OFAC SDN sanctioned-address list into KV (ofac:*). Fail-soft.
+    ctx.waitUntil(refreshOfacList(env).catch((err) => console.warn("curb_ofac_refresh_cron", String(err?.message || err))));
   },
 
   async fetch(request, env) {
@@ -390,7 +427,15 @@ export default {
     // (see src/geo.js). /health is exempt so status monitors keep working. 451 for
     // everyone else in a blocked geo. See geo.js for the country list + ?geotest hook.
     const geoBlocked = geoBlockResponse(request, env);
-    if (geoBlocked) return geoBlocked;
+    if (geoBlocked) {
+      // [compliance] audit geo-blocks (append-only KV; best-effort, non-blocking)
+      await audit(env, "geo_block", {
+        path: new URL(request.url).pathname,
+        country: (request.cf && request.cf.country) || null,
+        region: (request.cf && request.cf.region) || null,
+      }).catch(() => {});
+      return geoBlocked;
+    }
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -626,6 +671,9 @@ export default {
         const body = sanitizeOfferInput(parsed.body);
         const capErr = validateCaps({ mtok: Number(body.mtok), priceUsd: Number(body.priceUsd) });
         if (capErr) return json({ error: capErr }, 400, request);
+        // [compliance] screen the seller payout address against the OFAC SDN list
+        const offerSanction = await screenSanctions(env, request, [body.sellerPayTo || body.payTo], "offer_sellerPayTo");
+        if (offerSanction) return offerSanction;
         const r = await createOffer(env, body);
         if (r.error) return json({ error: r.error }, r.status, request);
         return json(r.body, r.status, request);
@@ -642,6 +690,9 @@ export default {
           maxPriceUsd: body.maxPriceUsd != null ? Number(body.maxPriceUsd) : null,
         });
         if (capErr) return json({ error: capErr }, 400, request);
+        // [compliance] screen the buyer address (only when the intent carries one) against OFAC SDN
+        const intentSanction = await screenSanctions(env, request, [body.buyer || body.buyerAddress], "intent_buyer");
+        if (intentSanction) return intentSanction;
         const r = await createIntent(env, body, origin);
         if (r.error) return json({ error: r.error }, r.status, request);
         return json(r.body, r.status, request);
@@ -732,6 +783,11 @@ export default {
 
         if (!m) return json({ error: "not_found" }, 404, request);
 
+        // [compliance] screen payer (buyer) + seller payout against OFAC SDN before settling.
+        // The CDP facilitator also OFAC-screens the on-chain payer at settle; this is the pre-settle gate.
+        const paySanction = await screenSanctions(env, request, [m.buyer, m.sellerPayTo], "match_pay");
+        if (paySanction) return paySanction;
+
         // Explicit admin/manual demo settle (bearer-gated) — always marked demo.
         const adminDemo = url.searchParams.get("demo") === "1" && bearerOk(request, env.ACCESS_KEY);
         if (adminDemo) {
@@ -741,6 +797,18 @@ export default {
             mode: settleMode(env),
             note: "admin_demo_settle",
           });
+          // [compliance] audit settle (append-only KV; best-effort, non-blocking)
+          await audit(env, "settle", {
+            matchId: id,
+            model: m.model,
+            mtok: m.mtok,
+            sellerPayTo: m.sellerPayTo,
+            buyer: m.buyer || null,
+            grossUsd: (m.split && m.split.grossUsd) ?? null,
+            verified: false,
+            mode: settleMode(env),
+            note: "admin_demo_settle",
+          }).catch(() => {});
           return json(paid.body, paid.status, request);
         }
 
@@ -769,6 +837,19 @@ export default {
           mode: verdict.mode,
           settlement: verdict.settlement || null,
         });
+        // [compliance] audit settle success (append-only KV; best-effort, non-blocking)
+        await audit(env, "settle", {
+          matchId: id,
+          model: m.model,
+          mtok: m.mtok,
+          sellerPayTo: m.sellerPayTo,
+          buyer: m.buyer || null,
+          grossUsd: (m.split && m.split.grossUsd) ?? null,
+          verified: Boolean(verdict.verified),
+          demo: Boolean(verdict.demo),
+          mode: verdict.mode,
+          settlement: verdict.settlement || null,
+        }).catch(() => {});
         return json(paid.body, paid.status, request);
       }
 
