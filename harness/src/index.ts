@@ -67,7 +67,7 @@ ${themeBootScript()}
     </div>
     <div class="card">
       <h2>curb-buyer <span class="demo-tag">Demo</span></h2>
-      <p>Lists offers, creates intents, fetches dual-payee challenges.</p>
+      <p>Lists offers, creates intents, fetches single-payee challenges.</p>
       <a class="btn" href="${buyer}/">Open buyer</a>
       <a class="btn" href="${buyer}/health">/health</a>
     </div>

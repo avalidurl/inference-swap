@@ -1,15 +1,12 @@
 import {
   X402_VERSION,
-  NETWORK_SOLANA,
   USDC_BASE,
-  USDC_SOLANA,
-  DEFAULT_HUB_PAY_TO_SOLANA,
-  DEFAULT_SOLANA_FEE_PAYER,
+  USDC_NAME,
+  USDC_VERSION,
   hubPayToBase,
-  hubPayToSolana,
-  solanaEnabled,
   baseNetwork,
   baseAsset,
+  splitAddressBase,
   discoveryAccepts,
   settleMode,
   DISCOVERY_BAZAAR,
@@ -25,17 +22,15 @@ function paymentRequirementSchema() {
       scheme: { type: "string", enum: ["exact"] },
       network: {
         type: "string",
-        description:
-          "CAIP-2 network (eip155:8453 Base mainnet, solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp Solana mainnet).",
+        description: "CAIP-2 network (eip155:8453 Base mainnet).",
       },
       amount: { type: "string", description: "USDC atomic units (6 decimals)." },
-      asset: { type: "string", description: "USDC contract (EVM 0x…) or SPL mint (Solana base58)." },
-      payTo: { type: "string" },
+      asset: { type: "string", description: "USDC contract (EVM 0x…)." },
+      payTo: { type: "string", description: "The 0xSplits split address (gross lands here)." },
       maxTimeoutSeconds: { type: "integer" },
       extra: {
         type: "object",
-        description:
-          "EVM: EIP-712 domain {name, version} + role. Solana: {feePayer, role} from facilitator /supported.",
+        description: "EVM: EIP-712 domain {name, version} + role=gross + display breakdown.",
       },
     },
     required: ["scheme", "network", "amount", "asset", "payTo", "maxTimeoutSeconds"],
@@ -43,62 +38,31 @@ function paymentRequirementSchema() {
 }
 
 function exampleAccepts(env) {
-  const hub = hubPayToBase(env) || "0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE";
-  const hubSol = hubPayToSolana(env) || DEFAULT_HUB_PAY_TO_SOLANA;
-  const amountSeller = "95000"; // $0.095 after 500 bps on $0.10
-  const amountFee = "5000";
-  const out = [
+  // Single-payee, Base-only: ONE gross accept → the split address (0xSplits on Base). CURB
+  // fans out seller/hub on-chain via distribute(). breakdown/feeBps are display-only.
+  const splitBase = splitAddressBase(env) || hubPayToBase(env) || "0x546217c24617bCF9faD565E8ECABe5dE2D41326b";
+  const amountGross = "100000"; // $0.10 gross (6 decimals)
+  const breakdown = { sellerUsd: "0.095", feeUsd: "0.005" };
+  return [
     {
       scheme: "exact",
       network: baseNetwork(env),
-      amount: amountSeller,
+      amount: amountGross,
       asset: baseAsset(env),
-      payTo: hub,
+      payTo: splitBase,
       maxTimeoutSeconds: 300,
-      extra: { name: "USDC", version: "2", role: "seller", amountUsd: "0.095" },
-    },
-    {
-      scheme: "exact",
-      network: baseNetwork(env),
-      amount: amountFee,
-      asset: baseAsset(env),
-      payTo: hub,
-      maxTimeoutSeconds: 300,
-      extra: { name: "USDC", version: "2", role: "hub_fee", amountUsd: "0.005", feeBps: 500 },
+      extra: {
+        name: USDC_NAME,
+        version: USDC_VERSION,
+        role: "gross",
+        amountUsd: "0.10",
+        feeBps: 500,
+        breakdown,
+        splitAddress: splitAddressBase(env) || null,
+        splitType: "0xsplits-push-v2",
+      },
     },
   ];
-  if (solanaEnabled(env)) {
-    out.push(
-      {
-        scheme: "exact",
-        network: NETWORK_SOLANA,
-        amount: amountSeller,
-        asset: USDC_SOLANA,
-        payTo: hubSol,
-        maxTimeoutSeconds: 300,
-        extra: {
-          feePayer: env.X402_SOLANA_FEE_PAYER || DEFAULT_SOLANA_FEE_PAYER,
-          role: "seller",
-          amountUsd: "0.095",
-        },
-      },
-      {
-        scheme: "exact",
-        network: NETWORK_SOLANA,
-        amount: amountFee,
-        asset: USDC_SOLANA,
-        payTo: hubSol,
-        maxTimeoutSeconds: 300,
-        extra: {
-          feePayer: env.X402_SOLANA_FEE_PAYER || DEFAULT_SOLANA_FEE_PAYER,
-          role: "hub_fee",
-          amountUsd: "0.005",
-          feeBps: 500,
-        },
-      }
-    );
-  }
-  return out;
 }
 
 function pay402(env, origin, description, resourcePath = "/v1/pay") {
@@ -146,7 +110,7 @@ function pay402(env, origin, description, resourcePath = "/v1/pay") {
           error: "payment_required",
           resource: {
             url: `${origin}${resourcePath}`,
-            description: "CURB discovery probe — USDC on x402 on Base + Solana (sample price)",
+            description: "CURB discovery probe — USDC x402 on Base (sample price)",
             mimeType: "application/json",
           },
           accepts,
@@ -183,12 +147,6 @@ function ownershipDiscovery(env) {
 export function buildOpenApi(env, origin) {
   const feeBps = Number(env.FEE_BPS || 500);
   const protocols = [{ x402: {} }];
-  const payShHook = {
-    "x-numetal-pay-sh": {
-      status: "buyer_cli",
-      note: "Buyers may also pay via pay.sh on Solana (buyer-side CLI, not a seller acceptor).",
-    },
-  };
 
   return {
     openapi: "3.1.0",
@@ -196,9 +154,9 @@ export function buildOpenApi(env, origin) {
       title: "CURB",
       version: "0.1.0",
       description:
-        "CURB — agent-to-agent inference swap rail. Settlement is x402 USDC on Base and Solana. Each swap clears seller + protocol fee. Hub does not hold upstream LLM keys.",
+        "CURB — agent-to-agent inference swap rail. Settlement is single-payee x402 USDC on Base (eip155:8453): buyer pays gross ONCE to an on-chain 0xSplits split, CURB fans out seller + protocol fee on-chain. Hub does not hold upstream LLM keys.",
       "x-guidance":
-        "1) GET /v1/offers (free) to browse capacity. 2) POST /v1/offers to sell (include sellerPayTo Base 0x…; optional sellerSolPayTo for full Solana dual-payee). 3) POST /v1/intents to buy — hub auto-matches. 4) POST /v1/matches/{id}/pay bare → 402 with accepts[] (role=seller + role=hub_fee on eip155:8453 and, when enabled, solana:…). Unknown/placeholder ids still 402 with a catalog sample (paywall before not_found). Pick ONE network; pay BOTH roles on that network; retry with payment-signature / X-Payment. 5) Discovery probe: bare POST /v1/pay → sample 402 (no side effects). Refunds/billing: contact@numetal.xyz.",
+        "1) GET /v1/offers (free) to browse capacity. 2) POST /v1/offers to sell (include sellerPayTo Base 0x…). 3) POST /v1/intents to buy — hub auto-matches. 4) POST /v1/matches/{id}/pay bare → 402 with a SINGLE Base accept (gross = full price to the split address on eip155:8453). Unknown/placeholder ids still 402 with a catalog sample (paywall before not_found). Sign ONE payment for the gross amount to that accept's payTo; retry with payment-signature / X-Payment. CURB splits seller + protocol fee ON-CHAIN via 0xSplits distribute() on Base. 5) Discovery probe: bare POST /v1/pay → sample 402 (no side effects). Refunds/billing: contact@numetal.xyz.",
       contact: { email: "contact@numetal.xyz", name: "Numetal Labs", url: "https://curb.numetal.xyz" },
     },
     ...ownershipDiscovery(env),
@@ -293,15 +251,6 @@ export function buildOpenApi(env, origin) {
                       type: "string",
                       description: "Seller Base (EVM) USDC payTo — 0x…",
                     },
-                    sellerSolPayTo: {
-                      type: "string",
-                      description:
-                        "Optional seller Solana USDC payTo (base58). When set, match 402 includes full Solana dual-payee (seller + hub_fee).",
-                    },
-                    solanaPayTo: {
-                      type: "string",
-                      description: "Alias of sellerSolPayTo",
-                    },
                     endpoint: { type: "string", format: "uri" },
                     model: { type: "string" },
                     mtok: { type: "number" },
@@ -354,9 +303,9 @@ export function buildOpenApi(env, origin) {
       "/v1/pay": {
         post: {
           operationId: "discoveryPayProbe",
-          summary: "Discovery probe — bare POST returns sample dual-rail x402 402 (no side effects)",
+          summary: "Discovery probe — bare POST returns sample single-payee x402 402 (no side effects)",
           description:
-            "Stable URL for x402scan / AgentCash discovery. Returns HTTP 402 with accepts[] covering seller + hub_fee on Base and Solana (sample $0.10). Does not create a match. Real settlement uses POST /v1/matches/{id}/pay. Paywall runs before body validation.",
+            "Stable URL for x402scan / AgentCash discovery. Returns HTTP 402 with a SINGLE Base accept (gross = full price to the split address, sample $0.10). Does not create a match. Real settlement uses POST /v1/matches/{id}/pay. Paywall runs before body validation.",
           tags: ["Payments"],
           "x-payment-info": {
             price: { mode: "fixed", currency: "USD", amount: DISCOVERY_PRICE },
@@ -379,7 +328,7 @@ export function buildOpenApi(env, origin) {
             "402": pay402(
               env,
               origin,
-              "Payment Required — dual-payee x402 (seller + hub_fee) on Base and/or Solana USDC. WWW-Authenticate carries an IETF Payment challenge; PAYMENT-REQUIRED carries the x402 v2 body (incl. extensions.bazaar).",
+              "Payment Required — single-payee x402 (ONE gross accept → the on-chain 0xSplits split) on Base USDC. WWW-Authenticate carries an IETF Payment challenge; PAYMENT-REQUIRED carries the x402 v2 body (incl. extensions.bazaar).",
               "/v1/pay"
             ),
             "200": {
@@ -405,9 +354,9 @@ export function buildOpenApi(env, origin) {
       "/v1/matches/{id}/pay": {
         post: {
           operationId: "payMatch",
-          summary: "Pay match — 402 dual-payee accepts without payment header; settle with header",
+          summary: "Pay match — 402 single-payee accept without payment header; settle with header",
           description:
-            "Match-specific price (dynamic). Paywall runs before not_found: bare POST always returns 402 (live match challenge, or catalog sample when id is unknown/placeholder — same dual-rail shape as POST /v1/pay). Retry with payment-signature / X-Payment. 404 only when a payment header is present and the match id does not exist.",
+            "Match-specific price (dynamic). Paywall runs before not_found: bare POST always returns 402 (live match challenge, or catalog sample when id is unknown/placeholder — same single-payee shape as POST /v1/pay). Retry with payment-signature / X-Payment (ONE gross payment to the split address). 404 only when a payment header is present and the match id does not exist.",
           tags: ["Payments"],
           "x-payment-info": {
             price: { mode: "dynamic", currency: "USD", min: "0.001", max: "100.000000" },
@@ -441,7 +390,7 @@ export function buildOpenApi(env, origin) {
             "402": pay402(
               env,
               origin,
-              "Payment required (seller + hub fee on Base and/or Solana). WWW-Authenticate: Payment …; PAYMENT-REQUIRED: base64 x402 v2. Unknown match ids still 402 (catalog sample) when unpaid.",
+              "Payment required (ONE gross accept → the on-chain 0xSplits split on Base). WWW-Authenticate: Payment …; PAYMENT-REQUIRED: base64 x402 v2. Unknown match ids still 402 (catalog sample) when unpaid.",
               "/v1/matches/probe/pay"
             ),
             "200": {
@@ -510,7 +459,7 @@ export function buildOpenApi(env, origin) {
           in: "header",
           name: "payment-signature",
           description:
-            "x402 pay-per-call (USDC on Base eip155:8453 and/or Solana solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp). Bare request → 402 with PAYMENT-REQUIRED; sign and retry. Dual-payee: pay both role=seller and role=hub_fee on the chosen network.",
+            "x402 pay-per-call (USDC on Base eip155:8453). Bare request → 402 with PAYMENT-REQUIRED; sign and retry. Single-payee: sign ONE gross payment to the accept's payTo (the on-chain 0xSplits split); CURB fans out seller + protocol fee on-chain.",
         },
       },
     },
@@ -518,14 +467,16 @@ export function buildOpenApi(env, origin) {
       product: "numetal-curb",
       brand: "CURB",
       feeBps,
+      settlementModel: "single-payee-to-splitter",
+      split: {
+        base: splitAddressBase(env) || null,
+        provider: "0xsplits-push-v2",
+        note: "Buyer pays gross once to split; keeper distribute() fans out seller + hub on-chain.",
+      },
       hubPayTo: hubPayToBase(env),
-      hubPayToSolana: solanaEnabled(env) ? hubPayToSolana(env) : null,
-      networks: solanaEnabled(env)
-        ? [baseNetwork(env), NETWORK_SOLANA]
-        : [baseNetwork(env)],
+      networks: [baseNetwork(env)],
       assets: {
         base: baseAsset(env),
-        solana: solanaEnabled(env) ? USDC_SOLANA : null,
       },
       noUpstreamKeys: true,
       settlement: {
@@ -533,7 +484,6 @@ export function buildOpenApi(env, origin) {
         note:
           "demo: a present payment header settles but the grant is marked verified:false (NOT verified on-chain). verify (SETTLE_MODE=verify + CDP secrets): only a facilitator-verified+settled payment mints a grant; fake/bare headers get 402.",
       },
-      ...payShHook,
     },
   };
 }
@@ -548,7 +498,7 @@ export async function wellKnownX402(env, origin) {
           type: "http",
           x402Version: X402_VERSION,
           description:
-            "CURB — settlement is x402 USDC on Base and Solana. Each swap clears seller + protocol fee. Bare POST → 402.",
+            "CURB — single-payee x402 USDC on Base (eip155:8453). Buyer pays gross once to the on-chain 0xSplits split; CURB fans out seller + protocol fee on-chain. Bare POST → 402.",
           mimeType: "application/json",
           accepts: challenge.accepts,
         },
@@ -565,17 +515,16 @@ export async function wellKnownX402(env, origin) {
     mcp: `${origin}/mcp`,
     skill: `${origin}/skill.md`,
     feeBps: Number(env.FEE_BPS || 500),
+    settlementModel: "single-payee-to-splitter",
+    split: {
+      base: splitAddressBase(env) || null,
+      provider: "0xsplits-push-v2",
+    },
     hubPayTo: hubPayToBase(env),
-    hubPayToSolana: solanaEnabled(env) ? hubPayToSolana(env) : null,
-    networks: solanaEnabled(env) ? [baseNetwork(env), NETWORK_SOLANA] : [baseNetwork(env)],
+    networks: [baseNetwork(env)],
     assets: {
       [baseNetwork(env)]: baseAsset(env) || USDC_BASE,
-      ...(solanaEnabled(env) ? { [NETWORK_SOLANA]: USDC_SOLANA } : {}),
     },
     facilitator: env.FACILITATOR || "https://api.cdp.coinbase.com/platform/v2/x402",
-    paySh: {
-      status: "buyer_cli",
-      note: "Buyers may also pay via pay.sh on Solana (buyer-side CLI, not a seller acceptor).",
-    },
   };
 }

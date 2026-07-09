@@ -177,7 +177,7 @@ ${themeBootScript()}
     </div>
     <div class="card">
       <h3>curb-buyer <span class="demo-tag">Demo</span></h3>
-      <p>Lists offers, creates intents, surfaces dual-payee pay challenges.</p>
+      <p>Lists offers, creates intents, surfaces single-payee pay challenges.</p>
       <a class="btn" href="https://buyer.curb.numetal.xyz/">Open buyer</a>
       <a class="btn" href="https://buyer.curb.numetal.xyz/health">/health</a>
     </div>

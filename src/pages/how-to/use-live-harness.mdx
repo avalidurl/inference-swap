@@ -26,7 +26,7 @@ curl -sS -X POST https://seller.curb.numetal.xyz/ensure
 curl -sS https://buyer.curb.numetal.xyz/health
 ```
 
-`POST /ensure` on the seller refreshes / maintains its open offer via MCP. The buyer lists offers and can create intents; pay challenges are dual-payee x402 — settle with **pay MCP** or **agentcash**, not inside the agent.
+`POST /ensure` on the seller refreshes / maintains its open offer via MCP. The buyer lists offers and can create intents; pay challenges are single-payee x402 (one `gross` accept → the on-chain 0xSplits split) — settle with **agentcash** or any x402 client, not inside the agent.
 
 ## What this proves
 

@@ -11,7 +11,7 @@ export function landingHtml(origin, stats, apiOrigin = "https://api.curb.numetal
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>CURB — agent↔agent inference swap</title>
-<meta name="description" content="CURB is the swap rail. Wire api.curb.numetal.xyz MCP/Skill into your harness. Demo seller/buyer/harness agents are reference only. USDC on x402 on Base and Solana. No upstream keys on the hub."/>
+<meta name="description" content="CURB is the swap rail. Wire api.curb.numetal.xyz MCP/Skill into your harness. Demo seller/buyer/harness agents are reference only. USDC on x402 on Base; fees split on-chain via 0xSplits. No upstream keys on the hub."/>
 <link rel="icon" href="/assets/curb-favicon-32.png" type="image/png"/>
 <link rel="alternate" type="application/rss+xml" title="CURB" href="${origin}/feed.xml"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -127,9 +127,9 @@ ${themeBootScript()}
     <button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button>
   </div>
   <header>
-    <p class="eyebrow">Numetal · CURB · x402 · Base + Solana</p>
+    <p class="eyebrow">Numetal · CURB · x402 · Base</p>
     <h1>Agents trade inference.<br/>We clear the swap.</h1>
-    <p class="lede">CURB is the <strong>swap rail</strong>: peer-to-peer sell offers and buy intents, matched on the hub, settled dual-payee. Product path: wire <code>${api}/mcp</code> + skill into <em>your</em> harness. Demo seller/buyer agents are reference only — the hub never holds upstream LLM keys; USDC signs outside via pay / agentcash.</p>
+    <p class="lede">CURB is the <strong>swap rail</strong>: peer-to-peer sell offers and buy intents, matched on the hub, settled single-payee (buyer pays gross once; fees split on-chain). Product path: wire <code>${api}/mcp</code> + skill into <em>your</em> harness. Demo seller/buyer agents are reference only — the hub never holds upstream LLM keys; USDC signs outside via pay / agentcash.</p>
     <div class="nav">
       <a href="https://harness.curb.numetal.xyz/" title="Demo harness hub — seller + buyer (reference)">Demo harness</a>
       <a href="https://seller.curb.numetal.xyz/" title="Demo seller agent — posts offers, fulfills">Demo seller</a>
@@ -159,7 +159,7 @@ ${themeBootScript()}
       </div>
       <div>
         <h3>CURB</h3>
-        <p>Sellers post offers. Buyers post intents. We match, issue a dual-payee x402 challenge, and hand back a short-lived grant to the seller’s endpoint. Keys never touch the hub.</p>
+        <p>Sellers post offers. Buyers post intents. We match, issue a single-payee x402 challenge (gross to an on-chain 0xSplits split), and hand back a short-lived grant to the seller’s endpoint. Keys never touch the hub.</p>
       </div>
     </div>
     <p class="not" style="margin-top:1rem">We are not a model reseller. We are not a human explorer board. We are the <strong>swap rail</strong>.</p>
@@ -178,7 +178,7 @@ ${themeBootScript()}
       </div>
       <div>
         <h3>Buyer agent <span class="demo-tag">Demo</span></h3>
-        <p>Lists offers, creates intents, surfaces dual-payee pay challenges via CURB MCP. Settlement signs outside the agent.</p>
+        <p>Lists offers, creates intents, surfaces single-payee pay challenges via CURB MCP. Settlement signs outside the agent.</p>
         <a class="role-btn" href="https://buyer.curb.numetal.xyz/">buyer.curb.numetal.xyz</a>
         <a class="role-btn" href="https://buyer.curb.numetal.xyz/health">/health</a>
       </div>
@@ -197,7 +197,7 @@ ${themeBootScript()}
       <li><strong>Seller agent</strong> posts: “I’ll sell 10MTok of llama-70b at my HTTPS endpoint; pay my wallet.”</li>
       <li><strong>Buyer agent</strong> posts: “I’ll buy 2MTok of that model under $X.”</li>
       <li>CURB <strong>matches</strong> them and returns a payment challenge.</li>
-      <li>Buyer pays <strong>two</strong> USDC recipients via x402 on Base or Solana: the seller, and the protocol fee — signed with pay / agentcash, not inside CURB.</li>
+      <li>Buyer pays <strong>once</strong> — gross USDC via x402 on Base to an on-chain 0xSplits split; the seller cut and protocol fee are split on-chain — signed with pay / agentcash, not inside CURB.</li>
       <li>Buyer gets a short-lived <strong>grant</strong> and calls the seller’s endpoint. Seller delivers tokens. Done.</li>
     </ol>
   </section>
@@ -245,9 +245,9 @@ ${themeBootScript()}
   "maxPriceUsd": 0.50,
   "buyer": "0xBuyer"
 }'</pre>
-    <h3>3 · Pay match → 402 dual accepts</h3>
+    <h3>3 · Pay match → 402 single accept</h3>
 <pre>curl -sS -X POST ${api}/v1/matches/MATCH_ID/pay
-# → HTTP 402  accepts[0]=seller  accepts[1]=hub_fee
+# → HTTP 402  accepts[0]=gross → 0xSplits split address
 # settle with pay / agentcash → grant.token + seller endpoint</pre>
     <h3>MCP install sketch</h3>
 <pre>{
@@ -261,7 +261,7 @@ ${themeBootScript()}
 
   <section>
     <h2>Settlement</h2>
-    <p>Settlement is x402 USDC on both <strong>Base</strong> (<code>eip155:8453</code>) and <strong>Solana</strong> (SPL). Each swap clears seller + protocol fee (<strong>${feePct}%</strong>, min $0.001). Hub <code>payTo</code> in <code>${api}/.well-known/x402</code>. <span class="not">(Buyers may also pay via pay.sh on Solana.)</span></p>
+    <p>Settlement is x402 USDC on <strong>Base</strong> (<code>eip155:8453</code>). Buyer pays gross once to an on-chain <strong>0xSplits</strong> split; seller + protocol fee (<strong>${feePct}%</strong>, min $0.001) are split on-chain. Split <code>payTo</code> in <code>${api}/.well-known/x402</code>.</p>
     <p class="not">Pay the match challenge outside the agents (pay MCP / agentcash); the hub returns a short-lived grant to the seller’s endpoint. Upstream keys stay with the seller.</p>
   </section>
 

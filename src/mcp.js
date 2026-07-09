@@ -16,10 +16,6 @@ const TOOLS = [
       required: ["sellerPayTo", "endpoint", "model", "mtok", "priceUsd"],
       properties: {
         sellerPayTo: { type: "string" },
-        sellerSolPayTo: {
-          type: "string",
-          description: "Optional Solana USDC payTo for full dual-rail seller+hub",
-        },
         endpoint: { type: "string" },
         model: { type: "string" },
         mtok: { type: "number" },
@@ -54,7 +50,7 @@ const TOOLS = [
   },
   {
     name: "swap_pay_challenge",
-    description: "Get dual-payee x402 challenge for a match (seller + hub fee)",
+    description: "Get the single-payee x402 challenge for a match (ONE gross accept per rail → the on-chain split; CURB fans out seller + hub fee on-chain)",
     inputSchema: {
       type: "object",
       required: ["matchId"],

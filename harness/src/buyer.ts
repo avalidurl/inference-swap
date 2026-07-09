@@ -126,7 +126,7 @@ export class CurbBuyer extends Agent<HarnessEnv, BuyerState> {
         matchId: id,
         challenge,
         paymentNote:
-          "CURB does not sign. Settle dual-payee accepts with pay MCP or agentcash, then call seller endpoint with the grant.",
+          "CURB does not sign. Settle the single gross accept (→ on-chain 0xSplits split) with agentcash or any x402 client, then call seller endpoint with the grant.",
         payUrl: `${this.env.CURB_API_URL || CURB_API}/v1/matches/${id}/pay`,
       };
     } catch (e) {

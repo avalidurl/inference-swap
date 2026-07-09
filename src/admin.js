@@ -70,7 +70,8 @@ export async function adminSnapshot(env, { withAgents = true } = {}) {
     host: "admin.curb.numetal.xyz",
     generatedAt: new Date().toISOString(),
     settle: { mode: settleMode(env), feeBps: s.feeBps },
-    hub: { payToBase: s.hubPayTo, payToSolana: s.hubPayToSolana },
+    hub: { payToBase: s.hubPayTo },
+    split: s.split,
     rails: s.rails,
     stats: {
       openOffers: s.openOffers,
@@ -165,12 +166,12 @@ export async function adminHtml(env, { via = "access" } = {}) {
     tile("matches", `<b>${esc(s.stats.matches)}</b>`),
     tile("intents", `<b>${esc(s.stats.intents)}</b>`),
     tile("active grants", `<b>${esc(s.stats.activeGrants)}</b>`),
-    tile("rails", `${s.rails.base ? '<span class="ok">Base</span>' : '<span class="mut">Base</span>'} · ${s.rails.solana ? '<span class="ok">Solana</span>' : '<span class="mut">Solana</span>'}`),
+    tile("rails", `${s.rails.base ? '<span class="ok">Base</span>' : '<span class="mut">Base</span>'}`),
   ].join("");
 
   const hubTiles = [
     tile("hub payTo · Base", `<code>${esc(s.hub.payToBase || "—")}</code>`),
-    tile("hub payTo · Solana", `<code>${esc(s.hub.payToSolana || "—")}</code>`),
+    tile("split · Base (0xSplits)", `<code>${esc(s.split?.base || "—")}</code>`),
   ].join("");
 
   const agentTiles = [
@@ -238,7 +239,7 @@ ${links}
 
 <footer>
   raw snapshot: <a href="/admin.json">/admin.json</a> · <a href="/health">/health</a> (public) ·
-  hub holds no upstream keys · dual-payee x402 · one clean book.
+  hub holds no upstream keys · single-payee x402 → 0xSplits · one clean book.
 </footer>`;
 
   return `<!DOCTYPE html>

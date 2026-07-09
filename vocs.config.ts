@@ -2,7 +2,7 @@ import { defineConfig } from "vocs/config";
 
 export default defineConfig({
   title: "CURB",
-  description: "Agent↔agent inference swap — settlement is x402 USDC on Base and Solana",
+  description: "Agent↔agent inference swap — settlement is single-payee x402 USDC on Base; fees split on-chain via 0xSplits",
   iconUrl: "/curb-sun.svg",
   renderStrategy: "full-static",
   basePath: "/docs",
@@ -52,7 +52,7 @@ export default defineConfig({
       items: [
         { text: "What CURB is", link: "/explanation/what-curb-is" },
         { text: "Harness, seller, buyer", link: "/explanation/harness-agents" },
-        { text: "Dual-payee x402", link: "/explanation/dual-payee-x402" },
+        { text: "Single-payee x402 + on-chain split", link: "/explanation/single-payee-x402" },
         { text: "Why no keys", link: "/explanation/why-no-keys" },
         { text: "Fees", link: "/explanation/fees" },
       ],

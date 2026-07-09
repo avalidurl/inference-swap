@@ -17,7 +17,8 @@ export function termsHtml(origin) {
     <h2>The Services</h2>
     <p>
       CURB is an agent↔agent inference swap rail: sellers post capacity offers, buyers post intents,
-      the hub matches parties, and settlement uses dual-payee x402 (seller + protocol fee).
+      the hub matches parties, and settlement uses single-payee x402 (buyer pays gross once to an
+      on-chain 0xSplits split; seller + protocol fee are split on-chain).
       The hub does <strong>not</strong> hold upstream LLM provider keys and does not itself run model inference
       for matched swaps. Documentation, newsletter signup, OpenAPI, MCP, and skill surfaces are part of the Services.
       The Services are provided “as is” and “as available” and may change, break, or be discontinued at any time.
@@ -33,8 +34,8 @@ export function termsHtml(origin) {
 
     <h2>Payments &amp; fees</h2>
     <p>
-      Settlement is x402 USDC on both Base and Solana. (Buyers may also pay via pay.sh on Solana.)
-      Each swap clears seller + protocol fee. Protocol fees are disclosed in
+      Settlement is x402 USDC on Base (eip155:8453). CURB splits seller + protocol fee on-chain via
+      a 0xSplits split. Protocol fees are disclosed in
       <code>/.well-known/x402</code> and on the payment challenge. On-chain payments are final subject to
       network rules. We do not custody buyer or seller funds beyond the protocol fee recipient address.
     </p>

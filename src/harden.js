@@ -62,9 +62,6 @@ const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const OFFER_KEYS = [
   "sellerPayTo",
   "payTo",
-  "sellerSolPayTo",
-  "solanaPayTo",
-  "solPayTo",
   "endpoint",
   "model",
   "mtok",
@@ -97,9 +94,6 @@ export function sanitizeOfferInput(body) {
   if (out.endpoint != null) out.endpoint = String(out.endpoint).slice(0, 512);
   if (out.note != null) out.note = String(out.note).slice(0, 280);
   if (out.attestation != null) out.attestation = String(out.attestation).slice(0, 128);
-  if (out.sellerSolPayTo != null) out.sellerSolPayTo = String(out.sellerSolPayTo).slice(0, 64);
-  if (out.solanaPayTo != null) out.solanaPayTo = String(out.solanaPayTo).slice(0, 64);
-  if (out.solPayTo != null) out.solPayTo = String(out.solPayTo).slice(0, 64);
   return out;
 }
 

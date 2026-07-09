@@ -33,7 +33,7 @@ curl -s https://api.curb.numetal.xyz/v1/matches/MATCH_ID | jq .
 
 ## 3. Buyer pays you + hub
 
-Settlement is dual-payee x402. You receive seller USDC; hub takes the protocol fee. After pay, the buyer holds a grant to hit **your** endpoint — the hub never proxies tokens through your LLM key.
+Settlement is single-payee x402: the buyer pays gross once to an on-chain 0xSplits split on Base, which fans out your seller USDC and the hub protocol fee on-chain. After pay, the buyer holds a grant to hit **your** endpoint — the hub never proxies tokens through your LLM key.
 
 ## Next
 

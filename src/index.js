@@ -37,7 +37,6 @@ import {
   themeBootScript,
   themeToggleScript,
 } from "./skin.js";
-import { solanaEnabled } from "./x402.js";
 import {
   readJsonLimited,
   rateLimit,
@@ -152,8 +151,7 @@ async function handleAdminHost(request, env, url, path) {
     if (parsed.error) return json({ error: parsed.error }, parsed.status, request);
     const b = parsed.body || {};
     const r = await createOffer(env, {
-      sellerPayTo: b.sellerPayTo || env.HUB_PAY_TO,
-      sellerSolPayTo: b.sellerSolPayTo || b.solanaPayTo || env.HUB_PAY_TO_SOLANA,
+      sellerPayTo: b.sellerPayTo || env.DEMO_SELLER_PAY_TO || env.HUB_PAY_TO,
       endpoint: b.endpoint || "https://seller.curb.numetal.xyz/fulfill",
       model: b.model || "demo/llama-3.3-70b",
       mtok: b.mtok || 10,
@@ -168,12 +166,8 @@ async function handleAdminHost(request, env, url, path) {
   return json({ error: "not_found", path }, 404, request);
 }
 
-function paymentRails(env) {
-  const rails = ["x402 · USDC on Base (eip155:8453)"];
-  if (solanaEnabled(env)) {
-    rails.push("x402 · USDC on Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp, SPL)");
-  }
-  return rails;
+function paymentRails() {
+  return ["x402 · USDC on Base (eip155:8453)"];
 }
 
 function apiRootIndex(env, apiOrigin, siteOrigin) {
@@ -181,7 +175,7 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
     service: "CURB",
     product: PRODUCT_ID,
     brand: "CURB",
-    what: "An agent↔agent inference swap rail — sellers post capacity, buyers post intents, the hub matches and clears dual-payee USDC via x402. Hub never holds upstream LLM keys.",
+    what: "An agent↔agent inference swap rail — sellers post capacity, buyers post intents, the hub matches and clears USDC via x402. Buyer pays gross ONCE to an on-chain split (0xSplits); CURB fans out seller/hub on-chain. Hub never holds upstream LLM keys.",
     docs: `${siteOrigin}/docs/`,
     site: siteOrigin,
     fees: `${siteOrigin}/fees`,
@@ -214,10 +208,9 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
       probe: "/v1/pay",
     },
     payments: {
-      rails: paymentRails(env),
+      rails: paymentRails(),
       paid: ["/v1/pay", "/v1/matches/:id/pay"],
-      note: "A bare POST to any paid surface returns one 402 carrying every enabled rail in accepts[]; the live 402 is authoritative — read it before signing. Each swap clears seller + protocol fee (dual-payee).",
-      buyer_cli: "Buyers may also pay via pay.sh on Solana (buyer-side CLI, not a seller acceptor).",
+      note: "A bare POST to any paid surface returns one 402 with a SINGLE Base accept (gross to the split address); the live 402 is authoritative — read it before signing. Buyer pays gross once; CURB splits seller + protocol fee on-chain via a 0xSplits split on Base.",
     },
     contact: "contact@numetal.xyz",
     note: "Free reads: GET /v1/offers, GET /health, GET /openapi.json, GET /.well-known/x402, GET /skill.md, GET /llms.txt, GET /mcp. Paid: POST /v1/pay (discovery probe) and POST /v1/matches/{id}/pay. Marketing + docs on curb.numetal.xyz; demo/reference agents on harness/seller/buyer.curb.numetal.xyz (not the product path); this host is the agent API — wire MCP/skill into YOUR harness.",
@@ -256,7 +249,7 @@ ${themeBootScript()}
 <body>
 <div class="topbar"><button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button></div>
 <h1>api.curb.numetal.xyz <span class="hx">●</span></h1>
-<p class="m">The agent-facing API for <a href="https://curb.numetal.xyz">CURB</a> — an agent↔agent inference swap rail by Numetal Labs. Sellers post capacity; buyers post intents; the hub matches and clears dual-payee USDC.</p>
+<p class="m">The agent-facing API for <a href="https://curb.numetal.xyz">CURB</a> — an agent↔agent inference swap rail by Numetal Labs. Sellers post capacity; buyers post intents; the hub matches and clears USDC. Buyer pays gross once to an on-chain split; CURB fans out seller + fee on-chain.</p>
 <div class="note"><b>This is an API — this page is only the human view.</b> Agents, bots, and LLMs get JSON: request this same URL with <code>Accept: application/json</code>, or read the machine catalog at <a href="/openapi.json">/openapi.json</a>. Nothing here is human-gated.</div>
 <section><h2>For machines — discovery &amp; docs</h2><ul>
 <li><code>GET /openapi.json</code> <span class="m">— OpenAPI 3.1 (x402scan / AgentCash / CDP Bazaar read this)</span></li>
@@ -271,9 +264,9 @@ ${themeBootScript()}
 <li><code>GET /health</code></li>
 </ul></section>
 <section><h2>Paid surfaces <span class="tag paid">x402</span></h2>
-<p class="m">Settlement is x402 USDC on <b>Base</b> and/or <b>Solana</b> (SPL). A bare POST returns one 402 with every enabled rail in <code>accepts[]</code>; the live 402 is authoritative. Each swap clears seller + protocol fee. (Buyers may also pay via pay.sh on Solana.)</p><ul>
+<p class="m">Settlement is x402 USDC on <b>Base</b> (<code>eip155:8453</code>). A bare POST returns one 402 with a single <code>accepts[]</code> entry (gross to the split address); the live 402 is authoritative. Buyer pays gross once; CURB splits seller + protocol fee on-chain via a 0xSplits split on Base.</p><ul>
 <li><code>POST /v1/pay</code> <span class="m">— discovery probe ($0.10 sample, no side effects)</span></li>
-<li><code>POST /v1/matches/:id/pay</code> <span class="m">— settle a real match (dual-payee)</span></li>
+<li><code>POST /v1/matches/:id/pay</code> <span class="m">— settle a real match (single-payee → on-chain split)</span></li>
 </ul></section>
 <section><h2>Swap loop</h2><ul>
 <li><code>POST /v1/offers</code> <span class="m">— sell capacity</span></li>
@@ -316,7 +309,7 @@ function llmsTxt(apiOrigin, siteOrigin) {
   const agentApi = "https://api.curb.numetal.xyz";
   return [
     "# CURB",
-    `> Agent↔agent inference swap. Settlement is x402 USDC on Base and Solana. Each swap clears seller + protocol fee. No upstream keys on hub. Product: ${PRODUCT_ID}`,
+    `> Agent↔agent inference swap. Settlement is x402 USDC on Base (eip155:8453). Buyer pays gross once to an on-chain 0xSplits split; CURB fans out seller + protocol fee on-chain. No upstream keys on hub. Product: ${PRODUCT_ID}`,
     "",
     "## Surfaces",
     `Site: ${siteOrigin}/`,
@@ -357,8 +350,8 @@ function llmsTxt(apiOrigin, siteOrigin) {
     `llms.txt: ${agentApi}/llms.txt`,
     "",
     "## Payments",
-    "Settlement is x402 USDC on Base (eip155:8453) and Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp, SPL). (Buyers may also pay via pay.sh on Solana — buyer-side CLI, not a seller acceptor.)",
-    "Each swap clears seller + protocol fee (dual-payee accepts[]). Pick one network; pay both roles.",
+    "Settlement is x402 USDC on Base (eip155:8453). CURB splits seller + protocol fee on-chain via a 0xSplits split.",
+    "Single-payee (spec-compliant): ONE accept = gross to the split address. Buyer signs ONE payment; CURB splits seller + protocol fee ON-CHAIN via 0xSplits distribute() on Base.",
     "",
     "Contact: contact@numetal.xyz",
     "",
@@ -369,8 +362,7 @@ async function seedDemoOfferIfEmpty(env, origin) {
   const s = await stats(env);
   if ((s.openOffers || 0) > 0) return { skipped: true, openOffers: s.openOffers };
   const r = await createOffer(env, {
-    sellerPayTo: env.HUB_PAY_TO,
-    sellerSolPayTo: env.HUB_PAY_TO_SOLANA,
+    sellerPayTo: env.DEMO_SELLER_PAY_TO || env.HUB_PAY_TO,
     endpoint: "https://seller.curb.numetal.xyz/fulfill",
     model: "demo/llama-3.3-70b",
     mtok: 10,
@@ -671,12 +663,10 @@ export default {
         return paymentRequiredResponse({
           error: "payment_required",
           message:
-            "CURB discovery probe. Attach payment covering seller + hub_fee accepts on one network (Base or Solana), or use POST /v1/matches/{id}/pay for a real match.",
+            "CURB discovery probe. Attach ONE payment for the gross amount to the accept's payTo (the on-chain 0xSplits split) on Base (eip155:8453), or use POST /v1/matches/{id}/pay for a real match.",
           price: { amount: String(challenge.split.grossUsd), currency: "USD" },
           paymentInfo: {
-            networks: challenge.rails?.solana
-              ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
-              : ["eip155:8453"],
+            networks: ["eip155:8453"],
             asset: "USDC",
             x402Version: 2,
           },
@@ -701,12 +691,10 @@ export default {
             return paymentRequiredResponse({
               error: "payment_required",
               message:
-                "Attach payment-signature / X-Payment covering seller + hub_fee accepts on one network (Base or Solana), then retry.",
+                "Attach payment-signature / X-Payment for ONE gross payment to the accept's payTo (the on-chain 0xSplits split) on Base (eip155:8453), then retry.",
               price: { amount: String(fresh.split.grossUsd), currency: "USD" },
               paymentInfo: {
-                networks: fresh.challenge?.rails?.solana
-                  ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
-                  : ["eip155:8453"],
+                networks: ["eip155:8453"],
                 asset: "USDC",
                 x402Version: 2,
               },
@@ -718,13 +706,11 @@ export default {
           return paymentRequiredResponse({
             error: "payment_required",
             message:
-              "Match not found or discovery probe. Sample dual-rail challenge (same as POST /v1/pay). Create a live match, then pay that id; or use POST /v1/pay.",
+              "Match not found or discovery probe. Sample Base challenge (same as POST /v1/pay). Create a live match, then pay that id; or use POST /v1/pay.",
             note: "match_not_found_probe",
             price: { amount: String(challenge.split.grossUsd), currency: "USD" },
             paymentInfo: {
-              networks: challenge.rails?.solana
-                ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
-                : ["eip155:8453"],
+              networks: ["eip155:8453"],
               asset: "USDC",
               x402Version: 2,
             },
@@ -753,12 +739,10 @@ export default {
           const fresh = await refreshMatchChallenge(env, m, origin);
           return paymentRequiredResponse({
             error: "payment_required",
-            message: `Payment not verified (${verdict.reason || "unverified"}). Attach a facilitator-verifiable payment covering seller + hub_fee on one network (Base or Solana), then retry.`,
+            message: `Payment not verified (${verdict.reason || "unverified"}). Attach a facilitator-verifiable ONE gross payment to the accept's payTo (the on-chain 0xSplits split) on Base (eip155:8453), then retry.`,
             price: { amount: String(fresh.split.grossUsd), currency: "USD" },
             paymentInfo: {
-              networks: fresh.challenge?.rails?.solana
-                ? ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
-                : ["eip155:8453"],
+              networks: ["eip155:8453"],
               asset: "USDC",
               x402Version: 2,
             },

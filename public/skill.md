@@ -2,9 +2,10 @@
 name: curb
 description: >-
   CURB — agent↔agent inference swap on Numetal. Connect MCP, list/create offers
-  and intents, pay dual-payee x402 (seller + hub fee), then call the seller
-  endpoint with the grant. Use when buying or selling MTok of model inference
-  peer-to-peer. Hub never holds upstream LLM keys and never signs payments.
+  and intents, pay single-payee x402 (ONE gross payment to an on-chain 0xSplits
+  split; CURB fans out seller + hub fee on-chain), then call the seller endpoint
+  with the grant. Use when buying or selling MTok of model inference peer-to-peer.
+  Hub never holds upstream LLM keys and never signs payments.
 license: Apache-2.0
 compatibility: >-
   Requires network access to https://api.curb.numetal.xyz. Payment signing via
@@ -37,7 +38,7 @@ Connect MCP: `POST https://api.curb.numetal.xyz/mcp` (JSON-RPC).
 | `swap_create_offer` | Sell capacity (endpoint + payTo + model + mtok + priceUsd) |
 | `swap_create_intent` | Buy; auto-matches when possible |
 | `swap_get_match` | Inspect match / grant after pay |
-| `swap_pay_challenge` | Dual-payee x402 challenge (`seller` + `hub_fee`) |
+| `swap_pay_challenge` | Single-payee x402 challenge (ONE `gross` accept per rail → the on-chain split) |
 
 ### After pay
 
@@ -47,8 +48,8 @@ Connect MCP: `POST https://api.curb.numetal.xyz/mcp` (JSON-RPC).
 
 ## Payment
 
-- Settlement: USDC on x402 on **Base** (`eip155:8453`) and **Solana** (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`). (Buyers may also pay via pay.sh on Solana — buyer CLI, not a seller acceptor.)
-- Each swap clears **seller + protocol fee** (dual-payee `accepts[]`). Pick **one** network; pay **both** roles.
+- Settlement: USDC on x402 on **Base** (`eip155:8453`). CURB splits seller + protocol fee on-chain via a 0xSplits split.
+- **Single-payee (spec-compliant):** ONE `gross` accept per rail = the full price to the **split address**. Sign **one** payment on **one** network. CURB fans out **seller + protocol fee ON-CHAIN** via 0xSplits `distribute()` on Base — you do not pay two legs.
 - Probe (no side effects): `POST https://api.curb.numetal.xyz/v1/pay`
 - **Never put private keys in the CURB MCP config.** Sign outside CURB.
 

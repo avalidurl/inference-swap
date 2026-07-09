@@ -30,15 +30,15 @@ export const WALLETS = [
   },
   {
     label: "Hub fee · Base (x402)",
-    note: "CURB protocol fee recipient · AgentCash Base deposit",
+    note: "CURB protocol fee recipient (5% split recipient) · AgentCash Base deposit",
     address: "0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE",
     chain: "base",
   },
   {
-    label: "Hub fee · Solana (x402)",
-    note: "CURB protocol fee recipient · AgentCash Solana deposit",
-    address: "2onXWK1M43AZHYbM7EFaLG7rhqZkt9JWxgGjZziq4tCg",
-    chain: "solana",
+    label: "Split · Base (0xSplits)",
+    note: "CURB single-payee split — gross lands here; distribute() fans out seller 95% + hub 5%",
+    address: "0x546217c24617bCF9faD565E8ECABe5dE2D41326b",
+    chain: "base",
   },
   {
     label: "Numetal Team",
@@ -62,7 +62,6 @@ function shortAddr(a) {
 }
 
 function explorerUrl(w) {
-  if (w.chain === "solana") return `https://solscan.io/account/${w.address}`;
   return `https://basescan.org/address/${w.address}`;
 }
 
@@ -305,16 +304,16 @@ ${themeBootScript()}
       <p class="dnote">Every creator-fee claim splits WETH 80/10/10 and $CURB 40/30/30 to team, treasury, and burn — same policy as $NUMETAL.</p>
     </div>
 
-    <div class="csec"><span class="lab"><span class="blk">█</span>Hub swap fees</span><span class="cnt">x402 dual-payee</span></div>
+    <div class="csec"><span class="lab"><span class="blk">█</span>Hub swap fees</span><span class="cnt">x402 → 0xSplits</span></div>
     <div class="dwrap">
-      <div class="dh">Each matched inference swap (seller + hub)</div>
+      <div class="dh">Each matched inference swap (gross → on-chain split → seller + hub)</div>
       <div class="barx" aria-label="${(100 - Number(feePct)).toFixed(1)} percent seller, ${feePct} percent hub">
         <span class="seg s-seller" style="flex:${10000 - feeBps} 0 0">${(100 - Number(feePct)).toFixed(1)}% seller</span>
         <span class="seg s-hub" style="flex:${feeBps} 0 0">${feePct}% hub</span>
       </div>
     </div>
     <div class="row"><span class="k">Fee bps</span><span class="lead"></span><span class="v">${feeBps}</span></div>
-    <div class="row"><span class="k">Rails</span><span class="lead"></span><span class="v">Base + Solana USDC</span></div>
+    <div class="row"><span class="k">Rails</span><span class="lead"></span><span class="v">Base USDC (eip155:8453)</span></div>
 
     <div class="csec"><span class="lab"><span class="blk">█</span>Wallet ledger</span><span class="cnt">who is who</span></div>
     ${walletRows()}
@@ -330,7 +329,7 @@ ${themeBootScript()}
     <h2>How fees work</h2>
     <p><strong>LP / protocol layer.</strong> CURB launched on Bankr (Doppler) on Base. On-chain reward share is <strong>${t.creatorSharePct}%</strong> creator (goekhan Bankr EVM claimer) / <strong>${t.protocolSharePct}%</strong> protocol — verified via <code>bankr fees --token</code>. That layer does not yet multi-split to team/treasury/burn on-chain; claims land at the creator claimer first.</p>
     <p><strong>Distribution (creator-side).</strong> Claimed creator fees follow the same Numetal policy as <a href="https://numetal.xyz/fees" target="_blank" rel="noopener">numetal.xyz/fees</a>: WETH side 80% team / 10% treasury / 10% burn; $CURB side 40% team / 30% treasury / 30% burn.</p>
-    <p><strong>Hub swap fees.</strong> On CURB inference matches, payment is dual-payee x402: seller wallet + hub fee (<strong>${feePct}%</strong>, min $0.001 USDC) on Base and/or Solana. Hub never holds upstream LLM keys.</p>
+    <p><strong>Hub swap fees.</strong> On CURB inference matches, payment is single-payee x402: the buyer pays gross ONCE to an on-chain 0xSplits split on Base; the split fans out seller wallet + hub fee (<strong>${feePct}%</strong>, min $0.001 USDC) on-chain. Hub never holds upstream LLM keys.</p>
     <p class="muted">Team / treasury wallets are the same Numetal Labs addresses published on <a href="https://numetal.xyz/fees" target="_blank" rel="noopener">numetal.xyz/fees</a>.</p>
   </section>
 

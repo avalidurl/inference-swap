@@ -1,11 +1,9 @@
 import { uid, putJson, getJson, listIds, pushId, isValidId } from "./store.js";
 import {
-  dualAccepts,
+  splitAccepts,
   feeSplit,
-  isSolanaAddress,
   hubPayToBase,
-  hubPayToSolana,
-  solanaEnabled,
+  splitAddressBase,
   bazaarExtension,
   MATCH_PAY_BAZAAR,
 } from "./x402.js";
@@ -18,12 +16,6 @@ function normAddr(a) {
   const s = String(a || "").trim();
   if (!/^0x[a-fA-F0-9]{40}$/.test(s)) return null;
   return s.toLowerCase();
-}
-
-function normSol(a) {
-  const s = String(a || "").trim();
-  if (!isSolanaAddress(s)) return null;
-  return s;
 }
 
 function httpsOnly(url) {
@@ -52,7 +44,6 @@ export function isCleanModel(m) {
 
 export async function createOffer(env, body) {
   const sellerPayTo = normAddr(body.sellerPayTo || body.payTo);
-  const sellerSolPayTo = normSol(body.sellerSolPayTo || body.solanaPayTo || body.solPayTo);
   const endpoint = httpsOnly(body.endpoint);
   const model = String(body.model || "").trim().slice(0, 128);
   const mtok = Number(body.mtok || body.mTok || 0);
@@ -64,9 +55,6 @@ export async function createOffer(env, body) {
   if (!isCleanModel(model)) return { error: "model_invalid", status: 400 };
   if (!(mtok > 0) || mtok > MAX_MTOK) return { error: "mtok_out_of_range", status: 400 };
   if (!(priceUsd > 0) || priceUsd > MAX_PRICE_USD) return { error: "priceUsd_out_of_range", status: 400 };
-  if ((body.sellerSolPayTo || body.solanaPayTo || body.solPayTo) && !sellerSolPayTo) {
-    return { error: "sellerSolPayTo_invalid", status: 400 };
-  }
 
   const id = uid("offer");
   const offer = {
@@ -74,7 +62,6 @@ export async function createOffer(env, body) {
     type: "sell",
     status: "open",
     sellerPayTo,
-    sellerSolPayTo: sellerSolPayTo || null,
     endpoint,
     model,
     mtok,
@@ -188,9 +175,8 @@ async function createMatch(env, { offer, intent, origin }) {
   const gross = offer.priceUsd * (mtok / offer.mtok);
   const split = feeSplit(env, gross);
   const resourceUrl = `${origin}/v1/matches/${id}/pay`;
-  const challenge = await dualAccepts(env, {
+  const challenge = await splitAccepts(env, {
     sellerPayTo: offer.sellerPayTo,
-    sellerSolPayTo: offer.sellerSolPayTo || null,
     grossUsd: split.grossUsd,
     resourceUrl,
     description: `Swap ${mtok} MTok ${offer.model}`,
@@ -204,7 +190,6 @@ async function createMatch(env, { offer, intent, origin }) {
     model: offer.model,
     mtok,
     sellerPayTo: offer.sellerPayTo,
-    sellerSolPayTo: offer.sellerSolPayTo || null,
     sellerEndpoint: offer.endpoint,
     buyer: intent.buyer,
     split,
@@ -266,10 +251,12 @@ export async function stats(env) {
     matches: matchIds.length,
     feeBps: Number(env.FEE_BPS || 500),
     hubPayTo: hubPayToBase(env) || null,
-    hubPayToSolana: solanaEnabled(env) ? hubPayToSolana(env) : null,
+    split: {
+      model: "single-payee-to-splitter",
+      base: splitAddressBase(env) || null,
+    },
     rails: {
-      base: Boolean(hubPayToBase(env)),
-      solana: solanaEnabled(env),
+      base: true,
     },
   };
 }
@@ -340,11 +327,10 @@ export async function purgeBook(env) {
   return deleted;
 }
 
-/** Reseed ONE clean demo offer (hub as seller payTo, harness fulfill endpoint). */
+/** Reseed ONE clean demo offer (demo seller payTo, harness fulfill endpoint). */
 export async function reseedDemoOffer(env) {
   return createOffer(env, {
-    sellerPayTo: env.HUB_PAY_TO,
-    sellerSolPayTo: env.HUB_PAY_TO_SOLANA,
+    sellerPayTo: env.DEMO_SELLER_PAY_TO || env.HUB_PAY_TO,
     endpoint: "https://seller.curb.numetal.xyz/fulfill",
     model: "demo/llama-3.3-70b",
     mtok: 10,
@@ -354,12 +340,11 @@ export async function reseedDemoOffer(env) {
   });
 }
 
-/** Rebuild challenge for an existing match (e.g. after Solana feePayer refresh). */
+/** Rebuild challenge for an existing match (e.g. after price/config refresh). */
 export async function refreshMatchChallenge(env, match, origin) {
   const resourceUrl = `${origin}/v1/matches/${match.id}/pay`;
-  match.challenge = await dualAccepts(env, {
+  match.challenge = await splitAccepts(env, {
     sellerPayTo: match.sellerPayTo,
-    sellerSolPayTo: match.sellerSolPayTo || null,
     grossUsd: match.split?.grossUsd ?? 0,
     resourceUrl,
     description: `Swap ${match.mtok} MTok ${match.model}`,

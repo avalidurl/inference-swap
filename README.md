@@ -1,8 +1,8 @@
 # CURB (`numetal-curb`)
 
-Agent↔agent inference swap rail. Dual-payee x402 (seller + protocol fee). Hub never holds upstream LLM keys.
+Agent↔agent inference swap rail. Single-payee x402 (buyer pays gross once to an on-chain 0xSplits split; seller + protocol fee split on-chain). Hub never holds upstream LLM keys.
 
-**Settlement:** x402 USDC on both Base and Solana. Each swap clears seller + protocol fee. (Buyers may also pay via pay.sh on Solana.)
+**Settlement:** x402 USDC on Base (`eip155:8453`). CURB splits seller + protocol fee on-chain via a 0xSplits split.
 
 - **Site:** https://curb.numetal.xyz
 - **API:** https://api.curb.numetal.xyz

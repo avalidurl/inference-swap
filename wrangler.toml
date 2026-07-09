@@ -23,16 +23,21 @@ html_handling = "auto-trailing-slash"
 PRODUCT = "numetal-curb"
 NETWORK = "eip155:8453"
 USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-NETWORK_SOLANA = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
-USDC_SOLANA = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-# Hub fee recipient (Base) — AgentCash Base deposit
+# Hub fee recipient (Base) — AgentCash Base deposit; also the 5% recipient inside the split
 HUB_PAY_TO = "0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE"
-# Hub fee recipient (Solana) — AgentCash Solana deposit (verified via agentcash accounts)
-HUB_PAY_TO_SOLANA = "2onXWK1M43AZHYbM7EFaLG7rhqZkt9JWxgGjZziq4tCg"
-X402_SOLANA_ENABLED = "true"
 DISCOVERY_PRICE_USD = "0.1"
 FEE_BPS = "500"
 MIN_FEE_USDC = "0.001"
+# ── Single-payee (Option A) on-chain fee splitter ──────────────────────────
+# Base split = 0xSplits PushSplit v2 (immutable). Buyer pays gross ONCE here; a keeper calls
+# distribute() to fan out to seller + hub on-chain. Address is the deterministic predict for
+# {seller 0x8f49:95%, hub 0x3eee:5%}, owner=0, salt=0 on PushSplitFactory V2.2
+# (0x8E8eB0cC6AE34A38B67D5Cf91ACa38f60bc3Ecf4). Deploy via createSplitDeterministic before distribute.
+SPLIT_ADDRESS_BASE = "0x546217c24617bCF9faD565E8ECABe5dE2D41326b"
+# 0xSplits recipients (allocations = shares, total 1_000_000; distributionIncentive 0) — for keeper distribute() reconstruction + 402 display
+SPLIT_RECIPIENTS_BASE = "0x8f49d4d782488e8576c8c54288027c57f4acf521:950000,0x3eee81B5b4cf1983b7DB36cf042B5d06c04F33eE:50000"
+# Distinct demo seller (Bankr) so a real settle + distribute proves seller-side movement (≠ hub 0x3eee)
+DEMO_SELLER_PAY_TO = "0x8f49d4d782488e8576c8c54288027c57f4acf521"
 FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 # Settlement mode: "demo" | "verify".
 #   demo   → a present payment header settles but grants are marked verified:false
@@ -43,7 +48,7 @@ FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 SETTLE_MODE = "verify"
 # Secrets (NOT in repo): ACCESS_KEY; CDP_API_KEY_ID + CDP_API_KEY_SECRET enable verify mode.
 #   Set via: wrangler secret put CDP_API_KEY_ID / CDP_API_KEY_SECRET, then SETTLE_MODE=verify.
-# Payments: settlement is x402 USDC on Base + Solana (buyers may also pay via pay.sh on Solana)
+# Payments: settlement is single-payee x402 USDC on Base; fees split on-chain via a 0xSplits split
 # Operator dashboard (admin.curb.numetal.xyz) — Cloudflare Access email gate.
 #   ACCESS_TEAM_DOMAIN: the Zero Trust team domain that mints the Access JWT.
 #   ACCESS_AUD: the AUD of the "CURB Admin" self-hosted Access application (admin.curb.numetal.xyz),
