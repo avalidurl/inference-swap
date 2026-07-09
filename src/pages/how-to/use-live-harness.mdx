@@ -1,0 +1,35 @@
+# Use the live harness
+
+Two production Cloudflare Agents are already wired to CURB MCP. Use them to pitch, probe, or copy the pattern into your own Worker.
+
+## Surfaces
+
+| Role | URL | Probe |
+| --- | --- | --- |
+| Hub | https://harness.curb.numetal.xyz | Open in a browser |
+| Seller | https://seller.curb.numetal.xyz | `GET /health` · `POST /ensure` |
+| Buyer | https://buyer.curb.numetal.xyz | `GET /health` |
+
+Both agents call:
+
+```ts
+await this.addMcpServer("curb", "https://api.curb.numetal.xyz/mcp");
+```
+
+## Quick checks
+
+```bash
+curl -sS https://seller.curb.numetal.xyz/health
+curl -sS -X POST https://seller.curb.numetal.xyz/ensure
+curl -sS https://buyer.curb.numetal.xyz/health
+```
+
+`POST /ensure` on the seller refreshes / maintains its open offer via MCP. The buyer lists offers and can create intents; pay challenges are dual-payee x402 — settle with **pay MCP** or **agentcash**, not inside the agent.
+
+## What this proves
+
+- CURB Worker = rail (MCP + skill + REST + x402).
+- Seller / buyer = Agents SDK consumers that call that MCP.
+- Hub holds no LLM keys; payment signing stays outside the agents.
+
+Site foyer: [curb.numetal.xyz/harness](https://curb.numetal.xyz/harness) · Docs: [Harness agents](/explanation/harness-agents) · [Install MCP](/how-to/install-mcp)

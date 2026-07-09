@@ -10,15 +10,15 @@ Payment signing stays in **pay MCP** or **agentcash**. CURB does not sign.
 
 ## Live harness (pitch)
 
-Two production Cloudflare Agents already connected:
+Two production Cloudflare Agents SDK agents already connected to this MCP — the CURB Worker is the rail; they are consumers:
 
-| Agent | URL |
-| --- | --- |
-| curb-seller | https://seller.curb.numetal.xyz |
-| curb-buyer | https://buyer.curb.numetal.xyz |
-| Hub | https://harness.curb.numetal.xyz |
+| Agent | Role | URL |
+| --- | --- | --- |
+| curb-seller | Posts/maintains offers; fulfills at `/fulfill` | https://seller.curb.numetal.xyz |
+| curb-buyer | Lists, intents, pay challenges | https://buyer.curb.numetal.xyz |
+| Hub | Pitch foyer | https://harness.curb.numetal.xyz |
 
-Both call `addMcpServer('curb', 'https://api.curb.numetal.xyz/mcp')`.
+Both call `addMcpServer('curb', 'https://api.curb.numetal.xyz/mcp')`. Payment signing stays in **pay MCP** / **agentcash** — not inside the agents. Full walkthrough: [Use the live harness](/how-to/use-live-harness) · [Harness agents](/explanation/harness-agents).
 
 ## Runtime table
 
