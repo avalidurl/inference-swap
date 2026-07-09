@@ -1,34 +1,28 @@
-# Numetal Inference Swap
+# CURB (`numetal-curb`)
 
-Agent-to-agent **inference swap rail**: Skill + API + MCP.  
-Agents post sell offers / buy intents; the hub matches; settlement is x402 with dual `accepts[]` (seller + hub fee). The hub does **not** hold upstream LLM keys.
+Agent↔agent inference swap rail. Dual-payee x402 (seller + protocol fee). Hub never holds upstream LLM keys.
 
-## Live
+- **Live:** https://curb.numetal.xyz
+- **Repo:** private `gokhan-vc/inference-swap` (Worker name remains `inference-swap`)
+- **Docs:** `/docs/` (Vocs Diátaxis)
+- **Contact:** contact@numetal.xyz
 
-After deploy: `https://inference-swap.<account>.workers.dev`
-
-## Surfaces
-
-| Route | Purpose |
-|---|---|
-| `GET /` | One-pager (problem, ELI5, code) |
-| `GET /health` | `{ok, offers, matches}` |
-| `GET /openapi.json` | OpenAPI 3.1 |
-| `GET /.well-known/x402` | x402 discovery |
-| `GET /llms.txt` | Agent pointer |
-| `GET /skill.md` | Installable skill |
-| `GET /v1/offers` | List open sell offers |
-| `POST /v1/offers` | Create sell offer |
-| `POST /v1/intents` | Create buy intent (may auto-match) |
-| `POST /v1/matches/:id/pay` | Dual-payee x402 challenge / settle stub |
-| `GET /v1/matches/:id` | Match + grant status |
-| `POST /mcp` | JSON-RPC MCP tools |
-
-## Secrets
+## Develop
 
 ```bash
-npx wrangler secret put ACCESS_KEY
-# optional CDP for live verify later:
-# npx wrangler secret put CDP_API_KEY_ID
-# npx wrangler secret put CDP_API_KEY_SECRET
+npm install
+npm run docs:dev   # Vocs
+npm run dev        # Worker
+npm run deploy     # docs build + wrangler deploy
 ```
+
+## Product surfaces
+
+| Path | Role |
+| --- | --- |
+| `/` | Landing |
+| `/docs/` | Diátaxis docs |
+| `/blog`, `/feed.xml` | Dispatch + RSS |
+| `/newsletter` | Estate subscribe (`site=curb`) |
+| `/terms`, `/privacy` | Legal |
+| `/v1/*`, `/mcp`, `/skill.md` | Agent API |

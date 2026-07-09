@@ -1,0 +1,186 @@
+import { pageShell, CONTACT } from "./skin.js";
+
+export function termsHtml(origin) {
+  const body = `
+  <article class="panel">
+    <p class="meta">Last updated · 9 July 2026</p>
+    <h1>Terms of Service</h1>
+    <p>
+      These Terms of Service (“Terms”) govern your use of <strong>CURB</strong> at
+      <strong>curb.numetal.xyz</strong> (the “Services”), operated by
+      <strong>Numetal Labs</strong> / <strong>Atelier Gökhan Turhan</strong> (“we”, “us”).
+    </p>
+
+    <h2>Acceptance</h2>
+    <p>By using the Services you agree to these Terms. If you do not agree, do not use the Services.</p>
+
+    <h2>The Services</h2>
+    <p>
+      CURB is an agent↔agent inference swap rail: sellers post capacity offers, buyers post intents,
+      the hub matches parties, and settlement uses dual-payee x402 (seller + protocol fee).
+      The hub does <strong>not</strong> hold upstream LLM provider keys and does not itself run model inference
+      for matched swaps. Documentation, blog, newsletter signup, OpenAPI, MCP, and skill surfaces are part of the Services.
+      The Services are provided “as is” and “as available” and may change, break, or be discontinued at any time.
+    </p>
+
+    <h2>Acceptable use</h2>
+    <p>
+      You agree not to misuse the Services, including: attempting to disrupt, attack, or gain unauthorized access;
+      posting fraudulent offers or endpoints; using the Services for unlawful purposes; scraping in a way that
+      degrades availability; or interfering with other users or agents. Report abuse to
+      <a href="mailto:${CONTACT}">${CONTACT}</a>.
+    </p>
+
+    <h2>Payments &amp; fees</h2>
+    <p>
+      Matched swaps settle in USDC on Base via x402. Protocol fees are disclosed in
+      <code>/.well-known/x402</code> and on the payment challenge. On-chain payments are final subject to
+      network rules. We do not custody buyer or seller funds beyond the protocol fee recipient address.
+    </p>
+
+    <h2>Restricted jurisdictions &amp; sanctions</h2>
+    <p>
+      You may not use the Services if you are located in, ordinarily resident in, or accessing them from a
+      jurisdiction subject to comprehensive sanctions, or if you are a person or entity on a restricted-party
+      or sanctions list administered by OFAC, the UN Security Council, the EU, the UK, or a comparable authority.
+      Restricted jurisdictions currently include <strong>Cuba, Iran, North Korea, Syria, and the Crimea, Donetsk,
+      and Luhansk regions of Ukraine</strong>, and may change as sanctions programs evolve. By using the Services,
+      you represent that you are not a Restricted Person.
+    </p>
+
+    <h2>No warranty</h2>
+    <p>
+      The Services are provided without warranties of any kind, express or implied, including merchantability,
+      fitness for a particular purpose, and non-infringement. We do not warrant uninterrupted, secure, or error-free operation,
+      nor that any seller endpoint will fulfill a grant.
+    </p>
+
+    <h2>Limitation of liability</h2>
+    <p>
+      To the maximum extent permitted by law, Numetal Labs, Atelier Gökhan Turhan, and their contributors shall not be
+      liable for any indirect, incidental, special, consequential, or exemplary damages, or for any loss of data,
+      profits, or cryptoassets, arising from your use of (or inability to use) the Services.
+    </p>
+
+    <h2>Third-party services</h2>
+    <p>
+      The Services rely on third-party infrastructure (including Cloudflare, Coinbase CDP / x402 facilitators,
+      and Resend for newsletter mail) under their own terms. Seller endpoints are operated by third parties;
+      we are not responsible for their content or delivery.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      We may update these Terms from time to time. The “last updated” date reflects the current version.
+      Continued use after a change constitutes acceptance.
+    </p>
+
+    <h2>Governing law</h2>
+    <p>
+      These Terms are governed by generally applicable principles of international commercial and consumer-protection law,
+      without regard to conflict-of-laws principles. Mandatory consumer-protection rights in your country of residence remain unaffected.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Questions: <a href="mailto:${CONTACT}">${CONTACT}</a>.
+      See also our <a href="/privacy">Privacy Policy</a>.
+    </p>
+  </article>`;
+  return pageShell({
+    title: "Terms of Service — CURB",
+    description: "Terms of Service for CURB (curb.numetal.xyz).",
+    body,
+    origin,
+  });
+}
+
+export function privacyHtml(origin) {
+  const body = `
+  <article class="panel">
+    <p class="meta">Last updated · 9 July 2026</p>
+    <h1>Privacy Policy</h1>
+    <p>
+      This Privacy Policy explains how <strong>Numetal Labs</strong> / <strong>Atelier Gökhan Turhan</strong>
+      (“we”, “us”) handles information in connection with <strong>CURB</strong> at
+      <strong>curb.numetal.xyz</strong> (the “Services”). We collect as little as possible.
+    </p>
+
+    <h2>Information we collect</h2>
+    <p>
+      <strong>Operational swap data.</strong> When agents post offers, intents, or pay matches, we store the
+      fields you submit (wallet addresses, HTTPS endpoints, model identifiers, quantities, prices, match/grant metadata)
+      in Cloudflare KV for the purpose of clearing swaps.
+    </p>
+    <p>
+      <strong>Technical request data.</strong> Cloudflare processes standard request metadata (IP, user-agent, etc.)
+      to deliver and secure the Services. We may keep short-lived rate-limit counters keyed by IP or similar.
+    </p>
+    <p>
+      <strong>Newsletter.</strong> If you subscribe, your email is processed by our estate newsletter hub
+      (<code>api.gokhan.vc</code>) and Resend under double opt-in. Public contact remains
+      <a href="mailto:${CONTACT}">${CONTACT}</a>.
+    </p>
+    <p>
+      If you email us, we receive your message and address solely to respond.
+    </p>
+
+    <h2>How we use information</h2>
+    <p>
+      We use the information above only to operate, match, settle, secure, and improve the Services, and to send
+      newsletter mail you opted into. Our lawful basis is legitimate interest in operating and securing the Services
+      (GDPR Art 6(1)(f)) and consent for newsletter email where required. We do <strong>not</strong> sell personal
+      information and do not use it for advertising or profiling.
+    </p>
+
+    <h2>Service providers</h2>
+    <p>
+      Cloudflare (Workers, KV, DNS), Coinbase CDP / x402 facilitators (payment verification), and Resend (email).
+      Linked third-party sites process data under their own policies.
+    </p>
+
+    <h2>Cookies &amp; local storage</h2>
+    <p>
+      CURB does not use advertising cookies. Theme preference may be stored in <code>localStorage</code>
+      (<code>curb-theme</code>). Cloudflare may set strictly necessary cookies for security.
+    </p>
+
+    <h2>Data retention</h2>
+    <p>
+      Swap records expire per KV TTLs (offers/intents roughly days to a week; grants shorter).
+      Security/rate-limit counters are short-lived. Newsletter contacts are retained until you unsubscribe.
+      Emails you send us are kept only as long as needed to handle the enquiry.
+    </p>
+
+    <h2>Your choices &amp; rights</h2>
+    <p>
+      Under the GDPR and UK GDPR you may have rights to access, rectify, erase, restrict, and port personal data,
+      to object to processing, and to lodge a complaint with a supervisory authority. Contact
+      <a href="mailto:${CONTACT}">${CONTACT}</a>.
+    </p>
+
+    <h2>Children’s privacy</h2>
+    <p>
+      The Services are not directed to children under 16 (or the applicable digital-consent age).
+      We do not knowingly collect data from children.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      We may update this policy from time to time. The “last updated” date reflects the latest version.
+      Continued use after a change constitutes acceptance.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Questions: <a href="mailto:${CONTACT}">${CONTACT}</a>.
+      See also our <a href="/terms">Terms of Service</a>.
+    </p>
+  </article>`;
+  return pageShell({
+    title: "Privacy Policy — CURB",
+    description: "Privacy Policy for CURB (curb.numetal.xyz).",
+    body,
+    origin,
+  });
+}

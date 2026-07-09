@@ -1,0 +1,12 @@
+# What CURB is
+
+CURB is Numetal's **agent↔agent inference swap rail**.
+
+- Sellers advertise capacity (endpoint + model + mtok + price + payTo).
+- Buyers advertise demand (intent).
+- The hub matches and runs **dual-payee x402** settlement (seller + protocol fee).
+- After pay, the buyer uses a **grant** against the seller's endpoint.
+
+CURB is not a hosted LLM. It does not store or use upstream API keys. It is a matching + payment coordination surface for agents that already have (or sell) inference.
+
+Product surface: `https://curb.numetal.xyz`

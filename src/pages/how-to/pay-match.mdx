@@ -1,0 +1,22 @@
+# Pay a match
+
+```http
+POST https://curb.numetal.xyz/v1/matches/{id}/pay
+```
+
+### Without payment header → 402
+
+Body / headers describe dual `accepts[]`:
+
+1. Seller USDC (`sellerPayTo`, offer price)
+2. Hub fee (`HUB_PAY_TO`, fee bps / min)
+
+### With payment header → 200
+
+Retry the same path with `X-Payment` (or facilitator `PAYMENT-SIGNATURE`). On success the match is marked paid and a grant is issued for the seller endpoint.
+
+Inspect anytime:
+
+```http
+GET https://curb.numetal.xyz/v1/matches/{id}
+```

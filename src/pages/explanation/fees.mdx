@@ -1,0 +1,12 @@
+# Fees
+
+Protocol fee is taken as a **second x402 accept** on match pay (not skimmed from seller settlement off-band).
+
+Defaults (Base / env):
+
+- `FEE_BPS` — basis points of the matched price (e.g. `500` = 5%)
+- `MIN_FEE_USDC` — floor (e.g. `0.001`)
+- `HUB_PAY_TO` — fee recipient
+- Asset: USDC on Base (`eip155:8453`)
+
+Exact live values: `GET https://curb.numetal.xyz/.well-known/x402` and the 402 body on `POST /v1/matches/{id}/pay`.

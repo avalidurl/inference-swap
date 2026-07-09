@@ -3,22 +3,40 @@ import { paymentRequiredResponse, hasPaymentHeader } from "./x402.js";
 import { buildOpenApi, wellKnownX402 } from "./openapi.js";
 import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
+import { termsHtml, privacyHtml } from "./legal.js";
+import { blogIndexHtml, blogPostHtml, feedXml, sitemapXml, newsletterHtml } from "./blog.js";
+import { corsHeaders, securityHeaders } from "./skin.js";
+import {
+  readJsonLimited,
+  rateLimit,
+  sanitizeOfferInput,
+  sanitizeIntentInput,
+  validateCaps,
+} from "./harden.js";
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Payment, PAYMENT-SIGNATURE",
-};
+const PRODUCT_ID = "numetal-curb";
 
-function json(data, status = 200) {
+function json(data, status = 200, request) {
   return new Response(JSON.stringify(data, null, 2), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8", ...CORS },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      ...corsHeaders(request),
+      ...securityHeaders({ "Content-Security-Policy": undefined }),
+    },
   });
 }
 
-function text(body, type = "text/plain; charset=utf-8", status = 200) {
-  return new Response(body, { status, headers: { "Content-Type": type, ...CORS } });
+function text(body, type = "text/plain; charset=utf-8", status = 200, request) {
+  const isHtml = type.includes("html");
+  return new Response(body, {
+    status,
+    headers: {
+      "Content-Type": type,
+      ...corsHeaders(request),
+      ...(isHtml ? securityHeaders() : securityHeaders({ "Content-Security-Policy": undefined })),
+    },
+  });
 }
 
 function bearerOk(request, key) {
@@ -28,14 +46,14 @@ function bearerOk(request, key) {
 }
 
 async function skillMd(env, origin) {
-  // Prefer repo skill file content inlined for deploy simplicity
-  return `# Numetal Inference Swap
+  return `# CURB
 
-Agent-to-agent inference swap rail. Base: ${origin}
+Agent-to-agent inference swap rail (product id: \`${PRODUCT_ID}\`). Base: ${origin}
 
 - OpenAPI: ${origin}/openapi.json
 - Discovery: ${origin}/.well-known/x402
 - MCP: POST ${origin}/mcp
+- Docs: ${origin}/docs/
 - Fee: ${env.FEE_BPS || 500} bps · hub does not hold upstream LLM keys
 
 ## Sell
@@ -53,106 +71,195 @@ POST ${origin}/v1/intents
 ## Pay
 POST ${origin}/v1/matches/{id}/pay → 402 dual accepts (seller + hub) → retry with X-Payment → grant
 
-Full skill: see repo skills/numetal-inference-swap/SKILL.md
+Full skill: see repo skills/curb/SKILL.md
 `;
+}
+
+function llmsTxt(origin) {
+  return [
+    "# CURB",
+    `> Agent↔agent inference swap. Dual-payee x402. No upstream keys on hub. Product: ${PRODUCT_ID}`,
+    "",
+    `Home: ${origin}/`,
+    `Docs: ${origin}/docs/`,
+    `OpenAPI: ${origin}/openapi.json`,
+    `Discovery: ${origin}/.well-known/x402`,
+    `Skill: ${origin}/skill.md`,
+    `MCP: POST ${origin}/mcp`,
+    `Offers: GET ${origin}/v1/offers`,
+    `Blog: ${origin}/blog`,
+    `Feed: ${origin}/feed.xml`,
+    `Sitemap: ${origin}/sitemap.xml`,
+    `Contact: contact@numetal.xyz`,
+    "",
+  ].join("\n");
 }
 
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: CORS });
+      return new Response(null, { status: 204, headers: corsHeaders(request) });
     }
 
     const url = new URL(request.url);
     const origin = url.origin;
     const path = url.pathname.replace(/\/+$/, "") || "/";
 
+    // Static assets + Vocs docs via Workers Assets
+    if (
+      path.startsWith("/assets/") ||
+      path.startsWith("/docs") ||
+      path === "/curb-sun.svg" ||
+      path.endsWith(".css") ||
+      path.endsWith(".js") ||
+      path.endsWith(".map") ||
+      path.endsWith(".woff2") ||
+      path.endsWith(".png") ||
+      path.endsWith(".svg") ||
+      path.endsWith(".ico")
+    ) {
+      if (env.ASSETS) {
+        const res = await env.ASSETS.fetch(request);
+        if (res.status !== 404) {
+          const headers = new Headers(res.headers);
+          headers.set("X-Content-Type-Options", "nosniff");
+          headers.set("Referrer-Policy", "no-referrer");
+          headers.set("X-Frame-Options", "DENY");
+          if (path.endsWith(".svg")) headers.set("Content-Type", "image/svg+xml; charset=utf-8");
+          return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+        }
+      }
+    }
+
     try {
       if (path === "/health" && request.method === "GET") {
         const s = await stats(env);
-        return json({ ok: true, product: "numetal-inference-swap", ...s });
+        return json({ ok: true, product: PRODUCT_ID, brand: "CURB", ...s }, 200, request);
       }
 
       if (path === "/" && request.method === "GET") {
         const s = await stats(env);
-        return text(landingHtml(origin, s), "text/html; charset=utf-8");
+        return text(landingHtml(origin, s), "text/html; charset=utf-8", 200, request);
+      }
+
+      if (path === "/terms" && request.method === "GET") {
+        return text(termsHtml(origin), "text/html; charset=utf-8", 200, request);
+      }
+      if (path === "/privacy" && request.method === "GET") {
+        return text(privacyHtml(origin), "text/html; charset=utf-8", 200, request);
+      }
+      if (path === "/newsletter" && request.method === "GET") {
+        return text(newsletterHtml(origin), "text/html; charset=utf-8", 200, request);
+      }
+      if (path === "/blog" && request.method === "GET") {
+        return text(blogIndexHtml(origin), "text/html; charset=utf-8", 200, request);
+      }
+      const blogPost = path.match(/^\/blog\/([^/]+)$/);
+      if (blogPost && request.method === "GET") {
+        const html = blogPostHtml(origin, blogPost[1]);
+        if (!html) return json({ error: "not_found" }, 404, request);
+        return text(html, "text/html; charset=utf-8", 200, request);
+      }
+      if ((path === "/feed.xml" || path === "/rss.xml") && request.method === "GET") {
+        return text(feedXml(origin), "application/rss+xml; charset=utf-8", 200, request);
+      }
+      if (path === "/sitemap.xml" && request.method === "GET") {
+        return text(sitemapXml(origin), "application/xml; charset=utf-8", 200, request);
       }
 
       if (path === "/openapi.json" && request.method === "GET") {
-        return json(buildOpenApi(env, origin));
+        return json(buildOpenApi(env, origin), 200, request);
       }
 
       if (path === "/.well-known/x402" && request.method === "GET") {
-        return json(wellKnownX402(env, origin));
+        return json(wellKnownX402(env, origin), 200, request);
       }
 
       if (path === "/llms.txt" && request.method === "GET") {
-        return text(
-          [
-            "# Numetal Inference Swap",
-            `> Agent↔agent inference swap. Dual-payee x402. No upstream keys on hub.`,
-            "",
-            `OpenAPI: ${origin}/openapi.json`,
-            `Discovery: ${origin}/.well-known/x402`,
-            `Skill: ${origin}/skill.md`,
-            `MCP: POST ${origin}/mcp`,
-            `Offers: GET ${origin}/v1/offers`,
-            "",
-          ].join("\n")
-        );
+        return text(llmsTxt(origin), "text/plain; charset=utf-8", 200, request);
       }
 
       if (path === "/skill.md" && request.method === "GET") {
-        return text(await skillMd(env, origin), "text/markdown; charset=utf-8");
+        return text(await skillMd(env, origin), "text/markdown; charset=utf-8", 200, request);
       }
 
       if (path === "/mcp" && request.method === "POST") {
+        const rl = await rateLimit(env, request, "mcp");
+        if (!rl.ok) return json({ error: rl.error }, rl.status, request);
         return handleMcp(env, request, origin);
       }
       if (path === "/mcp" && request.method === "GET") {
-        return json({
-          name: "numetal-inference-swap",
-          transport: "json-rpc POST",
-          tools: ["swap_list_offers", "swap_create_offer", "swap_create_intent", "swap_get_match", "swap_pay_challenge"],
-        });
+        return json(
+          {
+            name: PRODUCT_ID,
+            brand: "CURB",
+            transport: "json-rpc POST",
+            tools: [
+              "swap_list_offers",
+              "swap_create_offer",
+              "swap_create_intent",
+              "swap_get_match",
+              "swap_pay_challenge",
+            ],
+          },
+          200,
+          request
+        );
       }
 
       if (path === "/v1/offers" && request.method === "GET") {
-        const limit = Number(url.searchParams.get("limit") || 50);
-        return json({ offers: await listOffers(env, { limit }) });
+        const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit") || 50)));
+        return json({ offers: await listOffers(env, { limit }) }, 200, request);
       }
 
       if (path === "/v1/offers" && request.method === "POST") {
-        const body = await request.json().catch(() => ({}));
+        const rl = await rateLimit(env, request, "offers");
+        if (!rl.ok) return json({ error: rl.error }, rl.status, request);
+        const parsed = await readJsonLimited(request);
+        if (parsed.error) return json({ error: parsed.error }, parsed.status, request);
+        const body = sanitizeOfferInput(parsed.body);
+        const capErr = validateCaps({ mtok: Number(body.mtok), priceUsd: Number(body.priceUsd) });
+        if (capErr) return json({ error: capErr }, 400, request);
         const r = await createOffer(env, body);
-        if (r.error) return json({ error: r.error }, r.status);
-        return json(r.body, r.status);
+        if (r.error) return json({ error: r.error }, r.status, request);
+        return json(r.body, r.status, request);
       }
 
       if (path === "/v1/intents" && request.method === "POST") {
-        const body = await request.json().catch(() => ({}));
+        const rl = await rateLimit(env, request, "intents");
+        if (!rl.ok) return json({ error: rl.error }, rl.status, request);
+        const parsed = await readJsonLimited(request);
+        if (parsed.error) return json({ error: parsed.error }, parsed.status, request);
+        const body = sanitizeIntentInput(parsed.body);
+        const capErr = validateCaps({
+          mtok: Number(body.mtok),
+          maxPriceUsd: body.maxPriceUsd != null ? Number(body.maxPriceUsd) : null,
+        });
+        if (capErr) return json({ error: capErr }, 400, request);
         const r = await createIntent(env, body, origin);
-        if (r.error) return json({ error: r.error }, r.status);
-        return json(r.body, r.status);
+        if (r.error) return json({ error: r.error }, r.status, request);
+        return json(r.body, r.status, request);
       }
 
       const matchGet = path.match(/^\/v1\/matches\/([^/]+)$/);
       if (matchGet && request.method === "GET") {
         const m = await getMatch(env, matchGet[1]);
-        if (!m) return json({ error: "not_found" }, 404);
-        return json(m);
+        if (!m) return json({ error: "not_found" }, 404, request);
+        return json(m, 200, request);
       }
 
       const matchPay = path.match(/^\/v1\/matches\/([^/]+)\/pay$/);
       if (matchPay && request.method === "POST") {
+        const rl = await rateLimit(env, request, "pay");
+        if (!rl.ok) return json({ error: rl.error }, rl.status, request);
         const id = matchPay[1];
         const m = await getMatch(env, id);
-        if (!m) return json({ error: "not_found" }, 404);
+        if (!m) return json({ error: "not_found" }, 404, request);
 
         const demo = url.searchParams.get("demo") === "1" && bearerOk(request, env.ACCESS_KEY);
         if (demo) {
           const paid = await markPaid(env, id, { demo: true, note: "demo_settle" });
-          return json(paid.body, paid.status);
+          return json(paid.body, paid.status, request);
         }
 
         if (!hasPaymentHeader(request)) {
@@ -165,14 +272,15 @@ export default {
           });
         }
 
-        // v0.1: header present → issue grant (CDP full verify when secrets wired)
         const paid = await markPaid(env, id, { note: "x_payment_header_present" });
-        return json(paid.body, paid.status);
+        return json(paid.body, paid.status, request);
       }
 
       if (path === "/admin/seed" && request.method === "POST") {
-        if (!bearerOk(request, env.ACCESS_KEY)) return json({ error: "unauthorized" }, 401);
-        const body = await request.json().catch(() => ({}));
+        if (!bearerOk(request, env.ACCESS_KEY)) return json({ error: "unauthorized" }, 401, request);
+        const parsed = await readJsonLimited(request);
+        if (parsed.error) return json({ error: parsed.error }, parsed.status, request);
+        const body = parsed.body;
         const r = await createOffer(env, {
           sellerPayTo: body.sellerPayTo || env.HUB_PAY_TO,
           endpoint: body.endpoint || `${origin}/v1/demo-fulfill`,
@@ -182,22 +290,32 @@ export default {
           attestation: "demo_seed",
           note: "seed offer for smoke",
         });
-        return json(r.body || r, r.status || 500);
+        return json(r.body || r, r.status || 500, request);
       }
 
-      // Demo fulfill stub — sellers replace with real endpoint
       if (path === "/v1/demo-fulfill" && request.method === "POST") {
-        return json({
-          ok: true,
-          demo: true,
-          message: "Replace this endpoint with a real seller OpenAI-compatible API.",
-          echo: await request.json().catch(() => null),
-        });
+        const parsed = await readJsonLimited(request);
+        return json(
+          {
+            ok: true,
+            demo: true,
+            message: "Replace this endpoint with a real seller OpenAI-compatible API.",
+            echo: parsed.body ?? null,
+          },
+          200,
+          request
+        );
       }
 
-      return json({ error: "not_found", path }, 404);
+      // Fallback: try ASSETS for anything else (docs SPA chunks, etc.)
+      if (env.ASSETS) {
+        const res = await env.ASSETS.fetch(request);
+        if (res.status !== 404) return res;
+      }
+
+      return json({ error: "not_found", path }, 404, request);
     } catch (err) {
-      return json({ error: "internal", message: String(err?.message || err) }, 500);
+      return json({ error: "internal", message: String(err?.message || err) }, 500, request);
     }
   },
 };

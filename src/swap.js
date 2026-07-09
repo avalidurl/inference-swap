@@ -1,5 +1,6 @@
 import { uid, putJson, getJson, listIds, pushId } from "./store.js";
 import { dualAccepts, feeSplit } from "./x402.js";
+import { MAX_MTOK, MAX_PRICE_USD } from "./harden.js";
 
 const OFFER_TTL = 60 * 60 * 24 * 7; // 7d
 const MATCH_TTL = 60 * 60 * 24 * 3;
@@ -10,18 +11,29 @@ function normAddr(a) {
   return s.toLowerCase();
 }
 
+function httpsOnly(url) {
+  try {
+    const u = new URL(String(url || "").trim());
+    if (u.protocol !== "https:") return null;
+    if (u.username || u.password) return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
 export async function createOffer(env, body) {
   const sellerPayTo = normAddr(body.sellerPayTo || body.payTo);
-  const endpoint = String(body.endpoint || "").trim();
-  const model = String(body.model || "").trim();
+  const endpoint = httpsOnly(body.endpoint);
+  const model = String(body.model || "").trim().slice(0, 128);
   const mtok = Number(body.mtok || body.mTok || 0);
   const priceUsd = Number(body.priceUsd || body.price || 0);
 
   if (!sellerPayTo) return { error: "sellerPayTo_required", status: 400 };
-  if (!/^https:\/\//i.test(endpoint)) return { error: "endpoint_https_required", status: 400 };
+  if (!endpoint) return { error: "endpoint_https_required", status: 400 };
   if (!model) return { error: "model_required", status: 400 };
-  if (!(mtok > 0)) return { error: "mtok_positive_required", status: 400 };
-  if (!(priceUsd > 0)) return { error: "priceUsd_positive_required", status: 400 };
+  if (!(mtok > 0) || mtok > MAX_MTOK) return { error: "mtok_out_of_range", status: 400 };
+  if (!(priceUsd > 0) || priceUsd > MAX_PRICE_USD) return { error: "priceUsd_out_of_range", status: 400 };
 
   const id = uid("offer");
   const offer = {
@@ -64,7 +76,8 @@ export async function createIntent(env, body, origin) {
   const offerId = body.offerId ? String(body.offerId) : null;
 
   if (!model && !offerId) return { error: "model_or_offerId_required", status: 400 };
-  if (!(mtok > 0)) return { error: "mtok_positive_required", status: 400 };
+  if (!(mtok > 0) || mtok > MAX_MTOK) return { error: "mtok_out_of_range", status: 400 };
+  if (maxPriceUsd && maxPriceUsd > MAX_PRICE_USD) return { error: "maxPriceUsd_out_of_range", status: 400 };
 
   const id = uid("intent");
   const intent = {

@@ -2,11 +2,11 @@ export function buildOpenApi(env, origin) {
   return {
     openapi: "3.1.0",
     info: {
-      title: "Numetal Inference Swap",
+      title: "CURB",
       version: "0.1.0",
       description:
-        "Agent-to-agent inference swap rail. Post sell offers / buy intents; hub matches; x402 dual accepts (seller + protocol fee). Hub does not hold upstream LLM keys.",
-      contact: { email: "contact@numetal.xyz", name: "Numetal" },
+        "CURB — agent-to-agent inference swap rail. Post sell offers / buy intents; hub matches; x402 dual accepts (seller + protocol fee). Hub does not hold upstream LLM keys.",
+      contact: { email: "contact@numetal.xyz", name: "Numetal Labs" },
     },
     servers: [{ url: origin }],
     paths: {
@@ -84,7 +84,8 @@ export function buildOpenApi(env, origin) {
       },
     },
     "x-numetal": {
-      product: "inference-swap",
+      product: "numetal-curb",
+      brand: "CURB",
       feeBps: Number(env.FEE_BPS || 500),
       hubPayTo: env.HUB_PAY_TO || null,
       network: env.NETWORK || "eip155:8453",
@@ -96,7 +97,7 @@ export function buildOpenApi(env, origin) {
 export function wellKnownX402(env, origin) {
   return {
     version: 2,
-    name: "Numetal Inference Swap",
+    name: "CURB",
     description: "Peer-to-peer inference swap with dual-payee x402 (seller + hub fee).",
     url: origin,
     openapi: `${origin}/openapi.json`,

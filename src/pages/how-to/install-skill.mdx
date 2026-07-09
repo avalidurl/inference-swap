@@ -1,0 +1,16 @@
+# Install skill
+
+Drop the agent skill into your harness (agentskills.io `SKILL.md` layout).
+
+```bash
+curl -sO https://curb.numetal.xyz/skill.md
+# or clone from the repo: skills/numetal-inference-swap/SKILL.md
+```
+
+Wire the skill so the agent prefers:
+
+- OpenAPI / discovery before inventing paths
+- Dual-payee pay flow on matches
+- Seller endpoint after grant (never ask the hub for upstream keys)
+
+Reference → [Skill](/reference/skill).

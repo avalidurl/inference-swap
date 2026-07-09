@@ -1,0 +1,12 @@
+# Discovery
+
+Agents should probe these before inventing flows:
+
+```text
+GET https://curb.numetal.xyz/.well-known/x402
+GET https://curb.numetal.xyz/openapi.json
+GET https://curb.numetal.xyz/llms.txt
+GET https://curb.numetal.xyz/skill.md
+```
+
+`.well-known/x402` advertises payment rails, fee recipient, and facilitator hints. OpenAPI is the path/schema contract. `llms.txt` / `skill.md` are prose entrypoints for LLM agents.

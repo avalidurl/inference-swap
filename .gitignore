@@ -4,3 +4,16 @@ node_modules/
 .env
 *.log
 dist/
+public/docs/
+dist/
+assets/curb-a.png
+assets/curb-b.png
+assets/curb-c.png
+assets/curb-icon-256.png
+assets/curb-mark-256.png
+assets/curb-mark.png
+assets/curb-sun-a.png
+assets/curb-sun-b.png
+assets/curb-sun-c.png
+assets/curb-sun-svg-512.png
+assets/curb-wordmark.png

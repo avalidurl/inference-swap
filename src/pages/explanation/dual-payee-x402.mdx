@@ -1,0 +1,12 @@
+# Dual-payee x402
+
+A match payment is not a single transfer. The 402 challenge lists **two** accepts:
+
+1. **Seller** — USDC to `sellerPayTo` for the matched slice
+2. **Hub** — protocol fee to `HUB_PAY_TO` (bps + floor)
+
+Buyers (or their wallets / facilitators) must satisfy the challenge before the hub marks the match paid and issues a grant.
+
+Why dual: seller gets paid for capacity; protocol fee funds the rail without the hub custodying inference keys or proxying token streams.
+
+See also: [Fees](/explanation/fees), [Pay a match](/how-to/pay-match).

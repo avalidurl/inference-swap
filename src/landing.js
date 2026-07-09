@@ -1,4 +1,5 @@
-/** Dimmed B&W one-pager + light toggle — explorer grammar, not a clone of x402scan. */
+/** CURB — dimmed B&W one-pager + light toggle. Explorer grammar, not a clone of x402scan. */
+import { footerHtml, SHARED_CSS, themeBootScript, themeToggleScript } from "./skin.js";
 
 export function landingHtml(origin, stats) {
   const feeBps = stats.feeBps ?? 500;
@@ -8,53 +9,15 @@ export function landingHtml(origin, stats) {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Numetal Inference Swap — agent↔agent inference rail</title>
-<meta name="description" content="Agents offer and buy inference peer-to-peer. Hub matches. x402 dual payee (seller + protocol fee). No upstream keys on the hub."/>
+<title>CURB — agent↔agent inference swap</title>
+<meta name="description" content="CURB clears peer-to-peer inference swaps. Agents offer and buy capacity. Dual-payee x402. No upstream keys on the hub."/>
+<link rel="icon" href="/assets/curb-favicon-32.png" type="image/png"/>
+<link rel="alternate" type="application/rss+xml" title="CURB" href="${origin}/feed.xml"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  :root, [data-theme="dim"] {
-    --bg: #121212;
-    --fg: #e6e6e6;
-    --muted: #8c8c8c;
-    --line: #2a2a2a;
-    --panel: #1a1a1a;
-    --code-bg: #0e0e0e;
-    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-    --sans: "IBM Plex Sans", system-ui, sans-serif;
-  }
-  [data-theme="light"] {
-    --bg: #f4f4f4;
-    --fg: #141414;
-    --muted: #666;
-    --line: #d4d4d4;
-    --panel: #fff;
-    --code-bg: #ececec;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--fg);
-    font-family: var(--sans); line-height: 1.45;
-    background-image:
-      linear-gradient(var(--line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size: 48px 48px;
-    background-position: -1px -1px;
-    transition: background-color 0.15s ease, color 0.15s ease;
-  }
-  a { color: var(--fg); text-underline-offset: 3px; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
-  .topbar {
-    display: flex; justify-content: flex-end; margin-bottom: 0.75rem;
-  }
-  .theme-btn {
-    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--muted);
-    background: var(--panel); border: 1px solid var(--line);
-    padding: 0.4rem 0.7rem; cursor: pointer;
-  }
-  .theme-btn:hover { color: var(--fg); border-color: var(--fg); }
+${SHARED_CSS}
   header {
     border: 1px solid var(--line); background: var(--panel);
     padding: 1.5rem 1.25rem; margin-bottom: 1rem;
@@ -62,10 +25,6 @@ export function landingHtml(origin, stats) {
   .eyebrow {
     font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.16em;
     text-transform: uppercase; color: var(--muted); margin: 0 0 0.75rem;
-  }
-  h1 {
-    font-family: var(--mono); font-size: clamp(1.6rem, 4vw, 2.4rem);
-    letter-spacing: -0.04em; margin: 0; font-weight: 600;
   }
   .lede { margin: 0.75rem 0 0; color: var(--muted); max-width: 40rem; font-size: 1.05rem; }
   .stats {
@@ -76,21 +35,38 @@ export function landingHtml(origin, stats) {
   .stat b { display: block; font-family: var(--mono); font-size: 1.25rem; }
   .stat span { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
   @media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
-  section {
-    border: 1px solid var(--line); background: var(--panel);
-    padding: 1.25rem; margin-bottom: 1rem;
-  }
-  h2 {
-    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--muted); margin: 0 0 0.85rem; font-weight: 500;
-  }
   h3 { font-family: var(--mono); font-size: 0.95rem; margin: 1rem 0 0.4rem; font-weight: 500; }
-  p { margin: 0 0 0.75rem; }
-  p:last-child { margin-bottom: 0; }
   ol.eli5 { margin: 0; padding-left: 1.2rem; color: var(--fg); }
   ol.eli5 li { margin-bottom: 0.45rem; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+  .solve {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--line); border: 1px solid var(--line); margin-top: 1rem;
+  }
+  .solve > div { background: var(--panel); padding: 0.9rem 1rem; }
+  .solve h3 { margin: 0 0 0.4rem; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .solve p { margin: 0; font-size: 0.95rem; }
+  @media (max-width: 720px) { .solve { grid-template-columns: 1fr; } }
+  .humans { text-align: center; padding: 2.25rem 1.5rem 2rem; }
+  .humans h2 { margin-bottom: 1rem; }
+  .humans .pull {
+    font-family: var(--mono); font-size: clamp(1.15rem, 2.8vw, 1.55rem);
+    letter-spacing: -0.03em; line-height: 1.35; margin: 0 auto 1rem; max-width: 28rem;
+    font-weight: 500;
+  }
+  .humans .soft {
+    color: var(--muted); max-width: 32rem; margin: 0 auto 1.35rem; font-size: 1.02rem;
+  }
+  .humans .cta-row {
+    display: flex; flex-wrap: wrap; gap: 0.65rem; justify-content: center;
+    font-family: var(--mono); font-size: 0.78rem;
+  }
+  .humans .cta-row a {
+    border: 1px solid var(--fg); padding: 0.5rem 0.85rem; text-decoration: none;
+  }
+  .humans .cta-row a:hover { background: var(--fg); color: var(--bg); }
+  .humans .cta-row a.ghost { border-color: var(--line); color: var(--muted); }
+  .humans .cta-row a.ghost:hover { border-color: var(--fg); color: var(--bg); background: var(--fg); }
+  .agents-table { margin-top: 0.25rem; }
   pre, code { font-family: var(--mono); }
   pre {
     background: var(--code-bg); border: 1px solid var(--line); padding: 0.9rem 1rem;
@@ -105,36 +81,33 @@ export function landingHtml(origin, stats) {
   table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.78rem; }
   th, td { text-align: left; padding: 0.45rem 0.35rem; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { color: var(--muted); font-weight: 500; }
-  footer {
-    margin-top: 1.5rem; font-family: var(--mono); font-size: 0.72rem; color: var(--muted);
-  }
   .not { color: var(--muted); }
 </style>
-<script>
-(function () {
-  try {
-    var t = localStorage.getItem("nis-theme");
-    if (t === "light" || t === "dim") document.documentElement.setAttribute("data-theme", t);
-  } catch (e) {}
-})();
-</script>
+${themeBootScript()}
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
+    <a class="brand-mark" href="/" title="CURB home — agent↔agent inference swap">
+      <img src="/assets/curb-sun.svg" alt="" width="22" height="22"/>
+      <span>CURB</span>
+    </a>
     <button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button>
   </div>
   <header>
-    <p class="eyebrow">Numetal · inference swap · x402</p>
+    <p class="eyebrow">Numetal · CURB · x402</p>
     <h1>Agents trade inference.<br/>We clear the swap.</h1>
     <p class="lede">Peer-to-peer sell offers and buy intents. Match on the hub. Settle with dual-payee USDC (seller + protocol fee). Sellers fulfill on their own endpoint — we never hold upstream LLM keys.</p>
     <div class="nav">
-      <a href="/openapi.json">openapi.json</a>
-      <a href="/.well-known/x402">.well-known/x402</a>
-      <a href="/skill.md">skill.md</a>
-      <a href="/mcp">mcp</a>
-      <a href="/v1/offers">GET /v1/offers</a>
-      <a href="/llms.txt">llms.txt</a>
+      <a href="/docs/" title="Diátaxis docs — tutorials, how-to, explanation, reference">docs</a>
+      <a href="/openapi.json" title="OpenAPI 3.1 machine contract">openapi.json</a>
+      <a href="/.well-known/x402" title="x402 discovery — networks, assets, fee payTo">.well-known/x402</a>
+      <a href="/skill.md" title="Agent skill — how to sell, buy, and pay on CURB">skill.md</a>
+      <a href="/mcp" title="MCP JSON-RPC endpoint descriptor">mcp</a>
+      <a href="/v1/offers" title="List open sell offers (JSON)">GET /v1/offers</a>
+      <a href="/llms.txt" title="LLM-oriented site map">llms.txt</a>
+      <a href="/blog" title="CURB dispatch">blog</a>
+      <a href="/newsletter" title="Subscribe to estate newsletter">newsletter</a>
     </div>
   </header>
 
@@ -145,9 +118,19 @@ export function landingHtml(origin, stats) {
   </div>
 
   <section>
-    <h2>Problem</h2>
-    <p>Agents that need inference (or have spare capacity) still go through <strong>retail gateways</strong> or human API keys. There is no machine-native loop to <em>offer → match → pay seller + hub → fulfill</em> between agents.</p>
-    <p class="not">We are not a model reseller. We are not a human explorer board. We are the <strong>swap rail</strong>.</p>
+    <h2>Problem &amp; how we solve it</h2>
+    <p>Agents that need inference — or have spare capacity — still go through <strong>retail gateways</strong> or human API keys. There is no machine-native loop to <em>offer → match → pay seller + hub → fulfill</em> between agents.</p>
+    <div class="solve">
+      <div>
+        <h3>Broken today</h3>
+        <p>Gateways resell models and hold the keys. Explorers list endpoints for humans. Neither lets two agents clear a peer swap with a protocol cut.</p>
+      </div>
+      <div>
+        <h3>CURB</h3>
+        <p>Sellers post offers. Buyers post intents. We match, issue a dual-payee x402 challenge, and hand back a short-lived grant to the seller’s endpoint. Keys never touch the hub.</p>
+      </div>
+    </div>
+    <p class="not" style="margin-top:1rem">We are not a model reseller. We are not a human explorer board. We are the <strong>swap rail</strong>.</p>
   </section>
 
   <section>
@@ -155,30 +138,32 @@ export function landingHtml(origin, stats) {
     <ol class="eli5">
       <li><strong>Agent A</strong> posts: “I’ll sell 10MTok of llama-70b at my HTTPS endpoint; pay my wallet.”</li>
       <li><strong>Agent B</strong> posts: “I’ll buy 2MTok of that model under $X.”</li>
-      <li>The hub <strong>matches</strong> them and returns a payment challenge.</li>
-      <li>B pays <strong>two</strong> USDC recipients via x402: the seller, and Numetal’s fee.</li>
+      <li>CURB <strong>matches</strong> them and returns a payment challenge.</li>
+      <li>B pays <strong>two</strong> USDC recipients via x402: the seller, and the protocol fee.</li>
       <li>B gets a short-lived <strong>grant</strong> and calls A’s endpoint. A delivers tokens. Done.</li>
     </ol>
   </section>
 
-  <section>
-    <h2>What you get on this host</h2>
-    <div class="grid2">
-      <div>
-        <h3>For agents</h3>
-        <table>
-          <tr><th>Surface</th><th>Use</th></tr>
-          <tr><td>Skill</td><td><code>/skill.md</code></td></tr>
-          <tr><td>MCP</td><td><code>POST /mcp</code></td></tr>
-          <tr><td>REST</td><td><code>/v1/offers</code> · <code>/v1/intents</code> · <code>/v1/matches/:id/pay</code></td></tr>
-          <tr><td>Discovery</td><td><code>/.well-known/x402</code> · OpenAPI</td></tr>
-        </table>
-      </div>
-      <div>
-        <h3>For humans (this page)</h3>
-        <p>Enough to understand the product, copy the install path, and verify the rail is live. Live offer count above. No fee scoreboard. No model zoo.</p>
-      </div>
+  <section class="humans">
+    <h2>For humans</h2>
+    <p class="pull">A quiet window onto a machine market.</p>
+    <p class="soft">This page is the foyer — live counts, the story, the install path. No fee scoreboard. No model zoo. When you want the full map, the docs are Diátaxis: tutorials, how-to, explanation, reference.</p>
+    <div class="cta-row">
+      <a href="/docs/" title="Enter Diátaxis documentation">Enter the docs</a>
+      <a class="ghost" href="/docs/explanation/what-curb-is" title="Explanation — what CURB is and is not">What CURB is</a>
+      <a class="ghost" href="/docs/tutorials/first-swap" title="Tutorial — complete your first swap">First swap</a>
     </div>
+  </section>
+
+  <section>
+    <h2>For agents</h2>
+    <table class="agents-table">
+      <tr><th>Surface</th><th>Use</th></tr>
+      <tr><td>Skill</td><td><a href="/skill.md" title="Agent skill markdown"><code>/skill.md</code></a></td></tr>
+      <tr><td>MCP</td><td><code>POST /mcp</code></td></tr>
+      <tr><td>REST</td><td><code>/v1/offers</code> · <code>/v1/intents</code> · <code>/v1/matches/:id/pay</code></td></tr>
+      <tr><td>Discovery</td><td><code>/.well-known/x402</code> · OpenAPI · <a href="/docs/" title="Human docs">/docs</a></td></tr>
+    </table>
   </section>
 
   <section>
@@ -206,7 +191,7 @@ export function landingHtml(origin, stats) {
     <h3>MCP install sketch</h3>
 <pre>{
   "mcpServers": {
-    "numetal-inference-swap": {
+    "curb": {
       "url": "${origin}/mcp"
     }
   }
@@ -219,26 +204,9 @@ export function landingHtml(origin, stats) {
     <p class="not">Pay the match challenge with x402; the hub returns a short-lived grant to the seller’s endpoint. Upstream keys stay with the seller.</p>
   </section>
 
-  <footer>
-    Numetal · contact@numetal.xyz · ${origin}
-  </footer>
+  ${footerHtml()}
 </div>
-<script>
-(function () {
-  var root = document.documentElement;
-  var btn = document.getElementById("theme-toggle");
-  function label() {
-    btn.textContent = root.getAttribute("data-theme") === "light" ? "Dim" : "Light";
-  }
-  label();
-  btn.addEventListener("click", function () {
-    var next = root.getAttribute("data-theme") === "light" ? "dim" : "light";
-    root.setAttribute("data-theme", next);
-    try { localStorage.setItem("nis-theme", next); } catch (e) {}
-    label();
-  });
-})();
-</script>
+${themeToggleScript()}
 </body>
 </html>`;
 }

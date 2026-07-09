@@ -1,13 +1,22 @@
 name = "inference-swap"
 main = "src/index.js"
 compatibility_date = "2026-06-14"
+workers_dev = true
+routes = [{ pattern = "curb.numetal.xyz", custom_domain = true }]
 
 [[kv_namespaces]]
 binding = "SWAP"
 id = "02f320cca3914f288f1430b653a85bdf"
 
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "none"
+html_handling = "auto-trailing-slash"
+
 [vars]
-PRODUCT = "numetal-inference-swap"
+PRODUCT = "numetal-curb"
 NETWORK = "eip155:8453"
 USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 # Hub fee recipient (Base) — same treasury pattern as datebook tests / founder receive

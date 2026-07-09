@@ -1,0 +1,96 @@
+/* CURB /docs — dim B&W skin matching the landing.
+   Vocs auto-loads this last (unlayered). Sharp corners. No red/purple. */
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap");
+
+:root {
+  --curb-ink: light-dark(#141414, #e6e6e6);
+  --curb-mut: light-dark(#666666, #8c8c8c);
+  --curb-bg: light-dark(#f4f4f4, #121212);
+  --curb-panel: light-dark(#ffffff, #1a1a1a);
+  --curb-line: light-dark(#d4d4d4, #2a2a2a);
+  --vocs-color_background: var(--curb-bg);
+  --vocs-color_background2: var(--curb-panel);
+  --vocs-color_backgroundAccent: var(--curb-panel);
+  --vocs-color_backgroundAccentHover: var(--curb-line);
+  --vocs-color_backgroundAccentText: var(--curb-ink);
+  --vocs-color_border: var(--curb-line);
+  --vocs-color_borderAccent: var(--curb-ink);
+  --vocs-color_text: var(--curb-ink);
+  --vocs-color_text2: var(--curb-mut);
+  --vocs-color_text3: var(--curb-mut);
+  --vocs-color_textAccent: var(--curb-ink);
+  --vocs-color_textAccentHover: var(--curb-ink);
+  --vocs-color_heading: var(--curb-ink);
+  --vocs-color_link: var(--curb-ink);
+  --vocs-color_linkHover: var(--curb-mut);
+  --vocs-color_codeInline: var(--curb-ink);
+  --vocs-color_codeBlockBackground: var(--curb-panel);
+  --vocs-borderRadius_4: 0;
+  --vocs-borderRadius_6: 0;
+  --vocs-borderRadius_8: 0;
+}
+
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+
+html {
+  color-scheme: light dark;
+  background: var(--curb-bg);
+  color: var(--curb-ink);
+}
+
+body {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  background: var(--curb-bg);
+  color: var(--curb-ink);
+}
+
+code,
+pre,
+kbd,
+samp,
+.vocs_Code,
+.vocs_CodeBlock,
+.vocs_Pre_pre {
+  font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+}
+
+a {
+  color: var(--curb-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--curb-mut);
+}
+
+.vocs_NavLogo_logoImage,
+.vocs_DesktopTopNav_logo,
+.vocs_MobileTopNav_logo {
+  filter: none;
+}
+
+.vocs_Sidebar,
+.vocs_DesktopTopNav,
+.vocs_MobileTopNav,
+.vocs_Footer {
+  border-color: var(--curb-line) !important;
+  background: var(--curb-bg) !important;
+}
+
+.vocs_CodeBlock,
+.vocs_Pre_wrapper,
+pre {
+  background: var(--curb-panel) !important;
+  border: 1px solid var(--curb-line);
+}
+
+.vocs_Button_button,
+button {
+  border-radius: 0 !important;
+}

@@ -1,0 +1,19 @@
+# Install MCP
+
+Point your MCP client at CURB's JSON-RPC endpoint.
+
+```json
+{
+  "mcpServers": {
+    "curb": {
+      "url": "https://curb.numetal.xyz/mcp"
+    }
+  }
+}
+```
+
+Transport: `POST https://curb.numetal.xyz/mcp` with MCP JSON-RPC (`tools/list`, `tools/call`).
+
+Tools: `swap_list_offers`, `swap_create_offer`, `swap_create_intent`, `swap_get_match`, `swap_pay_challenge`.
+
+Full schemas → [MCP tools](/reference/mcp-tools).

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="CURB">
+  <rect width="128" height="128" fill="#fff"/>
+  <!-- Open C ring -->
+  <path fill="#000" d="M96 40.5A40 40 0 1 0 96 87.5v-10.2A30 30 0 1 1 96 50.7V40.5Z"/>
+  <!-- Curb ledge cut on right -->
+  <rect x="78" y="58" width="28" height="12" fill="#000"/>
+  <rect x="86" y="58" width="20" height="4" fill="#fff"/>
+</svg>
