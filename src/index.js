@@ -1,4 +1,5 @@
 import { createOffer, listOffers, createIntent, getMatch, markPaid, stats, refreshMatchChallenge } from "./swap.js";
+import { isValidId } from "./store.js";
 import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts } from "./x402.js";
 import { buildOpenApi, wellKnownX402 } from "./openapi.js";
 import { handleMcp } from "./mcp.js";
@@ -510,6 +511,8 @@ export default {
 
       const matchGet = path.match(/^\/v1\/matches\/([^/]+)$/);
       if (matchGet && request.method === "GET") {
+        // Reject invalid/over-long ids before any KV read (no backend leak).
+        if (!isValidId(matchGet[1])) return json({ error: "not_found" }, 404, request);
         const m = await getMatch(env, matchGet[1]);
         if (!m) return json({ error: "not_found" }, 404, request);
         return json(m, 200, request);
@@ -552,6 +555,9 @@ export default {
         const rl = await rateLimit(env, request, "pay");
         if (!rl.ok) return json({ error: rl.error }, rl.status, request);
         const id = matchPay[1];
+        // Absurd ids (beyond any real match id) are rejected before KV so the
+        // backend never 414s. Short placeholder ids keep the 402 probe path.
+        if (id.length > 128) return json({ error: "not_found" }, 404, request);
         const m = await getMatch(env, id);
 
         // Paywall BEFORE not_found — x402scan probes literal/placeholder ids and must get 402.
@@ -662,7 +668,13 @@ export default {
 
       return json({ error: "not_found", path }, 404, request);
     } catch (err) {
-      return json({ error: "internal", message: String(err?.message || err) }, 500, request);
+      // Never leak internal/backend messages to clients. Log server-side only.
+      console.error("curb_internal_error", {
+        path,
+        method: request.method,
+        err: String(err?.message || err),
+      });
+      return json({ error: "internal" }, 500, request);
     }
   },
 };
