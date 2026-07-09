@@ -36,6 +36,38 @@ npm run deploy     # docs build + wrangler deploy
 | `/terms`, `/privacy` | Legal |
 | `/v1/*`, `/mcp`, `/skill.md` | Agent API |
 
+## Keeper auto-distribute (on-chain fee fan-out)
+
+Buyers pay the **gross** once to the immutable 0xSplits split (single-payee x402). A permissionless
+`distribute()` fans it out on-chain to **seller 95% / hub 5%**. The split fixes that allocation — **who
+signs `distribute()` cannot change where funds land; the keeper only pays gas.** A gated cron
+(`src/distribute.js` → `maybeAutoDistribute`, already wired from `scheduled()` in `src/index.js`)
+submits it whenever the split holds ≥ `KEEPER_DISTRIBUTE_MIN` USDC, guarded by a `SWAP`-KV lock
+(`keeper:lock`, ~120s TTL) so overlapping runs never double-submit. It is a hard no-op until go-live.
+
+### Founder go-live — exactly one step
+
+**Recommended (app-owned Privy server wallet — the Worker signs itself):**
+
+1. Provision an **app-owned** Privy EVM server wallet (**no user owner / no key-quorum**) on Base.
+   Set `KEEPER_ADDRESS` (its `0x` address) and `PRIVY_KEEPER_WALLET_ID` (its wallet id) in
+   `wrangler.toml`, then set the app credentials as secrets and fund it with a little Base ETH for gas:
+
+   ```bash
+   wrangler secret put PRIVY_APP_ID
+   wrangler secret put PRIVY_APP_SECRET
+   ```
+
+2. Set `KEEPER_DISTRIBUTE = "on"` in `wrangler.toml` and deploy. That's it — the cron takes over.
+
+**Alternative (keep the existing quorum-owned keeper wallet):** register a Privy authorization key on
+the wallet's key-quorum and `wrangler secret put PRIVY_AUTHORIZATION_SIGNATURE` (sent verbatim as the
+`privy-authorization-signature` header). App-owned is preferred because the Worker needs no per-tx
+signature.
+
+`BASE_RPC_URL` (var, optional) overrides the balance-read RPC; it defaults to `https://mainnet.base.org`.
+All Privy responses are treated as untrusted (only a 2xx + a well-formed `0x…` tx hash is accepted).
+
 ## Live harness (Cloudflare Agents SDK)
 
 Separate Worker `curb-harness` (`harness/`):

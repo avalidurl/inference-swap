@@ -48,17 +48,36 @@ DEMO_SELLER_PAY_TO = "0x8f49d4d782488e8576c8c54288027c57f4acf521"
 # ── Distribute keeper (0xSplits distribute() submitter) ────────────────────
 # Privy EVM server wallet that calls the split's distribute() to fan the gross out on-chain
 # (seller 95% / hub 5%). distribute() is permissionless — the keeper only pays gas; the immutable
-# split fixes where funds go. Signs via Privy REST (see src/distribute.js). PROVEN 2026-07-09:
-#   deploy 0x25f17c0a…aafc0163 · settle 0xdd2ad482…cd005768 (verified) · distribute 0x748a6470…a5d387e3.
-# NOTE: wallet y1v7ph4oly0mlbf02qax1zfb is currently owned by a Privy key-quorum (user), so REST
-#   eth_sendTransaction needs a privy-authorization-signature (PRIVY_AUTHORIZATION_SIGNATURE) OR
-#   the keeper must be re-provisioned as an app-owned server wallet. Until then KEEPER_DISTRIBUTE
-#   stays "off" and the proof run above was submitted from an authorized local wallet.
+# split fixes where funds go, regardless of who signs. Signs via Privy REST (see src/distribute.js).
+# PROVEN 2026-07-09: deploy 0x25f17c0a…aafc0163 · settle 0xdd2ad482…cd005768 (verified) ·
+#   distribute 0x748a6470…a5d387e3.
+#
+# FOUNDER GO-LIVE — exactly ONE step remains (recommended path, app-owned server wallet):
+#   1. Provision an APP-OWNED Privy server wallet (no user owner / no key-quorum) on Base. Set
+#      KEEPER_ADDRESS below to its 0x address and PRIVY_KEEPER_WALLET_ID to its wallet id, then:
+#         wrangler secret put PRIVY_APP_ID
+#         wrangler secret put PRIVY_APP_SECRET
+#      Fund the wallet with a little ETH on Base for gas.
+#   2. Flip KEEPER_DISTRIBUTE = "on" and deploy. The gated cron (src/distribute.js maybeAutoDistribute,
+#      already wired from scheduled()) then submits distribute() whenever the split holds
+#      ≥ KEEPER_DISTRIBUTE_MIN USDC, guarded by a SWAP-KV lock so runs never double-submit.
+#   ALTERNATIVE (keep the existing quorum-owned wallet y1v7ph4oly0mlbf02qax1zfb below): register a
+#      Privy authorization key on its quorum and `wrangler secret put PRIVY_AUTHORIZATION_SIGNATURE`
+#      (sent verbatim as the privy-authorization-signature header). App-owned is preferred.
+#
+# CURRENT STATE: wallet y1v7ph4oly0mlbf02qax1zfb is owned by a Privy key-quorum (user), so the Worker
+#   cannot sign eth_sendTransaction from it with app auth alone. KEEPER_DISTRIBUTE stays "off" until
+#   the founder completes step 1 (or the ALTERNATIVE). The proof run above used an authorized local
+#   wallet. maybeAutoDistribute is a hard no-op while off / while signer secrets are absent.
 KEEPER_ADDRESS = "0xfcB6a8C978fF83F0cE622fd45A5dbd1c55d94649"
 PRIVY_KEEPER_WALLET_ID = "y1v7ph4oly0mlbf02qax1zfb"
-# "on" enables the gated cron auto-distribute (needs PRIVY_APP_ID/SECRET secrets + a signable keeper).
+# "on" enables the gated cron auto-distribute. Requires PRIVY_APP_ID + PRIVY_APP_SECRET secrets and a
+# signable keeper (app-owned server wallet, or quorum wallet + PRIVY_AUTHORIZATION_SIGNATURE secret).
 KEEPER_DISTRIBUTE = "off"
+# Minimum split USDC balance (raw 6dp) before the keeper spends gas on distribute(). 10000 = $0.01.
 KEEPER_DISTRIBUTE_MIN = "10000"
+# Base JSON-RPC endpoint for the keeper's balanceOf read. Optional — defaults to https://mainnet.base.org.
+# BASE_RPC_URL = "https://mainnet.base.org"
 FACILITATOR = "https://api.cdp.coinbase.com/platform/v2/x402"
 # Settlement mode: "demo" | "verify".
 #   demo   → a present payment header settles but grants are marked verified:false
