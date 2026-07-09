@@ -11,6 +11,7 @@ import {
 } from "./swap.js";
 import { adminHtml, adminSnapshot } from "./admin.js";
 import { maybeAutoDistribute } from "./distribute.js";
+import { geoBlockResponse } from "./geo.js";
 import { accessOk } from "./cfaccess.js";
 import { isValidId } from "./store.js";
 import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts, verifyPayment, settleMode } from "./x402.js";
@@ -383,6 +384,14 @@ export default {
   },
 
   async fetch(request, env) {
+    // ── Edge geo-block (Tier-0 sanctions/export-control gate) ──────────────────
+    // Runs BEFORE host routing and all app logic, on EVERY host (curb, api.curb,
+    // admin.curb). Blocks OFAC-comprehensively-sanctioned jurisdictions + China
+    // (see src/geo.js). /health is exempt so status monitors keep working. 451 for
+    // everyone else in a blocked geo. See geo.js for the country list + ?geotest hook.
+    const geoBlocked = geoBlockResponse(request, env);
+    if (geoBlocked) return geoBlocked;
+
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(request) });
     }

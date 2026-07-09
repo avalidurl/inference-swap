@@ -21,6 +21,13 @@ html_handling = "auto-trailing-slash"
 
 [vars]
 PRODUCT = "numetal-curb"
+# ── Edge geo-block (Tier-0 sanctions/export-control gate; see src/geo.js) ──
+# Comma list of ISO-3166-1 alpha-2 country codes blocked at the edge (451). Default =
+# OFAC comprehensively-embargoed jurisdictions + China ("China totally" → HK + MO too).
+# /health is always exempt. Occupied UA regions (Crimea/Donetsk/Luhansk) are handled in
+# code when country=UA. Russia (RU) is intentionally NOT here (not comprehensively
+# embargoed) — append "RU" to block it, no code change needed.
+BLOCKED_COUNTRIES = "CN,HK,MO,CU,IR,KP,SY"
 NETWORK = "eip155:8453"
 USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 # Hub fee recipient (Base) — AgentCash Base deposit; also the 5% recipient inside the split

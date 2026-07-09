@@ -45,9 +45,18 @@ export function termsHtml(origin) {
       You may not use the Services if you are located in, ordinarily resident in, or accessing them from a
       jurisdiction subject to comprehensive sanctions, or if you are a person or entity on a restricted-party
       or sanctions list administered by OFAC, the UN Security Council, the EU, the UK, or a comparable authority.
-      Restricted jurisdictions currently include <strong>Cuba, Iran, North Korea, Syria, and the Crimea, Donetsk,
-      and Luhansk regions of Ukraine</strong>, and may change as sanctions programs evolve. By using the Services,
-      you represent that you are not a Restricted Person.
+      By using the Services, you represent that you are not a Restricted Person.
+    </p>
+    <p>
+      Access to the Services is <strong>geo-restricted and blocked entirely</strong> for the following
+      jurisdictions: the OFAC comprehensively-sanctioned jurisdictions
+      <strong>Cuba, Iran, North Korea (DPRK), Syria</strong>, and the occupied
+      <strong>Crimea, Donetsk, and Luhansk</strong> regions of Ukraine, as well as
+      <strong>China, Hong Kong, and Macau</strong> (export-control compliance). We enforce this at the network
+      edge using approximate connection geolocation; requests from these regions receive an HTTP 451 response.
+      This list may change as sanctions and export-control programs evolve. Geo-blocking is a good-faith
+      compliance control and does not substitute for your own obligation not to use the Services as a
+      Restricted Person or from a restricted location.
     </p>
 
     <h2>No warranty</h2>
@@ -117,6 +126,11 @@ export function privacyHtml(origin) {
     <p>
       <strong>Technical request data.</strong> Cloudflare processes standard request metadata (IP, user-agent, etc.)
       to deliver and secure the Services. We may keep short-lived rate-limit counters keyed by IP or similar.
+    </p>
+    <p>
+      <strong>Geolocation for compliance.</strong> We use the approximate country/region that Cloudflare derives
+      from your connection solely to enforce our sanctions and export-control geo-block (see the Terms). We do not
+      store this for marketing and do not use it to profile you; it is evaluated at the edge to allow or block the request.
     </p>
     <p>
       <strong>Newsletter.</strong> If you subscribe, your email is processed by our estate newsletter hub
