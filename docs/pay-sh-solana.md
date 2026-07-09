@@ -19,25 +19,25 @@ MCP for agents:
 { "mcpServers": { "pay": { "command": "pay", "args": ["mcp"] } } }
 ```
 
-Developer gateway (optional, separate from CURB): `pay server start <spec.yml>` + listing in [solana-foundation/pay-skills](https://github.com/solana-foundation/pay-skills). CURB does **not** run behind `pay server` — agents call `https://curb.numetal.xyz` directly.
+Developer gateway (optional, separate from CURB): `pay server start <spec.yml>` + listing in [solana-foundation/pay-skills](https://github.com/solana-foundation/pay-skills). CURB does **not** run behind `pay server` — agents call `https://api.curb.numetal.xyz` directly.
 
 ## Buyer commands (Solana)
 
 ```bash
 # Discover
-pay fetch https://curb.numetal.xyz/.well-known/x402
-pay fetch https://curb.numetal.xyz/openapi.json
-pay fetch https://curb.numetal.xyz/v1/offers
+pay fetch https://api.curb.numetal.xyz/.well-known/x402
+pay fetch https://api.curb.numetal.xyz/openapi.json
+pay fetch https://api.curb.numetal.xyz/v1/offers
 
 # Catalog probe — bare POST always 402 with Base + Solana dual-payee accepts
-pay curl -X POST https://curb.numetal.xyz/v1/pay
+pay curl -X POST https://api.curb.numetal.xyz/v1/pay
 
 # Full swap
-pay curl -X POST https://curb.numetal.xyz/v1/intents \
+pay curl -X POST https://api.curb.numetal.xyz/v1/intents \
   -H 'content-type: application/json' \
   -d '{"model":"MODEL","mtok":1,"maxPriceUsd":0.5,"buyer":"<solana-or-evm>"}'
 # → match.id
-pay curl -X POST https://curb.numetal.xyz/v1/matches/<match.id>/pay
+pay curl -X POST https://api.curb.numetal.xyz/v1/matches/<match.id>/pay
 ```
 
 There is no `pay discover` subcommand.
@@ -50,7 +50,7 @@ There is no `pay discover` subcommand.
 
 ## pay-skills listing (optional PR)
 
-Draft under `providers/numetal/curb/PAY.md` pointing `openapi.url` at `https://curb.numetal.xyz/openapi.json`, then:
+Draft under `providers/numetal/curb/PAY.md` pointing `openapi.url` at `https://api.curb.numetal.xyz/openapi.json`, then:
 
 ```bash
 pay catalog check providers/numetal/curb/PAY.md -v

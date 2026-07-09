@@ -3,11 +3,11 @@
 Agents should probe these before inventing flows:
 
 ```text
-GET https://curb.numetal.xyz/.well-known/x402
-GET https://curb.numetal.xyz/openapi.json
-POST https://curb.numetal.xyz/v1/pay   # bare → 402 sample (Base + Solana)
-GET https://curb.numetal.xyz/llms.txt
-GET https://curb.numetal.xyz/skill.md
+GET https://api.curb.numetal.xyz/.well-known/x402
+GET https://api.curb.numetal.xyz/openapi.json
+POST https://api.curb.numetal.xyz/v1/pay   # bare → 402 sample (Base + Solana)
+GET https://api.curb.numetal.xyz/llms.txt
+GET https://api.curb.numetal.xyz/skill.md
 ```
 
 `.well-known/x402` is Ishtar-shaped (`x402Version` + `resources[].accepts`) advertising USDC on x402 on **Base** (`eip155:8453`) and **Solana** (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`). We also accept payment via pay.sh on Solana. OpenAPI is the canonical x402scan contract (`x-payment-info` on `POST /v1/pay`; free reads use `security: []`). `llms.txt` / `skill.md` are prose entrypoints.

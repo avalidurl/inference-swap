@@ -4,7 +4,8 @@ Agent↔agent inference swap rail. Dual-payee x402 (seller + protocol fee). Hub 
 
 **Payments:** We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.
 
-- **Live:** https://curb.numetal.xyz
+- **Site:** https://curb.numetal.xyz
+- **API:** https://api.curb.numetal.xyz
 - **Repo:** private `gokhan-vc/inference-swap` (Worker name remains `inference-swap`)
 - **Docs:** `/docs/` (Vocs Diátaxis)
 - **Contact:** contact@numetal.xyz

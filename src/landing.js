@@ -1,9 +1,10 @@
 /** CURB — dimmed B&W one-pager + light toggle. Explorer grammar, not a clone of x402scan. */
 import { footerHtml, SHARED_CSS, themeBootScript, themeToggleScript } from "./skin.js";
 
-export function landingHtml(origin, stats) {
+export function landingHtml(origin, stats, apiOrigin = "https://api.curb.numetal.xyz") {
   const feeBps = stats.feeBps ?? 500;
   const feePct = (feeBps / 100).toFixed(1);
+  const api = apiOrigin;
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dim">
 <head>
@@ -101,12 +102,12 @@ ${themeBootScript()}
     <div class="nav">
       <a href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
       <a href="/docs/" title="Diátaxis docs — tutorials, how-to, explanation, reference">docs</a>
-      <a href="/openapi.json" title="OpenAPI 3.1 machine contract">openapi.json</a>
-      <a href="/.well-known/x402" title="x402 discovery — networks, assets, fee payTo">.well-known/x402</a>
-      <a href="/skill.md" title="Agent skill — how to sell, buy, and pay on CURB">skill.md</a>
-      <a href="/mcp" title="MCP JSON-RPC endpoint descriptor">mcp</a>
-      <a href="/v1/offers" title="List open sell offers (JSON)">GET /v1/offers</a>
-      <a href="/llms.txt" title="LLM-oriented site map">llms.txt</a>
+      <a href="${api}/openapi.json" title="OpenAPI 3.1 machine contract">openapi.json</a>
+      <a href="${api}/.well-known/x402" title="x402 discovery — networks, assets, fee payTo">.well-known/x402</a>
+      <a href="${api}/skill.md" title="Agent skill — how to sell, buy, and pay on CURB">skill.md</a>
+      <a href="${api}/mcp" title="MCP JSON-RPC endpoint descriptor">mcp</a>
+      <a href="${api}/v1/offers" title="List open sell offers (JSON)">GET /v1/offers</a>
+      <a href="${api}/llms.txt" title="LLM-oriented site map">llms.txt</a>
       <a href="/newsletter" title="Subscribe to estate newsletter">newsletter</a>
     </div>
   </header>
@@ -159,8 +160,9 @@ ${themeBootScript()}
     <h2>For agents</h2>
     <table class="agents-table">
       <tr><th>Surface</th><th>Use</th></tr>
-      <tr><td>Skill</td><td><a href="/skill.md" title="Agent skill markdown"><code>/skill.md</code></a></td></tr>
-      <tr><td>MCP</td><td><code>POST /mcp</code></td></tr>
+      <tr><td>API</td><td><a href="${api}/" title="API root catalog"><code>${api}</code></a></td></tr>
+      <tr><td>Skill</td><td><a href="${api}/skill.md" title="Agent skill markdown"><code>/skill.md</code></a></td></tr>
+      <tr><td>MCP</td><td><code>POST ${api}/mcp</code></td></tr>
       <tr><td>REST</td><td><code>/v1/offers</code> · <code>/v1/intents</code> · <code>/v1/matches/:id/pay</code></td></tr>
       <tr><td>Discovery</td><td><code>/.well-known/x402</code> · OpenAPI · <a href="/docs/" title="Human docs">/docs</a></td></tr>
     </table>
@@ -169,7 +171,7 @@ ${themeBootScript()}
   <section>
     <h2>Minimal code</h2>
     <h3>1 · Sell</h3>
-<pre>curl -sS ${origin}/v1/offers -H 'content-type: application/json' -d '{
+<pre>curl -sS ${api}/v1/offers -H 'content-type: application/json' -d '{
   "sellerPayTo": "0xYourBaseAddress",
   "endpoint": "https://your-agent.example/v1/chat/completions",
   "model": "llama-3.3-70b",
@@ -178,21 +180,21 @@ ${themeBootScript()}
   "attestation": "own_capacity_or_licensed"
 }'</pre>
     <h3>2 · Buy (auto-match)</h3>
-<pre>curl -sS ${origin}/v1/intents -H 'content-type: application/json' -d '{
+<pre>curl -sS ${api}/v1/intents -H 'content-type: application/json' -d '{
   "model": "llama-3.3-70b",
   "mtok": 2,
   "maxPriceUsd": 0.50,
   "buyer": "0xBuyer"
 }'</pre>
     <h3>3 · Pay match → 402 dual accepts</h3>
-<pre>curl -sS -X POST ${origin}/v1/matches/MATCH_ID/pay
+<pre>curl -sS -X POST ${api}/v1/matches/MATCH_ID/pay
 # → HTTP 402  accepts[0]=seller  accepts[1]=hub_fee
 # retry with X-Payment → grant.token + seller endpoint</pre>
     <h3>MCP install sketch</h3>
 <pre>{
   "mcpServers": {
     "curb": {
-      "url": "${origin}/mcp"
+      "url": "${api}/mcp"
     }
   }
 }</pre>
@@ -200,7 +202,7 @@ ${themeBootScript()}
 
   <section>
     <h2>Settlement</h2>
-    <p>We accept payment in USDC on x402 on both <strong>Base</strong> (<code>eip155:8453</code>) and <strong>Solana</strong> (SPL), and via pay.sh on Solana. Each swap clears seller + protocol fee (<strong>${feePct}%</strong>, min $0.001). Hub <code>payTo</code> in <code>/.well-known/x402</code>.</p>
+    <p>We accept payment in USDC on x402 on both <strong>Base</strong> (<code>eip155:8453</code>) and <strong>Solana</strong> (SPL), and via pay.sh on Solana. Each swap clears seller + protocol fee (<strong>${feePct}%</strong>, min $0.001). Hub <code>payTo</code> in <code>${api}/.well-known/x402</code>.</p>
     <p class="not">Pay the match challenge; the hub returns a short-lived grant to the seller’s endpoint. Upstream keys stay with the seller.</p>
   </section>
 

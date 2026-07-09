@@ -172,7 +172,7 @@ function jsonRpc(id, resultOrError) {
   return new Response(JSON.stringify(body), {
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "https://curb.numetal.xyz",
+      "Access-Control-Allow-Origin": "*",
       "X-Content-Type-Options": "nosniff",
     },
   });

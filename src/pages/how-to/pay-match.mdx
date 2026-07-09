@@ -1,7 +1,7 @@
 # Pay a match
 
 ```http
-POST https://curb.numetal.xyz/v1/matches/{id}/pay
+POST https://api.curb.numetal.xyz/v1/matches/{id}/pay
 ```
 
 We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana. Each swap clears seller + protocol fee.
@@ -28,15 +28,15 @@ pay account list
 pay topup                     # fund USDC (no SOL needed for fees)
 
 # Free discovery
-pay fetch https://curb.numetal.xyz/health
-pay fetch https://curb.numetal.xyz/v1/offers
-pay fetch https://curb.numetal.xyz/.well-known/x402
+pay fetch https://api.curb.numetal.xyz/health
+pay fetch https://api.curb.numetal.xyz/v1/offers
+pay fetch https://api.curb.numetal.xyz/.well-known/x402
 
 # Sample 402 probe (no match) — pay.sh should recognize x402 + Solana accepts
-pay curl -X POST https://curb.numetal.xyz/v1/pay
+pay curl -X POST https://api.curb.numetal.xyz/v1/pay
 
 # Real match settle (after POST /v1/intents returned match.id)
-pay curl -X POST https://curb.numetal.xyz/v1/matches/MATCH_ID/pay
+pay curl -X POST https://api.curb.numetal.xyz/v1/matches/MATCH_ID/pay
 # Touch ID → signs Solana USDC for seller + hub_fee → grant
 ```
 
@@ -45,5 +45,5 @@ pay curl -X POST https://curb.numetal.xyz/v1/matches/MATCH_ID/pay
 Inspect anytime:
 
 ```http
-GET https://curb.numetal.xyz/v1/matches/{id}
+GET https://api.curb.numetal.xyz/v1/matches/{id}
 ```

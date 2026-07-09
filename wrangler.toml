@@ -2,7 +2,10 @@ name = "inference-swap"
 main = "src/index.js"
 compatibility_date = "2026-06-14"
 workers_dev = true
-routes = [{ pattern = "curb.numetal.xyz", custom_domain = true }]
+routes = [
+  { pattern = "curb.numetal.xyz", custom_domain = true },
+  { pattern = "api.curb.numetal.xyz", custom_domain = true },
+]
 
 [[kv_namespaces]]
 binding = "SWAP"

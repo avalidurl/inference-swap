@@ -5,7 +5,7 @@ Buy a matched slice of inference capacity end-to-end.
 ## 1. List open offers
 
 ```bash
-curl -s https://curb.numetal.xyz/v1/offers | jq .
+curl -s https://api.curb.numetal.xyz/v1/offers | jq .
 ```
 
 Pick an `id`, `model`, `mtok`, and `priceUsd` you can afford.
@@ -13,7 +13,7 @@ Pick an `id`, `model`, `mtok`, and `priceUsd` you can afford.
 ## 2. Post a buy intent
 
 ```bash
-curl -s -X POST https://curb.numetal.xyz/v1/intents \
+curl -s -X POST https://api.curb.numetal.xyz/v1/intents \
   -H 'content-type: application/json' \
   -d '{
     "model": "llama-3.3-70b",
@@ -28,7 +28,7 @@ If a match exists, the response includes a `match` with an `id`.
 ## 3. Request payment challenge
 
 ```bash
-curl -s -X POST https://curb.numetal.xyz/v1/matches/MATCH_ID/pay | jq .
+curl -s -X POST https://api.curb.numetal.xyz/v1/matches/MATCH_ID/pay | jq .
 ```
 
 Expect **402** with dual `accepts[]` (seller + hub fee). We accept payment in USDC on x402 on both Base and Solana, and via pay.sh on Solana.

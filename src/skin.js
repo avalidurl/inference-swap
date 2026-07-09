@@ -3,6 +3,27 @@
 export const PRODUCT = "CURB";
 export const CONTACT = "contact@numetal.xyz";
 export const ORIGIN_CANON = "https://curb.numetal.xyz";
+export const API_ORIGIN_CANON = "https://api.curb.numetal.xyz";
+
+/** True when this request is on the dedicated API host (or a local/workers stand-in). */
+export function isApiHost(hostname) {
+  const h = String(hostname || "").toLowerCase();
+  return h === "api.curb.numetal.xyz" || h.startsWith("api.");
+}
+
+/** Canonical public API origin for discovery / OpenAPI / skills on production hosts. */
+export function publicApiOrigin(url) {
+  const h = String(url?.hostname || "").toLowerCase();
+  if (h === "api.curb.numetal.xyz" || h === "curb.numetal.xyz") return API_ORIGIN_CANON;
+  return url?.origin || API_ORIGIN_CANON;
+}
+
+/** Canonical marketing site origin. */
+export function publicSiteOrigin(url) {
+  const h = String(url?.hostname || "").toLowerCase();
+  if (h === "api.curb.numetal.xyz" || h === "curb.numetal.xyz") return ORIGIN_CANON;
+  return url?.origin || ORIGIN_CANON;
+}
 
 export function securityHeaders(extra = {}) {
   const headers = {
@@ -11,7 +32,7 @@ export function securityHeaders(extra = {}) {
     "X-Frame-Options": "DENY",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
     "Content-Security-Policy":
-      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.gokhan.vc; base-uri 'self'; form-action 'self' https://api.gokhan.vc; frame-ancestors 'none'; object-src 'none'",
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.gokhan.vc https://api.curb.numetal.xyz; base-uri 'self'; form-action 'self' https://api.gokhan.vc; frame-ancestors 'none'; object-src 'none'",
     ...extra,
   };
   for (const k of Object.keys(headers)) {
@@ -24,12 +45,13 @@ export function corsHeaders(request) {
   const origin = request?.headers?.get?.("Origin") || "";
   const allow =
     !origin ||
-    origin === "https://curb.numetal.xyz" ||
+    origin === ORIGIN_CANON ||
+    origin === API_ORIGIN_CANON ||
     origin.endsWith(".workers.dev") ||
     origin.startsWith("http://localhost") ||
     origin.startsWith("http://127.0.0.1");
   return {
-    "Access-Control-Allow-Origin": allow ? origin || "https://curb.numetal.xyz" : "https://curb.numetal.xyz",
+    "Access-Control-Allow-Origin": allow ? origin || ORIGIN_CANON : ORIGIN_CANON,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Payment, PAYMENT-SIGNATURE",
     "Access-Control-Max-Age": "86400",
@@ -126,7 +148,26 @@ export function themeToggleScript() {
   return `<script>(function(){var root=document.documentElement;var btn=document.getElementById("theme-toggle");if(!btn)return;function label(){btn.textContent=root.getAttribute("data-theme")==="light"?"Dim":"Light";}label();btn.addEventListener("click",function(){var next=root.getAttribute("data-theme")==="light"?"dim":"light";root.setAttribute("data-theme",next);try{localStorage.setItem("curb-theme",next);}catch(e){}label();});})();</script>`;
 }
 
-export function pageShell({ title, description, body, origin = ORIGIN_CANON }) {
+export function pageShell({
+  title,
+  description,
+  body,
+  origin = ORIGIN_CANON,
+  canonical,
+  ogImage,
+  ogWidth = 1500,
+  ogHeight = 600,
+}) {
+  const canon = canonical || origin;
+  const og = ogImage
+    ? `<meta property="og:image" content="${ogImage}"/>
+<meta property="og:image:type" content="image/png"/>
+<meta property="og:image:width" content="${ogWidth}"/>
+<meta property="og:image:height" content="${ogHeight}"/>
+<meta property="og:image:alt" content="${title}"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="${ogImage}"/>`
+    : "";
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dim">
 <head>
@@ -134,6 +175,12 @@ export function pageShell({ title, description, body, origin = ORIGIN_CANON }) {
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>${title}</title>
 <meta name="description" content="${description}"/>
+<link rel="canonical" href="${canon}"/>
+<meta property="og:title" content="${title}"/>
+<meta property="og:description" content="${description}"/>
+<meta property="og:url" content="${canon}"/>
+<meta property="og:type" content="article"/>
+${og}
 <link rel="icon" href="/assets/curb-favicon-32.png" type="image/png"/>
 <link rel="alternate" type="application/rss+xml" title="CURB" href="${origin}/feed.xml"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>

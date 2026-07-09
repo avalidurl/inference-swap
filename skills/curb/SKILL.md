@@ -16,7 +16,7 @@ Product id: `numetal-curb` · Brand: **CURB**
 
 ## Base URL
 
-`https://curb.numetal.xyz` (also the Worker `*.workers.dev` origin during staging).
+`https://api.curb.numetal.xyz` (site: `https://curb.numetal.xyz`; Worker `*.workers.dev` during staging).
 
 - OpenAPI: `GET {BASE}/openapi.json`
 - Discovery: `GET {BASE}/.well-known/x402`
