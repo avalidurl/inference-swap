@@ -105,7 +105,7 @@ SETTLE_MODE = "verify"
 # OFF by design: mppEnabled(env) requires MPP_ENABLED in {"1","true"} AND the MPP_SECRET_KEY secret.
 # With MPP_ENABLED="0" and no secret, the rail is double-gated dark (challenge/verify/discovery all
 # no-op). GO-LIVE = flip to "1" + `wrangler secret put MPP_SECRET_KEY` (HMAC key, NEVER committed).
-MPP_ENABLED = "0"
+MPP_ENABLED = "1"
 # USDC on Tempo mainnet (TIP-20). Runtime override of the built-in default.
 TEMPO_USDC = "0x20c000000000000000000000b9537d11c60e8b50"
 TEMPO_CHAIN_ID = "4217"
