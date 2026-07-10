@@ -17,6 +17,19 @@ import { audit } from "./audit.js"; // [compliance]
 import { accessOk } from "./cfaccess.js";
 import { isValidId } from "./store.js";
 import { paymentRequiredResponse, hasPaymentHeader, discoveryAccepts, verifyPayment, settleMode } from "./x402.js";
+// [mpp] second payment rail — MPP on Tempo (push mode, splits). Dark behind mppEnabled(env).
+import {
+  mppEnabled,
+  parseMppAuth,
+  verifyMppSplitPayment,
+  buildMppChallengeHeader,
+  mppReceiptHeader,
+  mppProblem,
+  mppProblemCode,
+  mppNetwork,
+  MPP_DEDUP_TTL_SEC,
+} from "./mpp.js";
+import { getJson, putJson } from "./store.js";
 import { buildOpenApi, wellKnownX402 } from "./openapi.js";
 import { handleMcp } from "./mcp.js";
 import { landingHtml } from "./landing.js";
@@ -204,8 +217,13 @@ async function handleAdminHost(request, env, url, path) {
   return json({ error: "not_found", path }, 404, request);
 }
 
-function paymentRails() {
-  return ["x402 · USDC on Base (eip155:8453)"];
+function paymentRails(env) {
+  const rails = ["x402 · USDC on Base (eip155:8453)"];
+  // [mpp] advertise the Tempo rail only when the dark flag + secret are live.
+  if (env && mppEnabled(env)) {
+    rails.push(`MPP · USDC on Tempo (${mppNetwork(env)}, push, splits) on POST /v1/matches/{id}/pay`);
+  }
+  return rails;
 }
 
 function apiRootIndex(env, apiOrigin, siteOrigin) {
@@ -246,7 +264,7 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
       probe: "/v1/pay",
     },
     payments: {
-      rails: paymentRails(),
+      rails: paymentRails(env),
       paid: ["/v1/pay", "/v1/matches/:id/pay"],
       note: "A bare POST to any paid surface returns one 402 with a SINGLE Base accept (gross to the split address); the live 402 is authoritative — read it before signing. Buyer pays gross once; CURB splits seller + protocol fee on-chain via a 0xSplits split on Base.",
     },
@@ -765,11 +783,19 @@ export default {
         if (id.length > 128) return json({ error: "not_found" }, 404, request);
         const m = await getMatch(env, id);
 
+        // [mpp] Detect an MPP credential (Authorization: Payment …) up front and treat it as
+        // "has payment", so an MPP-only request never falls into the bare 402 branch. x402
+        // (X-Payment / payment-signature) stays the DEFAULT rail; MPP runs only when a Payment
+        // credential is present AND no x402 header is.
+        const mppCred = mppEnabled(env) ? parseMppAuth(request.headers.get("authorization")) : null;
+        const hasX402 = hasPaymentHeader(request);
+        const isMpp = !!mppCred && !hasX402;
+
         // Paywall BEFORE not_found — x402scan probes literal/placeholder ids and must get 402.
-        if (!hasPaymentHeader(request)) {
+        if (!hasX402 && !mppCred) {
           if (m) {
             const fresh = await refreshMatchChallenge(env, m, origin);
-            return paymentRequiredResponse({
+            const resp402 = paymentRequiredResponse({
               error: "payment_required",
               message:
                 "Attach payment-signature / X-Payment for ONE gross payment to the accept's payTo (the on-chain 0xSplits split) on Base (eip155:8453), then retry.",
@@ -781,6 +807,15 @@ export default {
               },
               ...fresh.challenge,
             });
+            // [mpp] One 402, disjoint headers: emit the MPP `WWW-Authenticate: Payment method="tempo"`
+            // challenge co-resident with the x402 one (distinct challenge line, distinguished by
+            // method=). x402's data still rides PAYMENT-REQUIRED; MPP is purely additive.
+            if (mppEnabled(env)) {
+              const headers = new Headers(resp402.headers);
+              headers.append("WWW-Authenticate", await buildMppChallengeHeader(env, m));
+              return new Response(resp402.body, { status: resp402.status, headers });
+            }
+            return resp402;
           }
           const resourceUrl = `${origin}/v1/matches/${id}/pay`;
           const challenge = await discoveryAccepts(env, origin, resourceUrl);
@@ -828,6 +863,64 @@ export default {
             note: "admin_demo_settle",
           }).catch(() => {});
           return json(paid.body, paid.status, request);
+        }
+
+        // [mpp] MPP (Tempo push + splits) settle path. Runs only when a Payment credential is
+        // present and no x402 header. Verify fail-closed → on success mint the SAME grant the x402
+        // path mints, dedup on challenge id AND tx hash, attach Payment-Receipt + audit.
+        if (isMpp) {
+          const verified = await verifyMppSplitPayment(env, mppCred, m);
+          if (!verified.verified || !verified.payer) {
+            return mppProblem(env, m, mppProblemCode(verified.raw), "payment could not be verified");
+          }
+          // Single-use: reject a replayed challenge id OR settlement tx (one Tempo tx = one grant).
+          const nonceKey = `mpp:nonce:${verified.nonce}`;
+          const txKey = `mpp:tx:${verified.tx}`;
+          const [dupNonce, dupTx] = await Promise.all([getJson(env, nonceKey), getJson(env, txKey)]);
+          if (dupNonce || dupTx) {
+            return mppProblem(env, m, "payment-replayed", "this MPP payment was already settled");
+          }
+          await Promise.all([
+            putJson(env, nonceKey, { matchId: id, tx: verified.tx, at: new Date().toISOString() }, MPP_DEDUP_TTL_SEC),
+            putJson(env, txKey, { matchId: id, nonce: verified.nonce, at: new Date().toISOString() }, MPP_DEDUP_TTL_SEC),
+          ]);
+          const mppSettlement = [
+            {
+              rail: "mpp",
+              network: mppNetwork(env),
+              tx: verified.tx,
+              payer: verified.payer,
+              hub: verified.splits ? verified.splits.hub : null,
+              seller: verified.splits ? verified.splits.seller : null,
+            },
+          ];
+          const paidMpp = await markPaid(env, id, {
+            note: "mpp_verified_settled",
+            demo: false,
+            verified: true,
+            mode: "mpp",
+            settlement: mppSettlement,
+          });
+          // [compliance] audit the MPP settle (append-only KV; best-effort, non-blocking)
+          await audit(env, "settle", {
+            matchId: id,
+            rail: "mpp",
+            network: mppNetwork(env),
+            model: m.model,
+            mtok: m.mtok,
+            sellerPayTo: m.sellerPayTo,
+            buyer: m.buyer || null,
+            payer: verified.payer,
+            tx: verified.tx,
+            grossUsd: (m.split && m.split.grossUsd) ?? null,
+            verified: true,
+            demo: false,
+            mode: "mpp",
+            settlement: mppSettlement,
+          }).catch(() => {});
+          return json(paidMpp.body, paidMpp.status, request, {
+            "Payment-Receipt": mppReceiptHeader(env, verified.nonce, verified.tx, m),
+          });
         }
 
         // Real settlement gate. verify mode: only a facilitator-verified payment

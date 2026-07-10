@@ -95,6 +95,23 @@ SETTLE_MODE = "verify"
 # Secrets (NOT in repo): ACCESS_KEY; CDP_API_KEY_ID + CDP_API_KEY_SECRET enable verify mode.
 #   Set via: wrangler secret put CDP_API_KEY_ID / CDP_API_KEY_SECRET, then SETTLE_MODE=verify.
 # Payments: settlement is single-payee x402 USDC on Base; fees split on-chain via a 0xSplits split
+# ── [mpp] Second payment rail — MPP (Machine Payments Protocol) on Tempo (DARK) ───────────────
+# PUSH mode + SPLITS, additive to x402/Base. Same economics as x402 (seller 95% / hub 5%). The
+# buyer broadcasts its OWN TIP-20 USDC transfers on Tempo (one tx: seller net + hub fee), then
+# retries POST /v1/matches/{id}/pay with `Authorization: Payment <b64url>`; success → Payment-Receipt.
+# Tempo is EVM (eip155:4217), so it REUSES the existing Base addresses on Tempo — NO new address
+# fields: seller = the match's sellerPayTo, hub = HUB_PAY_TO (0x3eee… above).
+#
+# OFF by design: mppEnabled(env) requires MPP_ENABLED in {"1","true"} AND the MPP_SECRET_KEY secret.
+# With MPP_ENABLED="0" and no secret, the rail is double-gated dark (challenge/verify/discovery all
+# no-op). GO-LIVE = flip to "1" + `wrangler secret put MPP_SECRET_KEY` (HMAC key, NEVER committed).
+MPP_ENABLED = "0"
+# USDC on Tempo mainnet (TIP-20). Runtime override of the built-in default.
+TEMPO_USDC = "0x20c000000000000000000000b9537d11c60e8b50"
+TEMPO_CHAIN_ID = "4217"
+TEMPO_RPC_URL = "https://rpc.tempo.xyz"
+# Secret (NOT in repo): MPP_SECRET_KEY — HMAC key that binds/verifies the stateless MPP challenge ids.
+#   Set via: wrangler secret put MPP_SECRET_KEY   (required, with MPP_ENABLED="1", to arm the rail)
 # Operator dashboard (admin.curb.numetal.xyz) — Cloudflare Access email gate.
 #   ACCESS_TEAM_DOMAIN: the Zero Trust team domain that mints the Access JWT.
 #   ACCESS_AUD: the AUD of the "CURB Admin" self-hosted Access application (admin.curb.numetal.xyz),
