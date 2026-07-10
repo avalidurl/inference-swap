@@ -12,6 +12,24 @@ import {
   DISCOVERY_BAZAAR,
   MATCH_PAY_BAZAAR,
 } from "./x402.js";
+// [mpp] second rail (Tempo push+splits) — advertised in discovery only when the dark flag is live.
+import { mppEnabled, mppNetwork, mppCurrency } from "./mpp.js";
+
+/** Payment protocols advertised for paid ops — x402 always; MPP (Tempo) when enabled. */
+function paymentProtocols(env) {
+  const protocols = [{ x402: {} }];
+  if (mppEnabled(env)) protocols.push({ mpp: { network: mppNetwork(env), modes: ["push"], splits: true } });
+  return protocols;
+}
+
+/** Brief human/agent-readable rails list for x-numetal + discovery. */
+function railsList(env) {
+  const rails = ["x402 · USDC on Base (eip155:8453)"];
+  if (mppEnabled(env)) {
+    rails.push(`MPP · USDC on Tempo (${mppNetwork(env)}, push, splits) on POST /v1/matches/{id}/pay`);
+  }
+  return rails;
+}
 
 const DISCOVERY_PRICE = "0.100000";
 
@@ -146,7 +164,7 @@ function ownershipDiscovery(env) {
 
 export function buildOpenApi(env, origin) {
   const feeBps = Number(env.FEE_BPS || 500);
-  const protocols = [{ x402: {} }];
+  const protocols = paymentProtocols(env); // [mpp] x402 + MPP (Tempo) when enabled
 
   return {
     openapi: "3.1.0",
@@ -467,6 +485,18 @@ export function buildOpenApi(env, origin) {
       product: "numetal-curb",
       brand: "CURB",
       feeBps,
+      rails: railsList(env), // [mpp]
+      ...(mppEnabled(env)
+        ? {
+            mpp: {
+              network: mppNetwork(env),
+              currency: mppCurrency(env),
+              mode: "push",
+              splits: true,
+              note: "MPP (Tempo eip155 push, splits) on POST /v1/matches/{id}/pay. Credential: Authorization: Payment <b64url>; success carries Payment-Receipt. Same economics as x402 (seller 95% / hub 5%).",
+            },
+          }
+        : {}),
       settlementModel: "single-payee-to-splitter",
       split: {
         base: splitAddressBase(env) || null,
@@ -514,6 +544,21 @@ export async function wellKnownX402(env, origin) {
     openapi: `${origin}/openapi.json`,
     mcp: `${origin}/mcp`,
     skill: `${origin}/skill.md`,
+    // [mpp] second rail — advertised only when live. x402/Base remains the primary discovery surface.
+    rails: railsList(env),
+    ...(mppEnabled(env)
+      ? {
+          mpp: {
+            network: mppNetwork(env),
+            currency: mppCurrency(env),
+            mode: "push",
+            splits: true,
+            resource: `${origin}/v1/matches/{id}/pay`,
+            credential: "Authorization: Payment <b64url>",
+            receipt: "Payment-Receipt",
+          },
+        }
+      : {}),
     feeBps: Number(env.FEE_BPS || 500),
     settlementModel: "single-payee-to-splitter",
     split: {

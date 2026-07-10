@@ -50,6 +50,7 @@ Connect MCP: `POST https://api.curb.numetal.xyz/mcp` (JSON-RPC).
 
 - Settlement: USDC on x402 on **Base** (`eip155:8453`). CURB splits seller + protocol fee on-chain via a 0xSplits split.
 - **Single-payee (spec-compliant):** ONE `gross` accept per rail = the full price to the **split address**. Sign **one** payment on **one** network. CURB fans out **seller + protocol fee ON-CHAIN** via 0xSplits `distribute()` on Base — you do not pay two legs.
+- **Second rail — MPP (Tempo), optional:** when the live 402 also offers a co-resident `WWW-Authenticate: Payment method="tempo"` (and `/.well-known/x402` lists an `mpp` rail), CURB accepts **MPP on Tempo** (`eip155:4217`, **push**, **splits**) on `POST /v1/matches/{id}/pay`. Broadcast your own Tempo USDC transfers — seller net **and** hub fee (same 95/5 economics) in one tx — then retry with `Authorization: Payment <b64url>`; success carries a `Payment-Receipt`. Prefer x402/Base unless the 402 advertises the tempo challenge.
 - Probe (no side effects): `POST https://api.curb.numetal.xyz/v1/pay`
 - **Never put private keys in the CURB MCP config.** Sign outside CURB.
 
