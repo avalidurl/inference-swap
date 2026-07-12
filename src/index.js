@@ -170,7 +170,7 @@ async function handleAdminHost(request, env, url, path) {
       "locked — admin.curb.numetal.xyz is Cloudflare-Access gated (email login) or Bearer ACCESS_KEY.";
     return wantsHtml
       ? text(
-          `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>403 · CURB ops</title></head><body style="font:14px ui-monospace,Menlo,monospace;background:#121212;color:#e6e6e6;max-width:640px;margin:12vh auto;padding:0 20px"><h1 style="font-size:18px">403 · locked</h1><p>${msg}</p></body></html>`,
+          `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>403 · CURB ADMIN · AD-130</title><style>body{background:#fff;color:#000;font:12px/1.45 ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;max-width:640px;margin:12vh auto;padding:0 20px}.mast{display:flex;justify-content:space-between;gap:12px;padding:14px 0 6px;border-bottom:3px double #000;font-size:10px;letter-spacing:.14em;text-transform:uppercase}.mast b{font-size:13px;letter-spacing:.18em}h1{font-size:15px;letter-spacing:.06em;text-transform:uppercase;margin:22px 0 8px}.badge{display:inline-block;border:1px solid #000;padding:0 6px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:#000;color:#fff}</style></head><body><div class="mast"><b>■ NUMETAL · CURB · ADMIN</b><span>FORM AD-130 · INTERNAL · ACCESS-GATED</span></div><h1><span class="badge">DENIED</span> 403 · locked</h1><p>${msg}</p></body></html>`,
           "text/html; charset=utf-8",
           403,
           request
