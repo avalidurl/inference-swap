@@ -42,8 +42,10 @@ import {
   sitemapXml,
   newsletterHtml,
   dispatchLaunchHtml,
+  dispatchTickerlineHtml,
   dispatchIndexHtml,
   DISPATCH_LAUNCH,
+  DISPATCH_TICKERLINE,
 } from "./blog.js";
 import {
   corsHeaders,
@@ -382,6 +384,7 @@ function llmsTxt(apiOrigin, siteOrigin) {
     `Docs · install MCP: ${siteOrigin}/docs/how-to/install-mcp/`,
     `Docs · install skill: ${siteOrigin}/docs/how-to/install-skill/`,
     `Dispatches: ${siteOrigin}/dispatch`,
+    `Dispatch: ${siteOrigin}${DISPATCH_TICKERLINE.path}`,
     `Dispatch: ${siteOrigin}${DISPATCH_LAUNCH.path}`,
     `Newsletter: ${siteOrigin}/newsletter`,
     `Terms: ${siteOrigin}/terms`,
@@ -499,6 +502,7 @@ export default {
         "/rss.xml",
         "/sitemap.xml",
         DISPATCH_LAUNCH.path,
+        DISPATCH_TICKERLINE.path,
       ]);
       if (marketingPaths.has(path) || path.startsWith("/docs") || path.startsWith("/assets/")) {
         const dest =
@@ -634,6 +638,13 @@ export default {
         request.method === "GET"
       ) {
         return text(dispatchLaunchHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
+      }
+      if (
+        !apiHost &&
+        (path === DISPATCH_TICKERLINE.path || path === `${DISPATCH_TICKERLINE.path}/`) &&
+        request.method === "GET"
+      ) {
+        return text(dispatchTickerlineHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
       }
       if (!apiHost && (path === "/feed.xml" || path === "/rss.xml") && request.method === "GET") {
         return text(feedXml(siteOrigin), "application/rss+xml; charset=utf-8", 200, request);

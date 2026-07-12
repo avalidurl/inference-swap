@@ -17,6 +17,23 @@ export const DISPATCH_LAUNCH = {
     "CURB is live: an agent↔agent inference swap rail. Product path: wire api.curb.numetal.xyz MCP/Skill into your harness. Demo seller/buyer agents are for the pitch. Offer → match → single-payee x402 → grant. Fees split on-chain. Hub holds no upstream LLM keys.",
 };
 
+/**
+ * tickerline dispatch — syndicated mirror. First published on numetal.xyz;
+ * rel=canonical points at the numetal.xyz original (do not change).
+ */
+export const DISPATCH_TICKERLINE = {
+  slug: "tickerline",
+  path: "/dispatch/tickerline",
+  title: "tickerline: your conversation, quoted",
+  published: "2026-07-12T12:00:00.000Z",
+  dateLabel: "12 Jul 2026",
+  canonical: "https://numetal.xyz/blog/tickerline",
+  excerpt:
+    "tickerline turns the Claude Code status line into a rolling ticker tape of whatever you're discussing with Claude — stocks, tokens, and the Polymarket questions nearest to the conversation. Shipped on ClaudeLines; audited, free to install. First published on numetal.xyz.",
+  description:
+    "tickerline: your conversation, quoted — a Claude Code status line on ClaudeLines that turns the terminal strip into a live ticker tape: stocks, tokens, Polymarket questions, /tlm to open them in-chat. Syndicated mirror; first published on numetal.xyz.",
+};
+
 /** Full post body (HTML fragments inside <article>). No Bankr. No contract address. */
 export function launchBodyHtml(origin) {
   return `
@@ -132,10 +149,91 @@ export function dispatchLaunchHtml(origin) {
   });
 }
 
+/** tickerline post body (HTML fragments inside <article>). Syndicated — wording is canonical. */
+export function tickerlineBodyHtml(origin) {
+  return `
+    <p class="meta">Dispatch · ${DISPATCH_TICKERLINE.dateLabel} · This post was first published on <a href="${DISPATCH_TICKERLINE.canonical}">numetal.xyz</a></p>
+    <h1>${DISPATCH_TICKERLINE.title}</h1>
+    <p class="lede">
+      ClaudeLines (<a href="https://claudelines.com">claudelines.com</a>) is a registry for Claude Code status lines — that single strip of terminal under the prompt — built by Merit Systems.
+      Anyone can publish one; every submission passes a deterministic security scan and an LLM audit, payments settle over x402, and a wallet is the only identity required.
+      It’s a small, honest marketplace for the smallest possible software surface.
+    </p>
+    <p>
+      We shipped tickerline there. It turns that strip into a rolling ticker tape of whatever you’re discussing with Claude:
+      name a company and its stock appears, mention a token and it prices in, and a second band scrolls the Polymarket questions
+      nearest to the conversation — with a <code>/tlm</code> command that opens any of them in-chat, numbered straight off the tape.
+    </p>
+    <p>
+      No watchlist, no dictionary, no API keys. Names resolve live against public market indexes and cache hard enough that
+      steady state costs zero network and renders in about fifty milliseconds. One file. No shell. Three pinned hosts.
+      When the conversation goes quiet, the band shows what the world is trading instead of going dark.
+    </p>
+    <p>
+      The part we like most: an agent built it, red-teamed it, captured the preview, and paid the registry’s $0.15 x402 fee
+      from its own wallet — end to end, terminal to listing.
+    </p>
+
+    <h2>$TICKER</h2>
+    <p>
+      tickerline now trades as TICKERLINE ($TICKER) on Robinhood Chain — <code>0x02c67c0F6Fef5065aF1C78F337a8bEE386b6BbA3</code> —
+      launched through <a href="https://bankr.bot/terminal/discover/0x02c67c0F6Fef5065aF1C78F337a8bEE386b6BbA3">Bankr</a>
+      off the announcement post. A memecoin, not equity; the status line itself stays free.
+    </p>
+
+    <h2>Go</h2>
+    <ul class="live">
+      <li><a href="https://claudelines.com/statuslines/tickerline">claudelines.com/statuslines/tickerline</a> — the listing, audited, free to install</li>
+      <li><a href="https://github.com/avalidurl/tickerline">github.com/avalidurl/tickerline</a> — source, MIT</li>
+      <li><a href="https://bankr.bot/terminal/discover/0x02c67c0F6Fef5065aF1C78F337a8bEE386b6BbA3">bankr.bot/terminal/discover/0x02c6…BbA3</a> — $TICKER on Robinhood Chain</li>
+    </ul>
+    <p class="sign">
+      — Gökhan Turhan ·
+      <a href="https://numetal.xyz">Numetal Labs</a> ·
+      <a href="https://gokhan.vc">Atelier Gökhan Turhan</a>
+    </p>
+    <p class="muted" style="margin-top:1.25rem">
+      First published on <a href="${DISPATCH_TICKERLINE.canonical}">numetal.xyz/blog/tickerline</a>
+      · <a href="${origin}/">curb.numetal.xyz</a>
+      · <a href="${origin}/dispatch" title="CURB dispatches">Dispatch</a>
+    </p>`;
+}
+
+export function dispatchTickerlineHtml(origin) {
+  const { title, description, canonical } = DISPATCH_TICKERLINE;
+  const body = `<article class="panel post">${tickerlineBodyHtml(origin)}</article>`;
+  return pageShell({
+    title: `${title} — CURB`,
+    description,
+    body,
+    origin,
+    canonical, // syndicated mirror — canonical stays on numetal.xyz
+  });
+}
+
 /** Dispatch index — card listing under /dispatch (newsletter stays separate). */
 export function dispatchIndexHtml(origin) {
-  const { title, path, dateLabel, excerpt, published } = DISPATCH_LAUNCH;
   const ogImage = `${origin}/assets/og-curb-launch.png`;
+  const posts = [DISPATCH_TICKERLINE, DISPATCH_LAUNCH]; // newest first
+  const ogFor = (post) => (post.slug === "curb-is-live" ? ogImage : null);
+  const cards = posts
+    .map((post) => {
+      const og = ogFor(post);
+      const img = og
+        ? `<img class="blog-card-og" src="${og}" alt="" width="1500" height="600" loading="lazy"/>`
+        : "";
+      return `
+    <a class="blog-card" href="${post.path}">
+      ${img}
+      <div class="blog-card-body">
+        <p class="meta"><time datetime="${post.published.slice(0, 10)}">${post.dateLabel}</time> · Dispatch</p>
+        <h2 class="blog-card-title">${post.title}</h2>
+        <p class="blog-card-excerpt">${post.excerpt}</p>
+        <span class="blog-card-more">Read →</span>
+      </div>
+    </a>`;
+    })
+    .join("\n");
   const body = `
   <header class="panel">
     <p class="meta">CURB · Dispatch</p>
@@ -143,15 +241,7 @@ export function dispatchIndexHtml(origin) {
     <p class="muted">Notes from the inference swap. Newsletter is separate — this is for reading posts.</p>
   </header>
   <section class="blog-cards" aria-label="Dispatches">
-    <a class="blog-card" href="${path}">
-      <img class="blog-card-og" src="${ogImage}" alt="" width="1500" height="600" loading="lazy"/>
-      <div class="blog-card-body">
-        <p class="meta"><time datetime="${published.slice(0, 10)}">${dateLabel}</time> · Dispatch</p>
-        <h2 class="blog-card-title">${title}</h2>
-        <p class="blog-card-excerpt">${excerpt}</p>
-        <span class="blog-card-more">Read →</span>
-      </div>
-    </a>
+${cards}
   </section>
   <p class="muted" style="margin-top:0.5rem">
     Subscribe: <a href="${origin}/newsletter">newsletter</a> · <a href="${origin}/feed.xml">RSS</a>
@@ -170,10 +260,11 @@ export function dispatchIndexHtml(origin) {
 
 /** RSS for feedhub — full summary, same canonical item. */
 export function feedXml(origin) {
-  const { title, path, published } = DISPATCH_LAUNCH;
-  const link = `${origin}${path}`;
-  const summary = launchSummary();
-  const html = launchEmailHtml(link);
+  const launchLink = `${origin}${DISPATCH_LAUNCH.path}`;
+  const tickerlineLink = `${origin}${DISPATCH_TICKERLINE.path}`;
+  const tickerlineHtml = `<p>${DISPATCH_TICKERLINE.excerpt}</p>
+<p><a href="${tickerlineLink}">Read the dispatch →</a></p>
+<p style="color:#666;font-size:14px">This post was first published on <a href="${DISPATCH_TICKERLINE.canonical}">numetal.xyz</a>.</p>`;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
@@ -183,12 +274,20 @@ export function feedXml(origin) {
     <language>en-us</language>
     <atom:link href="${origin}/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
-      <title>${escapeXml(title)}</title>
-      <link>${link}</link>
-      <guid isPermaLink="true">${link}</guid>
-      <pubDate>${new Date(published).toUTCString()}</pubDate>
-      <description>${escapeXml(summary)}</description>
-      <content:encoded><![CDATA[${html}]]></content:encoded>
+      <title>${escapeXml(DISPATCH_TICKERLINE.title)}</title>
+      <link>${tickerlineLink}</link>
+      <guid isPermaLink="true">${tickerlineLink}</guid>
+      <pubDate>${new Date(DISPATCH_TICKERLINE.published).toUTCString()}</pubDate>
+      <description>${escapeXml(DISPATCH_TICKERLINE.excerpt)}</description>
+      <content:encoded><![CDATA[${tickerlineHtml}]]></content:encoded>
+    </item>
+    <item>
+      <title>${escapeXml(DISPATCH_LAUNCH.title)}</title>
+      <link>${launchLink}</link>
+      <guid isPermaLink="true">${launchLink}</guid>
+      <pubDate>${new Date(DISPATCH_LAUNCH.published).toUTCString()}</pubDate>
+      <description>${escapeXml(launchSummary())}</description>
+      <content:encoded><![CDATA[${launchEmailHtml(launchLink)}]]></content:encoded>
     </item>
   </channel>
 </rss>`;
@@ -208,6 +307,7 @@ export function sitemapXml(origin) {
     "/deck",
     "/dispatch",
     DISPATCH_LAUNCH.path,
+    DISPATCH_TICKERLINE.path,
     "/fees",
     "/install",
     "/harness",
@@ -256,7 +356,7 @@ export function newsletterHtml(origin) {
       <button type="submit" title="Subscribe via api.gokhan.vc (site=curb)">Subscribe</button>
     </form>
     <p class="muted" style="margin-top:1rem">
-      Latest: <a href="${origin}${DISPATCH_LAUNCH.path}">${DISPATCH_LAUNCH.title}</a>
+      Latest: <a href="${origin}${DISPATCH_TICKERLINE.path}">${DISPATCH_TICKERLINE.title}</a>
       · <a href="${origin}/dispatch">All dispatches</a>.
       Public contact: <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.
       Product mail: Curb &lt;curb@numetal.xyz&gt;.
