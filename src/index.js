@@ -43,9 +43,11 @@ import {
   newsletterHtml,
   dispatchLaunchHtml,
   dispatchTickerlineHtml,
+  dispatchX402Html,
   dispatchIndexHtml,
   DISPATCH_LAUNCH,
   DISPATCH_TICKERLINE,
+  DISPATCH_X402,
 } from "./blog.js";
 import {
   corsHeaders,
@@ -645,6 +647,13 @@ export default {
         request.method === "GET"
       ) {
         return text(dispatchTickerlineHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
+      }
+      if (
+        !apiHost &&
+        (path === DISPATCH_X402.path || path === `${DISPATCH_X402.path}/`) &&
+        request.method === "GET"
+      ) {
+        return text(dispatchX402Html(siteOrigin), "text/html; charset=utf-8", 200, request);
       }
       if (!apiHost && (path === "/feed.xml" || path === "/rss.xml") && request.method === "GET") {
         return text(feedXml(siteOrigin), "application/rss+xml; charset=utf-8", 200, request);
