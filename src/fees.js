@@ -1,5 +1,7 @@
 /** CURB — token & fees page (structure adapted from numetal.xyz/fees, dim B&W skin). */
-import { footerHtml, SHARED_CSS, themeBootScript, themeToggleScript, ORIGIN_CANON } from "./skin.js";
+import { footerHtml, mastheadHtml, DOC_REV, SHARED_CSS, themeBootScript, themeToggleScript, ORIGIN_CANON } from "./skin.js";
+
+const DOC_NO = "CB-020";
 
 export const CURB_TOKEN = {
   name: "CURB",
@@ -97,12 +99,7 @@ export function feesHtml(origin = ORIGIN_CANON, env = {}) {
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 ${SHARED_CSS}
-  .intro { text-align: center; padding: 0.5rem 0 0.25rem; }
-  .eyebrow {
-    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--muted); margin: 0 0 0.75rem;
-  }
-  .sub { color: var(--muted); margin: 0.5rem auto 0; max-width: 36rem; font-size: 0.98rem; }
+  .sub { color: var(--muted); margin: 0.5rem 0 0; max-width: 36rem; font-size: 0.98rem; }
   .token-mark {
     display: inline-flex; align-items: center; gap: 0.65rem;
     font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.12em;
@@ -113,16 +110,14 @@ ${SHARED_CSS}
   .nav {
     display: flex; flex-wrap: wrap; gap: 0.65rem 1rem;
     font-family: var(--mono); font-size: 0.78rem; margin: 1rem 0 0;
-    justify-content: center;
   }
   .nav a { border: 1px solid var(--fg); padding: 0.4rem 0.65rem; text-decoration: none; }
   .nav a:hover { background: var(--fg); color: var(--bg); }
   .nav a.on { background: var(--fg); color: var(--bg); }
   .crt {
-    max-width: 640px; margin: 1.25rem auto 1.5rem;
-    background: var(--panel); border: 1.5px solid var(--fg);
+    max-width: 640px; margin: 1.25rem 0 1.5rem;
+    background: var(--panel); border: 2px solid var(--fg);
     font-family: var(--mono); font-size: 0.82rem; color: var(--fg);
-    box-shadow: 2px 2px 0 rgba(0,0,0,.35);
   }
   .crt .mast {
     display: flex; justify-content: space-between; align-items: center; gap: 10px;
@@ -133,11 +128,7 @@ ${SHARED_CSS}
     display: flex; align-items: center; gap: 6px;
     font-size: 0.65rem; letter-spacing: 0.16em;
   }
-  .dotp {
-    width: 7px; height: 7px; border-radius: 50%; background: var(--bg);
-    display: inline-block; animation: pulse 1.7s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+  .dotp { width: 7px; height: 7px; background: var(--bg); display: inline-block; }
   .csec {
     display: flex; align-items: center; gap: 8px; padding: 0.45rem 0.9rem;
     background: var(--code-bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
@@ -170,15 +161,15 @@ ${SHARED_CSS}
   .barx { display: flex; height: 22px; border: 1px solid var(--fg); }
   .seg {
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem; color: #fff; font-weight: 700;
+    font-size: 0.65rem; font-weight: 700;
     white-space: nowrap; overflow: hidden;
-    border-right: 1px solid rgba(255,255,255,.45);
+    border-right: 1px solid var(--bg);
   }
   .seg:last-child { border-right: 0; }
-  /* Numetal fee-engine bar aesthetic (orange / Klein blue / near-black) */
-  .s-team { background: #FF5A1F; }
-  .s-trez { background: #002FA7; }
-  .s-burn { background: #2a2a2a; }
+  /* Distribution bars in house greys — hierarchy by tone, not hue */
+  .s-team { background: var(--fg); color: var(--bg); }
+  .s-trez { background: var(--muted); color: var(--bg); }
+  .s-burn { background: var(--line); color: var(--fg); }
   .s-creator { background: var(--fg); color: var(--bg); flex: 95 0 0; font-weight: 600; }
   .s-protocol { background: var(--muted); color: var(--bg); flex: 5 0 0; font-weight: 600; }
   .s-seller { background: var(--fg); color: var(--bg); font-weight: 600; }
@@ -190,9 +181,9 @@ ${SHARED_CSS}
   }
   .leg .lg { display: inline-flex; align-items: center; gap: 0.35rem; }
   .leg .d { width: 10px; height: 10px; display: inline-block; border: 1px solid var(--fg); }
-  .leg .d-team { background: #FF5A1F; }
-  .leg .d-trez { background: #002FA7; }
-  .leg .d-burn { background: #2a2a2a; }
+  .leg .d-team { background: var(--fg); }
+  .leg .d-trez { background: var(--muted); }
+  .leg .d-burn { background: var(--line); }
   .ldr {
     display: flex; align-items: center; gap: 10px;
     padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--line);
@@ -237,21 +228,24 @@ ${themeBootScript()}
     <button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button>
   </div>
 
-  <header class="intro panel" style="border:0;background:transparent;padding:0.25rem 0 0">
-    <div class="token-mark">
+  ${mastheadHtml({
+    docNo: DOC_NO,
+    status: "In service",
+    sub: "Token &amp; fees · Base · Bankr Doppler",
+    title: "Token &amp; fees.",
+    body: `<div class="token-mark">
       <img src="${t.logo}" alt="CURB" width="36" height="36"/>
       <span>$CURB</span>
     </div>
-    <p class="eyebrow">Token &amp; fees · Base · Bankr Doppler</p>
-    <h1>Token &amp; fees.</h1>
     <p class="sub">CURB on Base — contract, pool, Bankr LP layer, creator-fee distribution (team / treasury / burn), and hub x402 wallets.</p>
     <div class="nav" aria-label="Primary">
       <a href="/">Home</a>
       <a class="on" href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
       <a href="/docs/" title="Diátaxis docs">docs</a>
       <a href="/newsletter" title="Newsletter">newsletter</a>
-    </div>
-  </header>
+    </div>`,
+    bottom: [`Token: ${tokenShort} · Base ${t.chainId}`, "Canonical: curb.numetal.xyz/fees"],
+  })}
 
   <div class="crt" role="region" aria-label="CURB fee report">
     <div class="mast">
@@ -326,7 +320,7 @@ ${themeBootScript()}
   </div>
 
   <section class="how">
-    <h2>How fees work</h2>
+    <h2><span>How fees work</span> <span class="sec-no">§1</span></h2>
     <p><strong>LP / protocol layer.</strong> CURB launched on Bankr (Doppler) on Base. On-chain reward share is <strong>${t.creatorSharePct}%</strong> creator (goekhan Bankr EVM claimer) / <strong>${t.protocolSharePct}%</strong> protocol — verified via <code>bankr fees --token</code>. That layer does not yet multi-split to team/treasury/burn on-chain; claims land at the creator claimer first.</p>
     <p><strong>Distribution (creator-side).</strong> Claimed creator fees follow the same Numetal policy as <a href="https://numetal.xyz/fees" target="_blank" rel="noopener">numetal.xyz/fees</a>: WETH side 80% team / 10% treasury / 10% burn; $CURB side 40% team / 30% treasury / 30% burn.</p>
     <p><strong>Hub swap fees.</strong> On CURB inference matches, payment is single-payee x402: the buyer pays gross ONCE to an on-chain 0xSplits split on Base; the split fans out seller wallet + hub fee (<strong>${feePct}%</strong>, min $0.001 USDC) on-chain. Hub never holds upstream LLM keys.</p>
@@ -334,7 +328,7 @@ ${themeBootScript()}
   </section>
 
   <section>
-    <h2>Links</h2>
+    <h2><span>Links</span> <span class="sec-no">§2</span></h2>
     <div class="links">
       <a href="${t.website}">Website</a>
       <a href="${t.basescan}" target="_blank" rel="noopener">Basescan token</a>
@@ -346,7 +340,7 @@ ${themeBootScript()}
     </div>
   </section>
 
-  ${footerHtml()}
+  ${footerHtml({ no: DOC_NO, rev: DOC_REV })}
 </div>
 ${themeToggleScript()}
 </body>

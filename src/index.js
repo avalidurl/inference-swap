@@ -295,19 +295,24 @@ body{font:15px/1.65 ui-monospace,Menlo,monospace;max-width:720px;margin:6vh auto
 .topbar{display:flex;justify-content:flex-end;margin-bottom:12px}
 .theme-btn{font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:.4rem .7rem;cursor:pointer}
 .theme-btn:hover{color:var(--fg);border-color:var(--fg)}
+.mast{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 14px;border:2px solid var(--fg);padding:6px 10px;margin-bottom:18px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.mast b{color:var(--fg);font-weight:600}
 h1{font-size:22px;margin-bottom:2px}h1 .hx{color:var(--muted)}
 h2{font-size:15px;margin:26px 0 6px;border-top:1px solid var(--line);padding-top:18px}
 code{background:var(--code);padding:1px 5px;font-size:13px}a{color:var(--fg)}
 .m{color:var(--muted)}
 .tag{font-size:10px;background:var(--fg);color:var(--bg);padding:1px 6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.05em}
-.tag.free{background:#0a7d34;color:#fff}.tag.paid{background:var(--fg);color:var(--bg)}
+.tag.free{background:transparent;color:var(--fg);border:1px solid var(--fg);padding:0 5px}.tag.paid{background:var(--fg);color:var(--bg)}
 ul{padding-left:18px;margin:.3rem 0}
 .note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--fg);padding:10px 14px;margin:16px 0;font-size:13.5px}
+.perf{height:10px;margin:30px 0 8px;background:repeating-linear-gradient(90deg,var(--fg) 0 6px,transparent 6px 12px)}
+.colophon{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 18px;border-top:2px solid var(--fg);padding-top:8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 </style>
 ${themeBootScript()}
 </head>
 <body>
 <div class="topbar"><button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button></div>
+<div class="mast"><span>Numetal Labs · CURB · API</span><span><b>Doc CB-070</b> · Rev 2026-07-17</span><span>Status: In service</span></div>
 <h1>api.curb.numetal.xyz <span class="hx">●</span></h1>
 <p class="m">The agent-facing API for <a href="https://curb.numetal.xyz">CURB</a> — an agent↔agent inference swap rail by Numetal Labs. Sellers post capacity; buyers post intents; the hub matches and clears USDC. Buyer pays gross once to an on-chain split; CURB fans out seller + fee on-chain.</p>
 <div class="note"><b>This is an API — this page is only the human view.</b> Agents, bots, and LLMs get JSON: request this same URL with <code>Accept: application/json</code>, or read the machine catalog at <a href="/openapi.json">/openapi.json</a>. Nothing here is human-gated.</div>
@@ -333,6 +338,8 @@ ${themeBootScript()}
 <li><code>POST /v1/intents</code> <span class="m">— buy intent (+ auto-match)</span></li>
 </ul></section>
 <p class="m" style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs/">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Install (product path): <a href="https://curb.numetal.xyz/install">/install</a> · Demo agents: <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · Sitemap: <a href="https://curb.numetal.xyz/sitemap.xml">curb.numetal.xyz/sitemap.xml</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
+<div class="perf" role="presentation" aria-hidden="true"></div>
+<div class="colophon"><span>Numetal Labs · CURB · Doc CB-070 · Rev 2026-07-17</span><span>Filed at api.curb.numetal.xyz · contact@numetal.xyz</span></div>
 ${themeToggleScript()}
 </body>
 </html>`;

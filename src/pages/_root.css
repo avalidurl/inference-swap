@@ -94,3 +94,50 @@ pre {
 button {
   border-radius: 0 !important;
 }
+
+/* ── Document discipline — filed-paperwork structure in house tokens ── */
+
+body {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Section headings carry a 2px ink bottom rule */
+.vocs_H2,
+.vocs_Content h2 {
+  border-bottom: 2px solid var(--curb-ink);
+  padding-bottom: 0.3rem;
+}
+
+/* Tables: fully ruled boxes, header cells on the panel tone, uppercase micro-labels */
+.vocs_Content table {
+  border-collapse: collapse;
+  border: 1px solid var(--curb-ink);
+}
+
+.vocs_Content th,
+.vocs_Content td {
+  border: 1px solid var(--curb-line) !important;
+}
+
+.vocs_Content th {
+  background: var(--curb-panel);
+  color: var(--curb-mut);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Every docs page closes with a perforation bar + colophon line */
+.vocs_Content::after {
+  content: "Numetal Labs · CURB · Docs · Rev 2026-07-17 — filed at curb.numetal.xyz";
+  display: block;
+  margin-top: 3rem;
+  padding-top: calc(10px + 0.65rem);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--curb-mut);
+  background: repeating-linear-gradient(90deg, var(--curb-ink) 0 6px, transparent 6px 12px) top left / 100% 10px no-repeat;
+}

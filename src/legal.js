@@ -1,7 +1,16 @@
-import { pageShell, CONTACT } from "./skin.js";
+import { pageShell, mastRowsHtml, CONTACT } from "./skin.js";
+
+// Legal rev marks track the documents' own "last updated" date — furniture must not
+// imply a legal revision that did not happen.
+const LEGAL_REV = "2026-07-09";
+const DOC_TERMS = "CB-060";
+const DOC_PRIVACY = "CB-061";
 
 export function termsHtml(origin) {
   const body = `
+  <div class="masthead">
+    ${mastRowsHtml(DOC_TERMS, { rev: LEGAL_REV, status: "In force", org: "Numetal Labs · CURB" })}
+  </div>
   <article class="panel">
     <p class="meta">Last updated · 9 July 2026</p>
     <h1>Terms of Service</h1>
@@ -121,11 +130,15 @@ export function termsHtml(origin) {
     description: "Terms of Service for CURB (curb.numetal.xyz).",
     body,
     origin,
+    doc: { no: DOC_TERMS, rev: LEGAL_REV },
   });
 }
 
 export function privacyHtml(origin) {
   const body = `
+  <div class="masthead">
+    ${mastRowsHtml(DOC_PRIVACY, { rev: LEGAL_REV, status: "In force", org: "Numetal Labs · CURB" })}
+  </div>
   <article class="panel">
     <p class="meta">Last updated · 9 July 2026</p>
     <h1>Privacy Policy</h1>
@@ -218,5 +231,6 @@ export function privacyHtml(origin) {
     description: "Privacy Policy for CURB (curb.numetal.xyz).",
     body,
     origin,
+    doc: { no: DOC_PRIVACY, rev: LEGAL_REV },
   });
 }

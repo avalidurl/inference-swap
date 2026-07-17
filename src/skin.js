@@ -86,6 +86,7 @@ export const SHARED_CSS = `
   body {
     margin: 0; background: var(--bg); color: var(--fg);
     font-family: var(--sans); line-height: 1.45;
+    font-variant-numeric: tabular-nums;
     background-image:
       linear-gradient(var(--line) 1px, transparent 1px),
       linear-gradient(90deg, var(--line) 1px, transparent 1px);
@@ -117,8 +118,70 @@ export const SHARED_CSS = `
     letter-spacing: -0.04em; margin: 0 0 0.75rem; font-weight: 600;
   }
   h2 {
-    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--muted); margin: 1.25rem 0 0.65rem; font-weight: 500;
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--fg); margin: 1.25rem 0 0.65rem; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    border-bottom: 2px solid var(--fg); padding-bottom: 0.3rem;
+  }
+  h2 .sec-no { color: var(--muted); font-weight: 400; letter-spacing: 0.14em; white-space: nowrap; }
+  /* ── Document furniture — masthead / spec grid / doc tables / colophon ── */
+  .masthead {
+    border: 2px solid var(--fg); background: var(--panel);
+    padding: 0; margin-bottom: 1rem;
+  }
+  .mast-row {
+    display: flex; flex-wrap: wrap; justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+  .masthead > .mast-row:last-child, .masthead > .mast-title:last-child { border-bottom: 0; }
+  .mast-cell {
+    font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 0.45rem 0.9rem; border-right: 1px solid var(--line); flex: 1 1 auto;
+  }
+  .mast-cell:last-child { border-right: 0; }
+  .mast-cell b { color: var(--fg); font-weight: 600; }
+  .mast-title { padding: 1.15rem 0.95rem 1.25rem; border-bottom: 1px solid var(--line); }
+  .mast-title h1 { margin: 0.45rem 0 0.75rem; }
+  .mast-sub {
+    font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); margin: 0;
+  }
+  .stamp {
+    display: inline-block; border: 2px solid var(--fg); padding: 0.3rem 0.7rem;
+    font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--fg);
+    transform: rotate(-1.6deg); margin: 0.85rem 0 0.25rem;
+  }
+  .spec-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    border: 2px solid var(--fg); background: var(--panel); margin: 1rem 0;
+  }
+  .spec-cell { border: 1px solid var(--line); min-height: 5.2rem; padding: 0.6rem 0.8rem; }
+  .spec-cell .k {
+    display: block; font-family: var(--mono); font-size: 0.62rem;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+  .spec-cell b { display: block; font-family: var(--mono); font-size: 1.08rem; }
+  .spec-cell small { display: block; font-size: 0.68rem; color: var(--muted); margin-top: 0.3rem; }
+  .tblwrap { overflow-x: auto; }
+  table.doc { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.78rem; border: 1px solid var(--fg); }
+  table.doc th, table.doc td { border: 1px solid var(--line); padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+  table.doc th {
+    background: var(--code-bg); color: var(--muted); font-weight: 500;
+    font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  table.doc th.num, table.doc td.num { text-align: right; white-space: nowrap; }
+  .perf {
+    height: 10px; margin: 2rem 0 0.9rem;
+    background: repeating-linear-gradient(90deg, var(--fg) 0 6px, transparent 6px 12px);
+  }
+  .colophon {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.35rem 1.5rem;
+    border-top: 2px solid var(--fg); padding-top: 0.55rem; margin-top: 0.9rem;
+    font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
   }
   p { margin: 0 0 0.75rem; }
   p:last-child { margin-bottom: 0; }
@@ -153,9 +216,15 @@ export const SHARED_CSS = `
   article.post h1 { margin-bottom: 0.5rem; }
   article.post .lede { font-size: 1.05rem; color: var(--fg); margin-bottom: 1.1rem; }
   article.post h2 {
-    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--muted); margin: 1.6rem 0 0.65rem;
-    padding-top: 0.85rem; border-top: 1px solid var(--line); font-weight: 500;
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--fg); margin: 1.6rem 0 0.65rem;
+    border-bottom: 2px solid var(--fg); padding-bottom: 0.3rem; font-weight: 600;
+  }
+  article.post h1[id] {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--fg); margin: 1.6rem 0 0.65rem;
+    border-bottom: 2px solid var(--fg); padding-bottom: 0.3rem; font-weight: 600;
+    line-height: 1.45;
   }
   article.post ol.flow, article.post ul.live {
     margin: 0 0 0.85rem; padding-left: 1.2rem;
@@ -180,7 +249,7 @@ export const SHARED_CSS = `
   .blog-card-title {
     font-family: var(--mono); font-size: 1.15rem; letter-spacing: -0.03em;
     margin: 0.35rem 0 0.5rem; font-weight: 600; text-transform: none;
-    color: var(--fg);
+    color: var(--fg); display: block; border-bottom: 0; padding-bottom: 0;
   }
   .blog-card-excerpt { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem; }
   .blog-card-more {
@@ -188,6 +257,50 @@ export const SHARED_CSS = `
     text-transform: uppercase; color: var(--fg);
   }
 `;
+
+/** House revision mark for document furniture (masthead + colophon). */
+export const DOC_REV = "2026-07-17";
+
+/**
+ * Top meta strip of a document masthead: org · doc no + rev · status.
+ * Text is uppercased by CSS — write normal case here.
+ */
+export function mastRowsHtml(docNo, { rev = DOC_REV, status = "In service", org = "Numetal Labs · Engineering Bureau" } = {}) {
+  return `<div class="mast-row">
+      <span class="mast-cell">${org}</span>
+      <span class="mast-cell"><b>Doc ${docNo}</b> · Rev ${rev}</span>
+      <span class="mast-cell">Status: ${status}</span>
+    </div>`;
+}
+
+/**
+ * Full document masthead box: meta row, title block (subtitle + h1 + body + stamp),
+ * optional bottom meta row. `body` is trusted HTML (lede/nav from our own templates).
+ */
+export function mastheadHtml({ docNo, rev, status, org, sub, title, body = "", stamp, bottom = [] }) {
+  const bottomRow = bottom.length
+    ? `<div class="mast-row">${bottom.map((c) => `<span class="mast-cell">${c}</span>`).join("")}</div>`
+    : "";
+  return `<header class="masthead">
+    ${mastRowsHtml(docNo, { rev, status, org })}
+    <div class="mast-title">
+      ${sub ? `<p class="mast-sub">${sub}</p>` : ""}
+      ${title ? `<h1>${title}</h1>` : ""}
+      ${body}
+      ${stamp ? `<span class="stamp">${stamp}</span>` : ""}
+    </div>
+    ${bottomRow}
+  </header>`;
+}
+
+/** Perforation bar + colophon — the closing furniture of every page. */
+export function docColophonHtml(doc = {}) {
+  const no = doc.no || "CB-000";
+  const rev = doc.rev || DOC_REV;
+  const note = doc.note || `Filed at curb.numetal.xyz · ${CONTACT}`;
+  return `<div class="perf" role="presentation" aria-hidden="true"></div>
+<div class="colophon"><span>Numetal Labs · CURB · Doc ${no} · Rev ${rev}</span><span>${note}</span></div>`;
+}
 
 export function themeBootScript() {
   return `<script>(function(){try{var t=null;try{var m=document.cookie.match(/(?:^|; )curb-theme=(light|dim)(?:;|$)/);if(m)t=m[1];}catch(e){}if(!t){try{t=localStorage.getItem("curb-theme");}catch(e){}}if(t==="light"||t==="dim")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>`;
@@ -206,6 +319,7 @@ export function pageShell({
   ogImage,
   ogWidth = 1500,
   ogHeight = 600,
+  doc,
 }) {
   const canon = canonical || origin;
   const og = ogImage
@@ -248,14 +362,14 @@ ${themeBootScript()}
     <button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button>
   </div>
   ${body}
-  ${footerHtml()}
+  ${footerHtml(doc)}
 </div>
 ${themeToggleScript()}
 </body>
 </html>`;
 }
 
-export function footerHtml() {
+export function footerHtml(doc) {
   return `<nav class="foot-nav" aria-label="Site">
   <a href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
   <a href="/deck" title="CURB pitch deck — 15 slides, hosted + PDF">deck</a>
@@ -274,5 +388,6 @@ export function footerHtml() {
   by <a href="https://gokhan.vc" title="Atelier Gökhan Turhan VC — venture studio">Atelier Gökhan Turhan VC</a><br/>
   <a href="mailto:${CONTACT}" title="Public contact for Numetal / CURB">${CONTACT}</a>
   · product mail Curb &lt;curb@numetal.xyz&gt;
-</footer>`;
+</footer>
+${docColophonHtml(doc)}`;
 }

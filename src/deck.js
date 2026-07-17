@@ -155,6 +155,9 @@ table.tx a { color: var(--fg); text-underline-offset: 2px; }
 .deck-top .brand { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--fg); }
 .deck-top .brand img { width: 18px; height: 18px; display: block; }
 [data-theme="dim"] .deck-top .brand img { filter: invert(1); }
+.deck-top .deck-doc { color: var(--muted); letter-spacing: 0.12em; white-space: nowrap; }
+.deck-top .deck-doc b { color: var(--fg); font-weight: 600; }
+@media (max-width: 860px) { .deck-top .deck-doc { display: none; } }
 .deck-top .btns { display: flex; flex-wrap: wrap; gap: 0.45rem; justify-content: flex-end; }
 .deck-top button, .deck-top .btn-link {
   border: 1px solid var(--line); background: transparent; color: var(--muted);
@@ -725,6 +728,7 @@ ${themeBootScript()}
 <body class="deck-root">
 <div class="deck-top">
   <a class="brand" href="/" title="CURB home"><img src="/assets/curb-sun.svg" alt="" width="18" height="18"/><span>CURB</span></a>
+  <span class="deck-doc"><b>Doc CB-030</b> · Rev 2026-07-17 · Status: In service</span>
   <div class="btns">
     <a class="btn-link hot" href="${pdf}" download>Download PDF</a>
     <a class="btn-link" href="${md}">deck.md</a>

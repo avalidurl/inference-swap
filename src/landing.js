@@ -1,5 +1,7 @@
 /** CURB — dimmed B&W one-pager + light toggle. Explorer grammar, not a clone of x402scan. */
-import { footerHtml, SHARED_CSS, themeBootScript, themeToggleScript } from "./skin.js";
+import { footerHtml, mastheadHtml, DOC_REV, SHARED_CSS, themeBootScript, themeToggleScript } from "./skin.js";
+
+const DOC_NO = "CB-001";
 
 export function landingHtml(origin, stats, apiOrigin = "https://api.curb.numetal.xyz") {
   const feeBps = stats.feeBps ?? 500;
@@ -19,23 +21,7 @@ export function landingHtml(origin, stats, apiOrigin = "https://api.curb.numetal
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 ${SHARED_CSS}
-  header {
-    border: 1px solid var(--line); background: var(--panel);
-    padding: 1.5rem 1.25rem; margin-bottom: 1rem;
-  }
-  .eyebrow {
-    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--muted); margin: 0 0 0.75rem;
-  }
   .lede { margin: 0.75rem 0 0; color: var(--muted); max-width: 42rem; font-size: 1.05rem; }
-  .stats {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
-    background: var(--line); border: 1px solid var(--line); margin: 1rem 0;
-  }
-  .stat { background: var(--panel); padding: 0.85rem 1rem; }
-  .stat b { display: block; font-family: var(--mono); font-size: 1.25rem; }
-  .stat span { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
-  @media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
   h3 { font-family: var(--mono); font-size: 0.95rem; margin: 1rem 0 0.4rem; font-weight: 500; }
   ol.eli5 { margin: 0; padding-left: 1.2rem; color: var(--fg); }
   ol.eli5 li { margin-bottom: 0.45rem; }
@@ -72,18 +58,18 @@ ${SHARED_CSS}
   }
   .demo-banner code { font-size: 0.72rem; }
   @media (max-width: 900px) { .roles { grid-template-columns: 1fr; } }
-  .humans { text-align: center; padding: 2.25rem 1.5rem 2rem; }
+  .humans { padding: 1.5rem 1.25rem 1.5rem; }
   .humans h2 { margin-bottom: 1rem; }
   .humans .pull {
     font-family: var(--mono); font-size: clamp(1.15rem, 2.8vw, 1.55rem);
-    letter-spacing: -0.03em; line-height: 1.35; margin: 0 auto 1rem; max-width: 28rem;
+    letter-spacing: -0.03em; line-height: 1.35; margin: 0 0 1rem; max-width: 28rem;
     font-weight: 500;
   }
   .humans .soft {
-    color: var(--muted); max-width: 32rem; margin: 0 auto 1.35rem; font-size: 1.02rem;
+    color: var(--muted); max-width: 32rem; margin: 0 0 1.35rem; font-size: 1.02rem;
   }
   .humans .cta-row {
-    display: flex; flex-wrap: wrap; gap: 0.65rem; justify-content: center;
+    display: flex; flex-wrap: wrap; gap: 0.65rem;
     font-family: var(--mono); font-size: 0.78rem;
   }
   .humans .cta-row a {
@@ -104,9 +90,6 @@ ${SHARED_CSS}
   }
   .nav a { border: 1px solid var(--fg); padding: 0.4rem 0.65rem; text-decoration: none; }
   .nav a:hover { background: var(--fg); color: var(--bg); }
-  table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.78rem; }
-  th, td { text-align: left; padding: 0.45rem 0.35rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 500; }
   .not { color: var(--muted); }
   .def {
     font-family: var(--mono); font-weight: 600;
@@ -126,10 +109,12 @@ ${themeBootScript()}
     </a>
     <button type="button" class="theme-btn" id="theme-toggle" aria-label="Toggle light and dim theme">Light</button>
   </div>
-  <header>
-    <p class="eyebrow">Numetal · CURB · x402 · Base</p>
-    <h1>Agents trade inference.<br/>We clear the swap.</h1>
-    <p class="lede">CURB is the <strong>swap rail</strong>: peer-to-peer sell offers and buy intents, matched on the hub, settled single-payee (buyer pays gross once; fees split on-chain). Product path: wire <code>${api}/mcp</code> + skill into <em>your</em> harness. Demo seller/buyer agents are reference only — the hub never holds upstream LLM keys; USDC signs outside via pay / agentcash.</p>
+  ${mastheadHtml({
+    docNo: DOC_NO,
+    status: "In service",
+    sub: "Numetal · CURB · x402 · Base",
+    title: "Agents trade inference.<br/>We clear the swap.",
+    body: `<p class="lede">CURB is the <strong>swap rail</strong>: peer-to-peer sell offers and buy intents, matched on the hub, settled single-payee (buyer pays gross once; fees split on-chain). Product path: wire <code>${api}/mcp</code> + skill into <em>your</em> harness. Demo seller/buyer agents are reference only — the hub never holds upstream LLM keys; USDC signs outside via pay / agentcash.</p>
     <div class="nav">
       <a href="https://harness.curb.numetal.xyz/" title="Demo harness hub — seller + buyer (reference)">Demo harness</a>
       <a href="https://seller.curb.numetal.xyz/" title="Demo seller agent — posts offers, fulfills">Demo seller</a>
@@ -139,17 +124,19 @@ ${themeBootScript()}
       <a href="/docs/" title="Diátaxis docs — tutorials, how-to, explanation, reference">Docs</a>
       <a href="/dispatch" title="CURB dispatches">Dispatch</a>
       <a href="/fees" title="CURB token address, pool, and fee wallets">Token &amp; fees</a>
-    </div>
-  </header>
+    </div>`,
+    stamp: "Swap rail — clears on Base",
+    bottom: ["Canonical: curb.numetal.xyz", "Settlement: x402 USDC · eip155:8453"],
+  })}
 
-  <div class="stats">
-    <div class="stat"><b>${stats.openOffers ?? 0}</b><span>open offers</span></div>
-    <div class="stat"><b>${stats.matches ?? 0}</b><span>matches</span></div>
-    <div class="stat"><b>${feePct}%</b><span>protocol fee</span></div>
+  <div class="spec-grid" role="group" aria-label="Live counters">
+    <div class="spec-cell"><span class="k">Open offers</span><b>${stats.openOffers ?? 0}</b><small>sell-side book, live count</small></div>
+    <div class="spec-cell"><span class="k">Matches</span><b>${stats.matches ?? 0}</b><small>offer ↔ intent pairs</small></div>
+    <div class="spec-cell"><span class="k">Protocol fee</span><b>${feePct}%</b><small>per cleared match · min $0.001</small></div>
   </div>
 
   <section>
-    <h2>What CURB is</h2>
+    <h2><span>What CURB is</span> <span class="sec-no">§1</span></h2>
     <p class="def">CURB is agent-to-agent excess inference swap.</p>
     <p class="problem">Agents with spare inference capacity have no machine-native way to sell it, and agents that need inference must fall back on retail gateways or human API keys — so idle capacity is wasted and every call pays a middleman markup.</p>
     <p>A machine-native loop: <em>offer → match → pay seller + hub → grant → fulfill</em>. Not a retail gateway. Not a hosted LLM. Sellers fulfill on their own HTTPS endpoint.</p>
@@ -167,7 +154,7 @@ ${themeBootScript()}
   </section>
 
   <section>
-    <h2>Demo agents — seller &amp; buyer <span class="demo-tag">Demo</span></h2>
+    <h2><span>Demo agents — seller &amp; buyer <span class="demo-tag">Demo</span></span> <span class="sec-no">§2</span></h2>
     <p class="demo-banner"><strong>Demo / reference only — not the product path.</strong> These Cloudflare Agents SDK agents exist for the pitch. Production: add <code>${api}/mcp</code> (and <code>${api}/skill.md</code>) to <em>your</em> harness.</p>
     <p>They call <code>addMcpServer('curb', '${api}/mcp')</code> the same way your agent should. Copy the pattern; do not treat seller/buyer/harness as the product.</p>
     <div class="roles">
@@ -193,7 +180,7 @@ ${themeBootScript()}
   </section>
 
   <section>
-    <h2>ELI5</h2>
+    <h2><span>ELI5</span> <span class="sec-no">§3</span></h2>
     <ol class="eli5">
       <li><strong>Seller agent</strong> posts: “I’ll sell 10MTok of llama-70b at my HTTPS endpoint; pay my wallet.”</li>
       <li><strong>Buyer agent</strong> posts: “I’ll buy 2MTok of that model under $X.”</li>
@@ -204,7 +191,7 @@ ${themeBootScript()}
   </section>
 
   <section class="humans">
-    <h2>For humans</h2>
+    <h2><span>For humans</span> <span class="sec-no">§4</span></h2>
     <p class="pull">A quiet window onto a machine market.</p>
     <p class="soft">This page is the foyer — live counts, demo agents for the pitch, and the real install path (MCP + skill into your harness). Docs are Diátaxis: tutorials, how-to, explanation, reference.</p>
     <div class="cta-row">
@@ -216,8 +203,9 @@ ${themeBootScript()}
   </section>
 
   <section>
-    <h2>For agents</h2>
-    <table class="agents-table">
+    <h2><span>For agents</span> <span class="sec-no">§5</span></h2>
+    <div class="tblwrap">
+    <table class="doc agents-table">
       <tr><th>Surface</th><th>Use</th></tr>
       <tr><td>API</td><td><a href="${api}/" title="API root catalog"><code>${api}</code></a></td></tr>
       <tr><td>Skill</td><td><a href="${api}/skill.md" title="Agent skill markdown"><code>/skill.md</code></a></td></tr>
@@ -226,10 +214,11 @@ ${themeBootScript()}
       <tr><td>REST</td><td><code>/v1/offers</code> · <code>/v1/intents</code> · <code>/v1/matches/:id/pay</code></td></tr>
       <tr><td>Discovery</td><td><code>/.well-known/x402</code> · OpenAPI · <a href="/docs/" title="Human docs">/docs</a></td></tr>
     </table>
+    </div>
   </section>
 
   <section>
-    <h2>Minimal code</h2>
+    <h2><span>Minimal code</span> <span class="sec-no">§6</span></h2>
     <h3>1 · Sell</h3>
 <pre>curl -sS ${api}/v1/offers -H 'content-type: application/json' -d '{
   "sellerPayTo": "0xYourBaseAddress",
@@ -261,12 +250,12 @@ ${themeBootScript()}
   </section>
 
   <section>
-    <h2>Settlement</h2>
+    <h2><span>Settlement</span> <span class="sec-no">§7</span></h2>
     <p>Settlement is x402 USDC on <strong>Base</strong> (<code>eip155:8453</code>). Buyer pays gross once to an on-chain <strong>0xSplits</strong> split; seller + protocol fee (<strong>${feePct}%</strong>, min $0.001) are split on-chain. Split <code>payTo</code> in <code>${api}/.well-known/x402</code>.</p>
     <p class="not">Pay the match challenge outside the agents (pay MCP / agentcash); the hub returns a short-lived grant to the seller’s endpoint. Upstream keys stay with the seller.</p>
   </section>
 
-  ${footerHtml()}
+  ${footerHtml({ no: DOC_NO, rev: DOC_REV })}
 </div>
 ${themeToggleScript()}
 </body>

@@ -1,4 +1,11 @@
-import { pageShell } from "./skin.js";
+import { pageShell, mastheadHtml, mastRowsHtml, DOC_REV } from "./skin.js";
+
+// House doc numbers for the dispatch shelf (furniture only — slugs/copy untouched).
+const DOC_DISPATCH_INDEX = "CB-040";
+const DOC_LAUNCH = "CB-041";
+const DOC_TICKERLINE = "CB-042";
+const DOC_X402 = "CB-043";
+const DOC_NEWSLETTER = "CB-050";
 
 /**
  * CURB launch dispatch — long-form post + /dispatch index (cards).
@@ -63,7 +70,7 @@ export function launchBodyHtml(origin) {
       We never hold upstream LLM keys. The product path is wiring <code>https://api.curb.numetal.xyz/mcp</code> (and skill) into <em>your</em> harness — live <strong>seller</strong> and <strong>buyer</strong> agents on Cloudflare are demos for the pitch, not what you ship against.
     </p>
 
-    <h2>The problem</h2>
+    <h2><span>The problem</span> <span class="sec-no">§1</span></h2>
     <p>
       Agents that need tokens — or have spare capacity — still go through retail gateways, or they borrow a human’s API key.
       Gateways resell models and keep the keys. Explorers list endpoints for people to click.
@@ -73,7 +80,7 @@ export function launchBodyHtml(origin) {
       So inference stays stuck behind human wallets and hosted middlemen. Peer-to-peer trade between agents doesn’t clear.
     </p>
 
-    <h2>How CURB solves it</h2>
+    <h2><span>How CURB solves it</span> <span class="sec-no">§2</span></h2>
     <p>One loop:</p>
     <ol class="flow">
       <li><strong>Offer</strong> — a seller advertises endpoint, model, mtok, price, and payTo.</li>
@@ -87,7 +94,7 @@ export function launchBodyHtml(origin) {
       If you already sell inference (or want to buy it from another agent), you talk to CURB in agent-native formats — not a dashboard that holds your keys.
     </p>
 
-    <h2>Lean stack</h2>
+    <h2><span>Lean stack</span> <span class="sec-no">§3</span></h2>
     <p>
       Cloudflare Worker + KV for the rail. Demo / reference agents on the Cloudflare Agents SDK call the same MCP any client would — for the pitch only.
       Payments: USDC on x402 on Base (eip155:8453); fees split on-chain via a 0xSplits split. Settlement signs via pay / agentcash <em>outside</em> the agents — the hub never holds private keys.
@@ -98,7 +105,7 @@ export function launchBodyHtml(origin) {
       <a href="${origin}/fees">fees page</a>. Token page is there too if you want the Base listing — not required to trade.
     </p>
 
-    <h2>What’s live</h2>
+    <h2><span>What’s live</span> <span class="sec-no">§4</span></h2>
     <ul class="live">
       <li><a href="${origin}/">curb.numetal.xyz</a> — marketing + this dispatch</li>
       <li><a href="https://api.curb.numetal.xyz/">api.curb.numetal.xyz</a> — agent API (offers, intents, match, pay, MCP)</li>
@@ -114,7 +121,7 @@ export function launchBodyHtml(origin) {
       Paid surfaces return a live 402 with every enabled rail in <code>accepts[]</code> — read that before you sign.
     </p>
 
-    <h2>Go</h2>
+    <h2><span>Go</span> <span class="sec-no">§5</span></h2>
     <p>
       Product path: add <code>https://api.curb.numetal.xyz/mcp</code> to your harness (see <a href="${origin}/install">/install</a>).
       Demo seller/buyer are live for the pitch — poke the <a href="https://harness.curb.numetal.xyz/">harness</a> if you want, then wire the API yourself.
@@ -154,7 +161,10 @@ export function dispatchLaunchHtml(origin) {
   const { title, path, description } = DISPATCH_LAUNCH;
   const canonical = `${origin}${path}`;
   const ogImage = `${origin}/assets/og-curb-launch.png`;
-  const body = `<article class="panel post">${launchBodyHtml(origin)}</article>`;
+  const body = `<div class="masthead">
+    ${mastRowsHtml(DOC_LAUNCH, { status: "Filed", org: "Numetal Labs · CURB · Dispatch" })}
+  </div>
+  <article class="panel post">${launchBodyHtml(origin)}</article>`;
   return pageShell({
     title: `${title} — CURB`,
     description,
@@ -164,6 +174,7 @@ export function dispatchLaunchHtml(origin) {
     ogImage,
     ogWidth: 1500,
     ogHeight: 600,
+    doc: { no: DOC_LAUNCH },
   });
 }
 
@@ -192,14 +203,14 @@ export function tickerlineBodyHtml(origin) {
       from its own wallet — end to end, terminal to listing.
     </p>
 
-    <h2>$TICKER</h2>
+    <h2><span>$TICKER</span> <span class="sec-no">§1</span></h2>
     <p>
       tickerline now trades as TICKERLINE ($TICKER) on Robinhood Chain — <code>0x02c67c0F6Fef5065aF1C78F337a8bEE386b6BbA3</code> —
       launched through <a href="https://bankr.bot/terminal/discover/0x02c67c0F6Fef5065aF1C78F337a8bEE386b6BbA3">Bankr</a>
       off the announcement post. A memecoin, not equity; the status line itself stays free.
     </p>
 
-    <h2>Go</h2>
+    <h2><span>Go</span> <span class="sec-no">§2</span></h2>
     <ul class="live">
       <li><a href="https://claudelines.com/statuslines/tickerline">claudelines.com/statuslines/tickerline</a> — the listing, audited, free to install</li>
       <li><a href="https://github.com/avalidurl/tickerline">github.com/avalidurl/tickerline</a> — source, MIT</li>
@@ -219,13 +230,17 @@ export function tickerlineBodyHtml(origin) {
 
 export function dispatchTickerlineHtml(origin) {
   const { title, description, canonical } = DISPATCH_TICKERLINE;
-  const body = `<article class="panel post">${tickerlineBodyHtml(origin)}</article>`;
+  const body = `<div class="masthead">
+    ${mastRowsHtml(DOC_TICKERLINE, { status: "Filed · syndicated", org: "Numetal Labs · CURB · Dispatch" })}
+  </div>
+  <article class="panel post">${tickerlineBodyHtml(origin)}</article>`;
   return pageShell({
     title: `${title} — CURB`,
     description,
     body,
     origin,
     canonical, // syndicated mirror — canonical stays on numetal.xyz
+    doc: { no: DOC_TICKERLINE },
   });
 }
 
@@ -548,13 +563,17 @@ export function x402BodyHtml(origin) {
 
 export function dispatchX402Html(origin) {
   const { title, description, canonical } = DISPATCH_X402;
-  const body = `<article class="panel post">${x402BodyHtml(origin)}</article>`;
+  const body = `<div class="masthead">
+    ${mastRowsHtml(DOC_X402, { status: "Filed · syndicated", org: "Numetal Labs · CURB · Dispatch" })}
+  </div>
+  <article class="panel post">${x402BodyHtml(origin)}</article>`;
   return pageShell({
     title: `${title} — CURB`,
     description,
     body,
     origin,
     canonical, // syndicated mirror — canonical stays on gokhan.vc
+    doc: { no: DOC_X402 },
   });
 }
 
@@ -582,11 +601,15 @@ export function dispatchIndexHtml(origin) {
     })
     .join("\n");
   const body = `
-  <header class="panel">
-    <p class="meta">CURB · Dispatch</p>
-    <h1>Dispatch</h1>
-    <p class="muted">Notes from the inference swap. Newsletter is separate — this is for reading posts.</p>
-  </header>
+  ${mastheadHtml({
+    docNo: DOC_DISPATCH_INDEX,
+    status: "Open series",
+    org: "Numetal Labs · CURB · Dispatch",
+    sub: "CURB · Dispatch",
+    title: "Dispatch",
+    body: `<p class="muted">Notes from the inference swap. Newsletter is separate — this is for reading posts.</p>`,
+    bottom: ["Canonical: curb.numetal.xyz/dispatch", "Feed: /feed.xml"],
+  })}
   <section class="blog-cards" aria-label="Dispatches">
 ${cards}
   </section>
@@ -602,6 +625,7 @@ ${cards}
     ogImage,
     ogWidth: 1500,
     ogHeight: 600,
+    doc: { no: DOC_DISPATCH_INDEX },
   });
 }
 
@@ -702,6 +726,9 @@ ${urls}
 
 export function newsletterHtml(origin) {
   const body = `
+  <div class="masthead">
+    ${mastRowsHtml(DOC_NEWSLETTER, { status: "Open list", org: "Numetal Labs · CURB" })}
+  </div>
   <article class="panel">
     <h1>Newsletter</h1>
     <p class="muted">
@@ -725,5 +752,6 @@ export function newsletterHtml(origin) {
     description: "Subscribe to the CURB / Numetal estate newsletter.",
     body,
     origin,
+    doc: { no: DOC_NEWSLETTER },
   });
 }
