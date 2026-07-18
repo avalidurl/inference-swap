@@ -1029,6 +1029,9 @@ export function dispatchIndexHtml(origin) {
     body: `<p class="muted">Notes from the inference swap. Newsletter is separate — this is for reading posts.</p>`,
     bottom: ["Canonical: curb.numetal.xyz/dispatch", "Feed: /feed.xml"],
   })}
+  <p class="muted" style="margin-top:0.5rem">
+    Read them here or → <a href="${origin}/newsletter">subscribe</a> · <a href="${origin}/feed.xml">RSS</a>
+  </p>
   <section class="blog-cards" aria-label="Dispatches">
 ${cards}
   </section>
