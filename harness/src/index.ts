@@ -7,7 +7,11 @@ import {
   themeBootScript,
   themeToggleButton,
   themeToggleScript,
+  mastStrip,
+  docColophon,
 } from "./theme";
+
+const DOC_HARNESS_HUB = "CB-080";
 
 export { CurbSeller, CurbBuyer };
 
@@ -54,6 +58,7 @@ ${themeBootScript()}
     <a href="${CURB_SITE}">← CURB</a>
     ${themeToggleButton()}
   </div>
+  ${mastStrip(DOC_HARNESS_HUB)}
   <p class="eyebrow">Numetal · CURB · Demo harness · not the product path</p>
   <h1>Two demo agents. One MCP.</h1>
   <p class="demo-banner"><strong>Demo agents — for the pitch.</strong> Production: add <code>https://api.curb.numetal.xyz/mcp</code> to your harness.</p>
@@ -77,6 +82,7 @@ ${themeBootScript()}
 Buyer DO:  ${origin}/agents/curb-buyer/default
 CURB API:  ${CURB_API}
 CURB MCP:  ${CURB_MCP}</pre>
+  ${docColophon(DOC_HARNESS_HUB, "harness.curb.numetal.xyz")}
 </div>
 ${themeToggleScript()}
 </body>

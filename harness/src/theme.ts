@@ -28,7 +28,40 @@ a { color: var(--fg); text-underline-offset: 3px; }
   padding: 0.4rem 0.7rem; cursor: pointer;
 }
 .theme-btn:hover { color: var(--fg); border-color: var(--fg); }
+/* Document furniture — masthead strip, perforation bar, colophon */
+.mast-strip {
+  display: flex; flex-wrap: wrap; border: 2px solid var(--fg); background: var(--panel);
+  margin: 0 0 1rem; font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+}
+.mast-strip span { padding: 0.45rem 0.9rem; border-right: 1px solid var(--line); flex: 1 1 auto; }
+.mast-strip span:last-child { border-right: 0; }
+.mast-strip b { color: var(--fg); font-weight: 600; }
+.perf {
+  height: 10px; margin: 2rem 0 0.9rem;
+  background: repeating-linear-gradient(90deg, var(--fg) 0 6px, transparent 6px 12px);
+}
+.colophon {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.35rem 1.5rem;
+  border-top: 2px solid var(--fg); padding-top: 0.55rem; margin-top: 0.9rem;
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+}
 `;
+
+/** House revision mark for document furniture. */
+export const DOC_REV = "2026-07-17";
+
+/** Masthead meta strip: org · doc no + rev · status. */
+export function mastStrip(docNo: string, status = "Demo / reference"): string {
+  return `<div class="mast-strip"><span>Numetal Labs · Engineering Bureau</span><span><b>Doc ${docNo}</b> · Rev ${DOC_REV}</span><span>Status: ${status}</span></div>`;
+}
+
+/** Perforation bar + colophon — closing furniture of every page. */
+export function docColophon(docNo: string, filedAt: string): string {
+  return `<div class="perf" role="presentation" aria-hidden="true"></div>
+<div class="colophon"><span>Numetal Labs · CURB · Doc ${docNo} · Rev ${DOC_REV}</span><span>Filed at ${filedAt} · contact@numetal.xyz</span></div>`;
+}
 
 /** Boot before paint: cookie (cross-subdomain) then localStorage. */
 export function themeBootScript(): string {

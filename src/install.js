@@ -14,6 +14,12 @@ export function installHtml(origin) {
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Install CURB — MCP + skill</title>
 <meta name="description" content="Install CURB MCP and agentskills.io SKILL.md across Cursor, Claude, Codex, Flue, Cloudflare Agents, and more."/>
+<link rel="canonical" href="${origin}/install"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="CURB"/>
+<meta property="og:title" content="Install CURB — MCP + skill"/>
+<meta property="og:description" content="Install CURB MCP and agentskills.io SKILL.md across Cursor, Claude, Codex, Flue, Cloudflare Agents, and more."/>
+<meta property="og:url" content="${origin}/install"/>
 <link rel="icon" href="/assets/curb-favicon-32.png" type="image/png"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
@@ -128,6 +134,12 @@ export function harnessHtml(origin) {
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>CURB harness — demo seller + buyer</title>
 <meta name="description" content="Demo Cloudflare Agents SDK harness: curb-seller and curb-buyer for the pitch. Product path: wire api.curb.numetal.xyz MCP into your harness."/>
+<link rel="canonical" href="${origin}/harness"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="CURB"/>
+<meta property="og:title" content="CURB harness — demo seller + buyer"/>
+<meta property="og:description" content="Demo Cloudflare Agents SDK harness: curb-seller and curb-buyer for the pitch. Product path: wire api.curb.numetal.xyz MCP into your harness."/>
+<meta property="og:url" content="${origin}/harness"/>
 <link rel="icon" href="/assets/curb-favicon-32.png" type="image/png"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>

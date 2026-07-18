@@ -44,9 +44,16 @@ html, body.deck-root {
   font-family: var(--sans); line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
+body.deck-root {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px; background-position: -1px -1px;
+}
 .deck { position: fixed; inset: 0; overflow: hidden; }
 .deck-track {
   display: flex; height: 100%; width: 100%;
+  counter-reset: docsec;
   transition: transform var(--slide-dur) cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
@@ -55,14 +62,46 @@ html, body.deck-root {
   display: flex; flex-direction: column; justify-content: center;
   padding: calc(var(--deck-pad) + var(--deck-top-h)) var(--deck-pad) var(--deck-pad);
   position: relative;
+  counter-increment: docsec;
 }
 .slide-inner { max-width: var(--deck-max); width: 100%; margin: 0 auto; }
 .kicker {
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--muted); margin: 0 0 0.9rem;
+  position: relative; padding-right: 3.5rem;
+  border-bottom: 2px solid var(--fg); padding-bottom: 0.35rem;
+}
+.kicker::after {
+  content: "§ " counter(docsec); position: absolute; right: 0; bottom: 0.35rem;
+  color: var(--muted); letter-spacing: 0.14em; white-space: nowrap;
 }
 .kicker em { color: var(--fg); font-style: normal; font-weight: 600; }
-.rule { width: 3rem; height: 2px; background: var(--fg); margin: 0 0 1.15rem; }
+/* section rule now carried by the kicker itself */
+.rule { display: none; }
+.deck-mast {
+  display: flex; flex-wrap: wrap; border: 2px solid var(--fg);
+  margin: 0 0 1.15rem; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+}
+.deck-mast span { padding: 0.45rem 0.8rem; border-right: 1px solid var(--line); flex: 1 1 auto; }
+.deck-mast span:last-child { border-right: 0; }
+.deck-mast b { color: var(--fg); font-weight: 600; }
+.deck-stamp {
+  display: inline-block; border: 2px solid var(--fg); padding: 0.3rem 0.7rem;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--fg); transform: rotate(-1.6deg);
+  margin-top: 1.15rem;
+}
+.deck-perf {
+  height: 10px; margin: 1.6rem 0 0.7rem;
+  background: repeating-linear-gradient(90deg, var(--fg) 0 6px, transparent 6px 12px);
+}
+.deck-colophon {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.35rem 1.5rem;
+  border-top: 2px solid var(--fg); padding-top: 0.5rem;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+}
 .slide h1 {
   font-family: var(--mono); font-size: clamp(1.7rem, 4.8vw, 3rem); font-weight: 600;
   line-height: 1.1; letter-spacing: -0.035em; margin: 0 0 1.1rem; max-width: 20ch;
@@ -227,7 +266,12 @@ function slidesHtml(siteOrigin, apiOrigin) {
       n: 1,
       label: "Cover",
       cls: "title-slide is-active",
-      inner: `        <p class="kicker" data-animate><em>Numetal Labs</em> · Atelier Gökhan Turhan · 2026</p>
+      inner: `        <div class="deck-mast" data-animate>
+          <span>Numetal Labs · Engineering Bureau</span>
+          <span><b>Doc CB-030</b> · Rev 2026-07-17</span>
+          <span>Status: In service</span>
+        </div>
+        <p class="kicker" data-animate><em>Numetal Labs</em> · Atelier Gökhan Turhan · 2026</p>
         <h1 data-animate>CURB — the clearing rail for agent inference.</h1>
         <p class="lead" data-animate>Agents sell excess model capacity to agents. CURB matches the swap, settles USDC on Base, and splits the money on-chain — <strong>never touching the model, keys, or funds</strong>.</p>
         <div class="brands" data-animate>
@@ -240,7 +284,8 @@ function slidesHtml(siteOrigin, apiOrigin) {
           <a class="btn-dl" href="${pdf}" download>Download PDF</a>
           <a class="btn-ghost" href="${md}">deck.md for LLMs</a>
         </div>
-        <p class="title-hint" data-animate>Navigate with <kbd>←</kbd> <kbd>→</kbd> or <kbd>space</kbd> · swipe on touch</p>`,
+        <p class="title-hint" data-animate>Navigate with <kbd>←</kbd> <kbd>→</kbd> or <kbd>space</kbd> · swipe on touch</p>
+        <span class="deck-stamp" data-animate>Investor exhibit — clears on Base</span>`,
     })
   );
 
@@ -501,7 +546,9 @@ function slidesHtml(siteOrigin, apiOrigin) {
           <li data-animate>Wire the rail: <strong>${apiOrigin}/mcp</strong> + <strong>/skill.md</strong> into your harness.</li>
           <li data-animate>Verify the loop yourself on Basescan (slide 8) · read the <a href="${siteOrigin}/docs/">docs</a> · <a href="${md}">deck.md</a>.</li>
         </ul>
-        <p class="fine" data-animate>Appendix — Split ${TX.splitAddr.slice(0, 6)}…${TX.splitAddr.slice(-4)} on Base · USDC settlement (eip155:8453) · fee 500 bps, min $0.001 · seller ~95% / hub ~5%. Invitation to a conversation, not an offer or solicitation; not investment or legal advice.</p>`,
+        <p class="fine" data-animate>Appendix — Split ${TX.splitAddr.slice(0, 6)}…${TX.splitAddr.slice(-4)} on Base · USDC settlement (eip155:8453) · fee 500 bps, min $0.001 · seller ~95% / hub ~5%. Invitation to a conversation, not an offer or solicitation; not investment or legal advice.</p>
+        <div class="deck-perf" role="presentation" aria-hidden="true"></div>
+        <div class="deck-colophon" data-animate><span>Numetal Labs · CURB · Doc CB-030 · Rev 2026-07-17</span><span>Filed at curb.numetal.xyz/deck · contact@numetal.xyz</span></div>`,
     })
   );
 

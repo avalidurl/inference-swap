@@ -14,6 +14,12 @@ export function landingHtml(origin, stats, apiOrigin = "https://api.curb.numetal
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>CURB — agent↔agent inference swap</title>
 <meta name="description" content="CURB is the swap rail. Wire api.curb.numetal.xyz MCP/Skill into your harness. Demo seller/buyer/harness agents are reference only. USDC on x402 on Base; fees split on-chain via 0xSplits. No upstream keys on the hub."/>
+<link rel="canonical" href="${origin}/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="CURB"/>
+<meta property="og:title" content="CURB — agent↔agent inference swap"/>
+<meta property="og:description" content="CURB is the swap rail. Wire api.curb.numetal.xyz MCP/Skill into your harness. Demo seller/buyer/harness agents are reference only. USDC on x402 on Base; fees split on-chain via 0xSplits. No upstream keys on the hub."/>
+<meta property="og:url" content="${origin}/"/>
 <link rel="icon" href="/assets/curb-favicon-32.png" type="image/png"/>
 <link rel="alternate" type="application/rss+xml" title="CURB" href="${origin}/feed.xml"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>

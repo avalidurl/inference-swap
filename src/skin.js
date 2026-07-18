@@ -173,6 +173,14 @@ export const SHARED_CSS = `
     font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase;
   }
   table.doc th.num, table.doc td.num { text-align: right; white-space: nowrap; }
+  pre {
+    font-family: var(--mono); font-size: 0.78rem; line-height: 1.6;
+    background: var(--code-bg); border: 1px solid var(--line);
+    padding: 0.9rem 1rem; overflow-x: auto; margin: 0.5rem 0 1rem;
+  }
+  pre code, article.post pre code {
+    background: transparent; border: 0; padding: 0; font-size: inherit;
+  }
   .perf {
     height: 10px; margin: 2rem 0 0.9rem;
     background: repeating-linear-gradient(90deg, var(--fg) 0 6px, transparent 6px 12px);

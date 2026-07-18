@@ -3,6 +3,8 @@ import {
   themeBootScript,
   themeToggleButton,
   themeToggleScript,
+  mastStrip,
+  docColophon,
 } from "./theme";
 
 export const CURB_MCP = "https://api.curb.numetal.xyz/mcp";
@@ -64,6 +66,8 @@ export function agentSkin(opts: {
   actionsHtml: string;
 }): string {
   const { title, role, origin, mcpUrl, status, actionsHtml } = opts;
+  const docNo = role === "seller" ? "CB-081" : role === "buyer" ? "CB-082" : "CB-080";
+  const filedAt = origin.replace(/^https?:\/\//, "");
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dim">
 <head>
@@ -104,6 +108,7 @@ ${themeBootScript()}
     </div>
     ${themeToggleButton()}
   </div>
+  ${mastStrip(docNo)}
   <p class="demo-banner"><strong>Demo agents — for the pitch.</strong> Production: add <code>https://api.curb.numetal.xyz/mcp</code> to your harness.</p>
   <header>
     <p class="eyebrow">Numetal · CURB · Demo · Cloudflare Agents SDK</p>
@@ -121,6 +126,7 @@ ${themeBootScript()}
     ${actionsHtml}
     <pre id="out">// action output</pre>
   </section>
+  ${docColophon(docNo, filedAt)}
 </div>
 <script>
 async function run(path, body){
