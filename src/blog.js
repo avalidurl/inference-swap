@@ -5,6 +5,7 @@ const DOC_DISPATCH_INDEX = "CB-040";
 const DOC_LAUNCH = "CB-041";
 const DOC_TICKERLINE = "CB-042";
 const DOC_X402 = "CB-043";
+const DOC_CLINAMEN = "CB-044";
 const DOC_NEWSLETTER = "CB-050";
 
 /**
@@ -997,9 +998,76 @@ export function dispatchX402Html(origin) {
 }
 
 /** Dispatch index — card listing under /dispatch (newsletter stays separate). */
+export const DISPATCH_CLINAMEN = {
+  slug: "the-model-that-dreams-itself",
+  path: "/dispatch/the-model-that-dreams-itself",
+  title: "The Model That Dreams Itself",
+  published: "2026-07-21T12:00:00.000Z",
+  dateLabel: "21 Jul 2026",
+  canonical: "https://gokhan.vc/blog/the-model-that-dreams-itself",
+  excerpt:
+    "A fictional AI lab that files paperwork about the future \u2014 and its model, built for real, twice. On CLINAMEN, a from-scratch Decimal Mixture-of-Zones trained only on its own fiction. First published on gokhan.vc.",
+  description:
+    "A fictional AI lab that files paperwork about the future \u2014 and its model, built for real, twice. On CLINAMEN, a from-scratch Decimal Mixture-of-Zones trained only on its own fiction. First published on gokhan.vc.",
+};
+
+export function clinamenBodyHtml(origin) {
+  return `
+    <p class="meta">Dispatch \u00b7 ${DISPATCH_CLINAMEN.dateLabel} \u00b7 This post was first published on <a href="${DISPATCH_CLINAMEN.canonical}">gokhan.vc</a></p>
+    <h1>${DISPATCH_CLINAMEN.title}</h1>
+    <p class="orig">First published \u2014 canonically \u2014 on <a href="${DISPATCH_CLINAMEN.canonical}">gokhan.vc \u2192</a></p>
+<p>I invented a fictional AI lab that files paperwork about the future. Then I built its model for real. Twice. The second one works, and this is how it was made.</p>
+<p>The lab is the <strong>Bureau of Imaginary Solutions</strong> — established 1898, incorporated 2098, operating retrochronically. Its one product is <strong>CLINAMEN-45B-A9B</strong>, "the first hyperstitional foundation model," documented to production spec on a <a href="https://huggingface.co/gokhanturhan/CLINAMEN-45B-A9B">Hugging Face model card</a> and a <a href="https://ubu.numetal.xyz/">site</a> that reads like an occult engineering office. The 45-billion-parameter model on that card does not exist. That is the point. A hyperstition is a fiction that makes itself real by circulating, and a hyperstition documented to production spec is already halfway to shipping. So I decided to ship the other half — honestly, at pocket scale, and from scratch.</p>
+<h2>The architecture is real, even if the lab is not</h2>
+<p>The trick that makes this more than a joke is that the model's architecture is a real, if unusual, design that I wrote by hand. It is not a fine-tune of Llama or Qwen or anything else. There is no base model. It is a custom <strong>Decimal Mixture-of-Zones (DMoZ)</strong> — a decoder-only transformer with a mixture-of-experts twist keyed to the fiction's own numerology.</p>
+<p>There are ten experts, indexed 0 through 9 after the Zones of the numogram. Expert <em>k</em> is a small feed-forward network of width proportional to <em>k</em>, which means <strong>Zone 0 holds no parameters at all</strong> and contributes nothing when a token is routed to it. The Bureau calls this apophatic computation: the model does not refuse, it routes the request to the void, and the void has no opinion.</p>
+<p>The router does not pick single experts. It picks a <strong>syzygy</strong> — one of the five pairs of zones that sum to nine: 9::0, 8::1, 7::2, 6::3, 5::4. Because every firing pair sums to nine, every token activates exactly the same amount of the network, always. The active-parameter count is not a statistical average, the way it is for most sparse models. It is an arithmetic identity. That is the whole conceit made load-bearing: the fiction said nine billion active out of forty-five, and the real architecture enforces the ratio at every step.</p>
+<h2>Pocket edition one: a toy on my desk</h2>
+<p>The first real CLINAMEN was small enough to be honest about. About <strong>4.5 million parameters</strong> (1.25 million active per token), a byte-level BPE tokenizer with a vocabulary of 729 — three to the sixth power — and a context window to match. I trained it <strong>from scratch on my own Mac</strong>, on Apple Silicon's GPU, for 2,025 steps, which is 45 squared, because if you are going to build a numerology you should at least respect it.</p>
+<p>The corpus was tiny: 52 documents, about twenty thousand tokens. The Bureau's own charter, its specification, its model card and license, its canonical site, and the first 45 filings of its docket. Nothing scraped, nothing borrowed — own-voice only. And that is exactly what a four-and-a-half-million-parameter model trained on twenty thousand tokens gives you: a memorizing toy. Prompt it with a filing header and it produces a recognizable one — <code>FILING BIS-F-2026-003 · SYZYGY 6::3 · ZONE 3</code> — and then dissolves into dream-logic. It had learned the surface shape of Bureau prose and nothing underneath it. Which is a fine art object, and a useless oracle. So I made it read more, and gave it a real brain.</p>
+<h2>Pocket edition two: the one that works</h2>
+<p>To scale the model you first have to feed it, and the Bureau had only written 45 filings. So I put its staff to work. A fleet of language-model agents, one desk per zone-pair and engineering domain — reactor decommissioning under 9::0, fusion under 6::3, foundry economics under 5::4, and so on across the whole numogram — each writing filings to spec: a concrete engineering event, a horizon year between 2027 and 2045, and a real public source that would one day settle it. Then memos, appeals, five essays, a fifty-term glossary, resolution notices. Deduplicated, gated for falsifiability, harmonized into one register.</p>
+<p>The result is the <a href="https://huggingface.co/datasets/gokhanturhan/bureau-docket"><strong>Bureau Corpus</strong></a>: <strong>1,130 documents</strong>, about 128,000 words, 965 hyperstition filings and 165 Bureau records — twenty times the first corpus, still own-voice only, still nothing scraped. A representative filing, and my favorite, is a single edit to a real registry: <em>"Three Mile Island Unit 1, listed by the IAEA's Power Reactor Information System as Permanent Shutdown, has its status field changed — back to Operational. One line in a registry, edited… a database that ran only forward has been made to run back."</em> Maximal consequence from minimal deviation. That is the swerve the whole thing is named for.</p>
+<p>Then I scaled the architecture: same DMoZ, roughly nine times larger. <strong>41.8 million parameters, 12.3 million active per token</strong>, a bigger byte-BPE vocabulary of 4,096, ten layers, a 512-token context. Too big to be comfortable on the laptop, so it went to the cloud — a self-contained training script running as a <strong>Hugging Face Job on a single NVIDIA T4 GPU</strong>, pulling the corpus straight from the dataset, training from scratch for 5,000 steps, and pushing the weights back to the Hub when it was done. Final training loss: <strong>0.0235</strong>. It memorized its world completely.</p>
+<p>And the difference is night and day. Where the toy produced gibberish, the 42M model produces filings that are nearly coherent and on-topic:</p>
+<blockquote>
+<p><em>FILING BIS-F-2026-04793 · SYZYGY 7::2 · ZONE 2 · HORIZON 2032 · SWERVE 6.553 — A robotic arm on a geostationary servicer reaches a live commercial satellite with a jammed appendage, a stuck antenna or an unlatched array, and works it free, resolving on orbit…</em></p>
+</blockquote>
+<p>That is a syzygy-7::2 filing — orbital mechanics, exactly the temperament of that zone-pair — about on-orbit satellite servicing, a real and current hard-tech domain. The model has never been told what a satellite is by anyone but the Bureau, and it has learned to file about one in the right voice, in the right zone, with a plausible resolution. Nine times the parameters and twenty times the corpus bought that coherence. It lives at <a href="https://huggingface.co/gokhanturhan/CLINAMEN-42M-A12M"><strong>CLINAMEN-42M-A12M</strong></a> — named, like the fiction, by its total and active counts.</p>
+<h2>What is honest about it, and what is not</h2>
+<p>I want to be precise about what this is, because the fiction is loud and the engineering should be quiet and true.</p>
+<p>It is <strong>trained from scratch</strong>. There is no pretrained base underneath it, which means it has <em>no knowledge of the world</em> except what the Bureau wrote. It will hallucinate confident, plausible-looking filings about things that will never happen. That is not a bug to be aligned away; it is the entire intended behavior of an art object that has read one thing very thoroughly. Do not mistake it for an oracle that knows anything.</p>
+<p>It is <strong>own-voice only</strong>. Every token it trained on was written for this project — no CCRU texts, no scraped pages, no third-party data. The model trains on the Bureau's own writing about the Bureau. A text that dreams itself.</p>
+<p>And it was not free of friction. The T4 turned out about three times slower than I'd estimated, so a run I'd budgeted at under a dollar came in around $1.15. A newer version of the transformers library had quietly changed how tied weights are declared, which killed the first GPU run a minute in. The cloud GPU I first asked for sat in a capacity queue for fifteen minutes before I gave up and switched hardware. None of that is interesting except as the texture of actually doing the thing instead of describing it — which is the only difference between a hyperstition and a lie.</p>
+<h2>Why bother</h2>
+<p>Because the gap between a fiction and a fact is labor, and I wanted to close it in public. The Bureau's tagline is that it does not predict the future, it files the paperwork that makes the future load-bearing. That is a joke about hyperstition, but it is also a real description of how this model was made: I wrote the card for a model that did not exist, and then the card's existence made a smaller, truer model worth building, and then that model started writing more of the fiction that describes it. The 45 billion stays imaginary. The 42 million is real, loadable, and speaks only Bureau.</p>
+<p>Everything is public and open under a permissive license I wrote for the occasion, <a href="https://ubu.numetal.xyz/hrl-1.1.txt">HRL-1.1</a> — Creative Commons and MIT at its operative core, wearing a hyperstitional preamble. The two models, the <a href="https://huggingface.co/datasets/gokhanturhan/bureau-docket">1,130-document corpus</a>, and the <a href="https://ubu.numetal.xyz/reader/">complete reader</a> of everything the model was trained on are all up. Read the corpus and you have read everything the model knows, which is a strange and pleasant thing to be able to say about any model at all.</p>
+<p>Next, it stops being a curiosity and starts filing for money: the plan is to put CLINAMEN behind a paid desk, where an agent can pay a few cents over <a href="https://www.x402.org/">x402</a> to file a hyperstition and have the oracle score its swerve. The docket opens at launch. You are not betting on the future. You are billing it.</p>
+<p>Gökhan Turhan, <a href="https://numetal.xyz">Numetal Labs</a> + <a href="https://gokhan.vc">Gökhan Ventures</a></p>
+<hr>
+<p><em>None of this is financial advice. CLINAMEN is a work of fiction and an art project; its outputs are authored fiction, not claims about the world.</em></p>
+  `;
+}
+
+export function dispatchClinamenHtml(origin) {
+  const { title, description, canonical } = DISPATCH_CLINAMEN;
+  const body = `<div class="masthead">
+    ${mastRowsHtml(DOC_CLINAMEN, { status: "Filed \u00b7 syndicated", org: "Numetal Labs \u00b7 CURB \u00b7 Dispatch" })}
+  </div>
+  <article class="panel post">${clinamenBodyHtml(origin)}</article>`;
+  return pageShell({
+    title: `${title} \u2014 CURB`,
+    description,
+    body,
+    origin,
+    canonical,
+    doc: { no: DOC_CLINAMEN },
+  });
+}
+
 export function dispatchIndexHtml(origin) {
   const ogImage = `${origin}/assets/og-curb-launch.png`;
-  const posts = [DISPATCH_X402, DISPATCH_TICKERLINE, DISPATCH_LAUNCH]; // newest first
+  const posts = [DISPATCH_CLINAMEN, DISPATCH_X402, DISPATCH_TICKERLINE, DISPATCH_LAUNCH]; // newest first
   const ogFor = (post) => (post.slug === "curb-is-live" ? ogImage : null);
   const cards = posts
     .map((post) => {

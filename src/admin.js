@@ -184,9 +184,7 @@ export async function adminSnapshot(env, { withAgents = true } = {}) {
   };
 }
 
-/* AD-100 Bureau admin datasheet kit — after the house TR-100 receipt canon. Strict monochrome
-   (#fff paper / #000 ink / #eee hover only); system mono stack; inverted badges for negative
-   states; outlined badges for positive states. Inlined — no external stylesheet fetches. */
+/* Numetal Office admin kit. Inlined so the access-gated console has no stylesheet dependency. */
 const AD100_CSS = `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{background:#fff;color:#000;font:12px/1.45 ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace}
@@ -228,18 +226,29 @@ code{font:inherit}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0 12px}
 .tile{border:1px solid #000;padding:8px 10px}
 .tile .tk{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid #000;padding-bottom:3px;margin-bottom:5px}
-.tile .tv{font-size:13px;word-break:break-all}
-.tile .ts{font-size:10px;margin-top:4px;word-break:break-all}
+.tile .tv{font-size:13px;white-space:nowrap;overflow-x:auto}
+.tile .ts{font-size:10px;margin-top:4px;white-space:nowrap;overflow-x:auto}
+.identifier{white-space:nowrap;overflow-wrap:normal;word-break:normal;font-variant-numeric:tabular-nums}
+.table-scroll{width:100%;overflow-x:auto;border:1px solid #141414}
+.addrs{table-layout:auto;min-width:1120px}
 .addrs td{vertical-align:top}
-.atag{white-space:nowrap}
+.addrs th,.addrs td{padding-left:10px;padding-right:10px}
+.addrs th:first-child,.addrs td:first-child{padding-left:10px}
+.addrs th:last-child,.addrs td:last-child{padding-right:10px}
+.atag{width:auto;min-width:390px}
 .anote{font-size:10px;margin-top:3px;white-space:normal;max-width:26rem;line-height:1.4}
-td.addr code.full{display:inline-block;word-break:break-all;white-space:normal}
-.acts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:2px}
+.addrs td.addr{width:340px;min-width:340px;white-space:nowrap}
+td.addr code.full{display:inline-block;white-space:nowrap;overflow-wrap:normal;word-break:normal}
+.addrs td.acts{width:220px;min-width:220px;white-space:nowrap}
+.acts-inner,.acts-inline{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;white-space:nowrap}
+.acts-inline{margin-top:5px}
 button.cpy{border:1px solid #000;background:#fff;color:#000;font:inherit;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:0 6px;cursor:pointer}
 button.cpy:hover{background:#000;color:#fff}
 button.cpy.ok{background:#000;color:#fff}
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
-.lk{margin-top:2px;line-height:2;font-size:11px}`;
+.lk{margin-top:2px;line-height:2;font-size:11px}
+/* Office shell: sans for reading, mono only for IDs, metadata, and operational labels. */
+body{background:#e7e7e7;color:#141414;font:15px/1.45 "Helvetica Neue",Arial,"Arial Nova",sans-serif;font-synthesis:none;text-rendering:optimizeLegibility}.sheet{max-width:1440px;margin:48px auto 0;background:#fff;border:2px solid #141414;box-shadow:5px 5px 0 rgba(0,0,0,.15);padding:0 28px 56px}.office{display:flex;align-items:center;gap:22px;padding:23px 0 16px}.office .org{font-size:23px;font-weight:800;letter-spacing:-.035em;white-space:nowrap}.office .form{margin-left:auto;color:#686868;font:11px/1.2 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}.rail{display:flex;gap:3px;flex:1;min-width:160px}.rail i{display:block;flex:1;min-width:14px;height:16px}.rail i:nth-child(1){background:#dc4138}.rail i:nth-child(2){background:#16956e}.rail i:nth-child(3){background:#4b328f}.rail i:nth-child(4){background:#29a7db}.rail i:nth-child(5){background:#f2e71b}.rail i:nth-child(6){background:#d71989}.rail i:nth-child(7){background:#141414}.rail i:nth-child(n+8){background:#b9b9b9}.rail i:nth-child(15){background:#5e8d39}.rail i:nth-child(16){background:#137e74}.rail i:nth-child(17){background:#2555a5}.rail i:nth-child(18){background:#6f3c91}.rail i:nth-child(19){background:#ab2463}.rail i:nth-child(20){background:#c42c3a}.rail i:nth-child(21){background:#d67025}.rail i:nth-child(22){background:#f4bd17}.nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;padding:0 0 17px;border-bottom:1px solid #141414}.nav a{border:2px solid #141414;padding:7px 8px;text-align:center;text-decoration:none;color:#141414;font-size:16px;font-weight:700;line-height:1}.nav a[aria-current="page"]{box-shadow:inset 5px 0 0 #dc4138}.nav .dot{display:inline-block;width:11px;height:11px;background:#dc4138;border:2px solid #141414;border-radius:50%;margin-right:6px;vertical-align:-1px}.mast{padding:20px 0 6px;border:0}.mast .org{font-size:20px;letter-spacing:-.025em}.mast .form{font-family:ui-monospace,"SF Mono",Menlo,monospace;color:#686868}.stamp{border-top:1px solid #141414;border-bottom:1px solid #141414;padding:7px 0;color:#686868;font-family:ui-monospace,"SF Mono",Menlo,monospace}.sub{font-size:15px;max-width:78ch}h2{margin-top:22px;padding:8px 10px;background:#f3f3f3;border:1px solid #141414;border-bottom:0;font-size:12px;letter-spacing:.09em}.tiles{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.tile{border-color:#141414;padding:11px 12px}.tile .tk{font-family:ui-monospace,"SF Mono",Menlo,monospace;border-color:#141414}.tile .tv{font-size:15px}.tile .ts,.mut,code{font-family:ui-monospace,"SF Mono",Menlo,monospace}.btn{background:#f4bd17;border-width:2px}.btn:hover,.btn:focus{background:#141414;color:#fff;outline:2px solid #2555a5;outline-offset:2px}.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;border:1px solid #141414;padding:12px;background:#fff}.lane{border:1px solid #141414;min-width:0}.lane-head{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px;background:#f3f3f3;border-bottom:1px solid #141414}.lane-head h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase}.lane-head span{font:10px/1 ui-monospace,"SF Mono",Menlo,monospace;color:#686868}.lane-card{padding:11px;border-bottom:1px solid #141414;background:#fff}.lane-card:last-child{border-bottom:0}.lane-card:hover{background:#fff8dc}.lane-card .title{font-weight:700;margin-bottom:5px}.lane-card .meta{font:11px/1.4 ui-monospace,"SF Mono",Menlo,monospace;color:#686868}.lane-card details{margin-top:8px}.lane-card summary{font:10px/1.2 ui-monospace,"SF Mono",Menlo,monospace;cursor:pointer;text-transform:uppercase;letter-spacing:.06em}.badge{border-color:#141414}.foot{font-family:ui-monospace,"SF Mono",Menlo,monospace;border-color:#141414}@media(max-width:760px){.sheet{margin:0;border-left:0;border-right:0;box-shadow:none;padding:0 14px 48px}.office{flex-wrap:wrap;gap:10px}.office .org{font-size:20px}.office .form{margin-left:0}.rail{order:3;flex-basis:100%}.nav{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.nav a{font-size:12px}.board{grid-template-columns:1fr}.tiles{grid-template-columns:1fr}}@media(max-width:420px){.nav{grid-template-columns:repeat(2,minmax(0,1fr)}}`;
 
 const tile = (k, v, sub = "") =>
   `<div class="tile"><div class="tk">${esc(k)}</div><div class="tv">${v}</div>${sub ? `<div class="ts">${sub}</div>` : ""}</div>`;
@@ -253,8 +262,8 @@ const healthDot = (h) =>
 function addrCell(a) {
   const s = String(a || "").trim();
   if (!isEvm(s)) return `<td class="mut">${esc(s || "—")}</td>`;
-  return `<td class="addr"><code class="full">${esc(s)}</code>
-    <span class="acts"><button type="button" class="cpy" onclick="copyAddr('${esc(s)}',this)">copy</button>
+  return `<td class="addr"><code class="full identifier">${esc(s)}</code>
+    <span class="acts-inline"><button type="button" class="cpy" onclick="copyAddr('${esc(s)}',this)">copy</button>
     <a href="${esc(basescan(s))}" target="_blank" rel="noopener">view</a></span></td>`;
 }
 
@@ -318,6 +327,36 @@ function grantsTable(grants) {
   return `<table><thead><tr><th>token</th><th>matchId</th><th>endpoint</th><th>expiresAt</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
+function offersCards(offers) {
+  if (!offers.length) return `<p class="mut" style="padding:11px">No open offers.</p>`;
+  return offers
+    .map(
+      (o) => `<article class="lane-card"><div class="title">${esc(o.model)} <span class="badge">OPEN</span></div><p class="meta">offer <code>${esc(o.id)}</code> · ${esc(o.mtok)} · $${esc(o.priceUsd)} · ${esc(shortTs(o.createdAt))}</p><details><summary>settlement target</summary><p class="meta" style="margin-top:6px"><code class="identifier">${esc(o.sellerPayTo || "—")}</code></p></details></article>`,
+    )
+    .join("");
+}
+
+function matchesCards(matches) {
+  if (!matches.length) return `<p class="mut" style="padding:11px">No matches yet.</p>`;
+  return matches
+    .map((m) => {
+      const verified = m.paymentMeta?.verified;
+      const stamp = m.status === "paid" || m.status === "fulfilled" ? (verified ? "VERIFIED" : "DEMO") : String(m.status || "—").toUpperCase();
+      const split = m.split || {};
+      return `<article class="lane-card"><div class="title">${esc(m.model)} <span class="badge">${esc(stamp)}</span></div><p class="meta">match <code>${esc(m.id)}</code> · ${esc(m.mtok)} · $${esc(split.grossUsd ?? "—")} gross · ${esc(shortTs(m.paidAt))}</p><details><summary>settlement detail</summary><p class="meta" style="margin-top:6px">seller: <code class="identifier">${esc(m.sellerPayTo || "—")}</code><br>buyer: <code class="identifier">${esc(m.buyer || "—")}</code></p></details></article>`;
+    })
+    .join("");
+}
+
+function grantsCards(grants) {
+  if (!grants.length) return `<p class="mut" style="padding:11px">No active grants.</p>`;
+  return grants
+    .map(
+      (g) => `<article class="lane-card"><div class="title">Grant <code>${esc(maskToken(g.token))}</code></div><p class="meta">match <code>${esc(g.matchId)}</code> · expires ${esc(shortTs(g.expiresAt))}</p><details><summary>endpoint</summary><p class="meta" style="margin-top:6px">${esc(String(g.endpoint || "—").replace(/^https?:\/\//, ""))}</p></details></article>`,
+    )
+    .join("");
+}
+
 /** Full (untruncated) wallet/contract inventory — TAG + full mono address + copy + basescan. */
 function addressesTable(addresses) {
   const rows = (addresses || [])
@@ -340,16 +379,16 @@ function addressesTable(addresses) {
               ? '<span class="badge">PREDICTED</span>'
               : "";
       return `<tr>${tagCell}
-        <td class="addr"><code class="full">${esc(r.address)}</code></td>
-        <td class="acts">
+        <td class="addr"><code class="full identifier">${esc(r.address)}</code></td>
+        <td class="acts"><div class="acts-inner">
           <button type="button" class="cpy" onclick="copyAddr('${esc(r.address)}',this)">copy</button>
           <a href="${esc(basescan(r.address))}" target="_blank" rel="noopener">basescan</a>
           ${status}
-        </td>
+        </div></td>
       </tr>`;
     })
     .join("");
-  return `<table class="addrs"><thead><tr><th>tag</th><th>address (full)</th><th>copy / explore</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return `<div class="table-scroll"><table class="addrs"><thead><tr><th>tag</th><th>address (full)</th><th>copy / explore</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 const linkRow = (links) =>
@@ -370,8 +409,8 @@ export async function adminHtml(env, { via = "access" } = {}) {
   ].join("");
 
   const hubTiles = [
-    tile("hub payTo · Base", `<code>${esc(s.hub.payToBase || "—")}</code>`),
-    tile("split · Base (0xSplits)", `<code>${esc(s.split?.base || "—")}</code>`),
+    tile("hub payTo · Base", `<code class="identifier">${esc(s.hub.payToBase || "—")}</code>`),
+    tile("split · Base (0xSplits)", `<code class="identifier">${esc(s.split?.base || "—")}</code>`),
   ].join("");
 
   const agentTiles = [
@@ -403,7 +442,9 @@ export async function adminHtml(env, { via = "access" } = {}) {
     ])}</div></div>
   </div>`;
 
-  const body = `<div class="mast">
+  const body = `<div class="office"><span class="org">Numetal Office</span><span class="rail" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="form">FORM AD-130 · CURB · INTERNAL</span></div>
+<nav class="nav" aria-label="Numetal operator"><a href="https://admin.numetal.xyz"><span class="dot"></span>Office</a><a href="https://admin.ishtar.numetal.xyz/admin">Ishtar</a><a aria-current="page" href="/admin">CURB</a><a href="https://curb.numetal.xyz">Site</a><a href="https://status.numetal.xyz">Status</a></nav>
+<div class="mast">
   <span class="org">■ NUMETAL · CURB · ADMIN</span>
   <span class="form">FORM AD-130 · INTERNAL · ACCESS-GATED</span>
 </div>
@@ -420,7 +461,7 @@ export async function adminHtml(env, { via = "access" } = {}) {
 <div class="tiles">${hubTiles}</div>
 
 <h2><span class="no">02</span>WALLETS &amp; CONTRACTS (${s.addresses.length})</h2>
-<p class="mut">Full addresses (no truncation). Grant tokens are bearer secrets — masked in 07, never here.</p>
+<p class="mut">Full addresses (no truncation). Grant tokens are bearer secrets — masked in the settlement board, never here.</p>
 ${addressesTable(s.addresses)}
 
 <h2><span class="no">03</span>ACTIONS</h2>
@@ -434,16 +475,14 @@ ${addressesTable(s.addresses)}
 <h2><span class="no">04</span>DEMO / HARNESS HEALTH</h2>
 <div class="tiles">${agentTiles}</div>
 
-<h2><span class="no">05</span>OPEN OFFERS (${s.offers.length})</h2>
-${offersTable(s.offers)}
+<h2><span class="no">05</span>SETTLEMENT FLOW BOARD</h2>
+<div class="board">
+  <section class="lane"><div class="lane-head"><h3>Open offers</h3><span>${s.offers.length}</span></div>${offersCards(s.offers)}</section>
+  <section class="lane"><div class="lane-head"><h3>Recent matches</h3><span>${s.recentMatches.length}</span></div>${matchesCards(s.recentMatches)}</section>
+  <section class="lane"><div class="lane-head"><h3>Active grants</h3><span>${s.grants.length}</span></div>${grantsCards(s.grants)}</section>
+</div>
 
-<h2><span class="no">06</span>RECENT MATCHES (${s.recentMatches.length})</h2>
-${matchesTable(s.recentMatches)}
-
-<h2><span class="no">07</span>ACTIVE GRANTS (${s.grants.length})</h2>
-${grantsTable(s.grants)}
-
-<h2><span class="no">08</span>LINKS</h2>
+<h2><span class="no">06</span>LINKS</h2>
 ${links}
 
 <p class="mut" style="margin-top:24px">
