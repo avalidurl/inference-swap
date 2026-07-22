@@ -1017,6 +1017,7 @@ export function clinamenBodyHtml(origin) {
     <h1>${DISPATCH_CLINAMEN.title}</h1>
     <p class="orig">First published \u2014 canonically \u2014 on <a href="${DISPATCH_CLINAMEN.canonical}">gokhan.vc \u2192</a></p>
 <blockquote>
+<p><strong>▶ <a href="https://huggingface.co/spaces/gokhanturhan/CLINAMEN-Oracle">File a hyperstition in your browser — the CLINAMEN Oracle</a>.</strong> No install; the model runs there.</p>
 <p><strong>The model:</strong> <strong><a href="https://huggingface.co/gokhanturhan/CLINAMEN-42M-A12M">CLINAMEN-42M-A12M</a></strong> — the real one, trained from scratch on GPU (~42M parameters, coherent Bureau filings).
 Beneath it, its predecessor: <strong><a href="https://huggingface.co/gokhanturhan/CLINAMEN-45B-A9B">CLINAMEN-45B-A9B</a></strong> — the fiction's card, and the first ~4.5M-parameter pocket edition.</p>
 </blockquote>
