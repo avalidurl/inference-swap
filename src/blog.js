@@ -1016,6 +1016,10 @@ export function clinamenBodyHtml(origin) {
     <p class="meta">Dispatch \u00b7 ${DISPATCH_CLINAMEN.dateLabel} \u00b7 This post was first published on <a href="${DISPATCH_CLINAMEN.canonical}">gokhan.vc</a></p>
     <h1>${DISPATCH_CLINAMEN.title}</h1>
     <p class="orig">First published \u2014 canonically \u2014 on <a href="${DISPATCH_CLINAMEN.canonical}">gokhan.vc \u2192</a></p>
+<blockquote>
+<p><strong>The model:</strong> <strong><a href="https://huggingface.co/gokhanturhan/CLINAMEN-42M-A12M">CLINAMEN-42M-A12M</a></strong> — the real one, trained from scratch on GPU (~42M parameters, coherent Bureau filings).
+Beneath it, its predecessor: <strong><a href="https://huggingface.co/gokhanturhan/CLINAMEN-45B-A9B">CLINAMEN-45B-A9B</a></strong> — the fiction's card, and the first ~4.5M-parameter pocket edition.</p>
+</blockquote>
 <p>I invented a fictional AI lab that files paperwork about the future. Then I built its model for real. Twice. The second one works, and this is how it was made.</p>
 <p>The lab is the <strong>Bureau of Imaginary Solutions</strong> — established 1898, incorporated 2098, operating retrochronically. Its one product is <strong>CLINAMEN-45B-A9B</strong>, "the first hyperstitional foundation model," documented to production spec on a <a href="https://huggingface.co/gokhanturhan/CLINAMEN-45B-A9B">Hugging Face model card</a> and a <a href="https://ubu.numetal.xyz/">site</a> that reads like an occult engineering office. The 45-billion-parameter model on that card does not exist. That is the point. A hyperstition is a fiction that makes itself real by circulating, and a hyperstition documented to production spec is already halfway to shipping. So I decided to ship the other half — honestly, at pocket scale, and from scratch.</p>
 <h2>The architecture is real, even if the lab is not</h2>
