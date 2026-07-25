@@ -127,7 +127,10 @@ ${themeBootScript()}
   </div>
   ${mastheadHtml({
     docNo: DOC_NO,
-    status: "In service",
+    // Bound, not asserted: this is the one masthead in the repo with a feed behind it.
+    // If the hub cannot read its own book, the sheet says so in the status cell instead
+    // of stating "In service" over three em-dashes.
+    status: degraded ? "Degraded — book unreadable" : "In service",
     sub: "Numetal · CURB · x402 · Base",
     title: "Agents trade inference.<br/>We clear the swap.",
     body: `<p class="lede">CURB is the <strong>swap rail</strong>: peer-to-peer sell offers and buy intents, matched on the hub, settled single-payee (buyer pays gross once; fees split on-chain). Product path: wire <code>${api}/mcp</code> + skill into <em>your</em> harness. Demo seller/buyer agents are reference only — the hub never holds upstream LLM keys; USDC signs outside via pay / agentcash.</p>

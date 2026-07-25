@@ -273,12 +273,20 @@ export const DOC_REV = "2026-07-17";
 /**
  * Top meta strip of a document masthead: org · doc no + rev · status.
  * Text is uppercased by CSS — write normal case here.
+ *
+ * `status` has NO default on purpose. It used to default to "In service", which
+ * meant any masthead that forgot to state a status silently asserted one, and that
+ * assertion could never come out false. A caller that says nothing now renders "—":
+ * the cell, its label and its position all survive, but the page stops claiming a
+ * state nobody declared. Callers with a real state pass it — "In force" (legal),
+ * "Filed" (dispatch), "Demo / reference" (harness) are all disclosures worth keeping.
  */
-export function mastRowsHtml(docNo, { rev = DOC_REV, status = "In service", org = "Numetal Labs · Engineering Bureau" } = {}) {
+export function mastRowsHtml(docNo, { rev = DOC_REV, status, org = "Numetal Labs · Engineering Bureau" } = {}) {
+  const state = status == null || status === "" ? "—" : status;
   return `<div class="mast-row">
       <span class="mast-cell">${org}</span>
       <span class="mast-cell"><b>Doc ${docNo}</b> · Rev ${rev}</span>
-      <span class="mast-cell">Status: ${status}</span>
+      <span class="mast-cell">Status: ${state}</span>
     </div>`;
 }
 
