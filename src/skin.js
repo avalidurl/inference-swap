@@ -163,7 +163,8 @@ export const SHARED_CSS = `
     letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
     margin-bottom: 0.35rem;
   }
-  .spec-cell b { display: block; font-family: var(--mono); font-size: 1.08rem; }
+  /* tabular figures so a readout swapping between a count and "—" holds its width */
+  .spec-cell b { display: block; font-family: var(--mono); font-size: 1.08rem; font-variant-numeric: tabular-nums; }
   .spec-cell small { display: block; font-size: 0.68rem; color: var(--muted); margin-top: 0.3rem; }
   .tblwrap { overflow-x: auto; }
   table.doc { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.78rem; border: 1px solid var(--fg); }

@@ -431,6 +431,10 @@ function llmsTxt(apiOrigin, siteOrigin) {
 
 async function seedDemoOfferIfEmpty(env, origin) {
   const s = await stats(env);
+  // stats() no longer throws on a KV read failure — it reports `degraded`. "Empty"
+  // and "unreadable" both come back as 0, so seeding on a degraded read would post a
+  // duplicate demo offer on top of a book we simply could not see. Bail instead.
+  if (s.degraded) return { skipped: true, reason: "store_degraded" };
   if ((s.openOffers || 0) > 0) return { skipped: true, openOffers: s.openOffers };
   const r = await createOffer(env, {
     sellerPayTo: env.DEMO_SELLER_PAY_TO || env.HUB_PAY_TO,
@@ -593,7 +597,12 @@ export default {
             : json(index, 200, request, { Vary: "Accept, Origin" });
         }
         const s = await stats(env);
-        return text(landingHtml(siteOrigin, s, apiOrigin), "text/html; charset=utf-8", 200, request);
+        // The landing page renders live book counters straight out of KV. A cached copy
+        // would freeze a count (or an em-dash) long past the state that produced it, so
+        // the honest-failure rendering only holds if the page is never stored.
+        return text(landingHtml(siteOrigin, s, apiOrigin), "text/html; charset=utf-8", 200, request, {
+          "Cache-Control": "no-store",
+        });
       }
 
       // [deck] hosted 15-slide pitch deck + markdown source + PDF redirect

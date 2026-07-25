@@ -76,11 +76,11 @@ export async function createOffer(env, body) {
   return { status: 201, body: offer };
 }
 
-export async function listOffers(env, { status = "open", limit = 50 } = {}) {
+export async function listOffers(env, { status = "open", limit = 50, onReadError } = {}) {
   const ids = await listIds(env, "idx:offers:open");
   const out = [];
   for (const id of ids.slice(0, Math.min(200, limit * 3))) {
-    const o = await getJson(env, `offer:${id}`);
+    const o = await getJson(env, `offer:${id}`, onReadError);
     if (!o) continue;
     if (status && o.status !== status) continue;
     out.push(o);
@@ -244,12 +244,44 @@ export async function markPaid(env, id, meta = {}) {
   return { status: 200, body: match };
 }
 
+/**
+ * Book counters.
+ *
+ * `degraded` is the honest half of this payload: a KV read that throws is swallowed
+ * by getJson/listIds, so without it a partial or total store failure renders as a
+ * confident `0` — indistinguishable from an empty book. Counts stay numeric (every
+ * existing consumer does arithmetic on them); consumers that DISPLAY them must render
+ * "unknown" when `degraded` is true rather than showing the number.
+ *
+ * An absent index key is NOT degraded — a book with no offers has no index yet.
+ * Only a thrown read is.
+ */
 export async function stats(env) {
-  const offers = await listOffers(env, { status: "open", limit: 500 });
-  const matchIds = await listIds(env, "idx:matches");
+  let degraded = false;
+  const onReadError = () => {
+    degraded = true;
+  };
+
+  let offers = [];
+  try {
+    offers = await listOffers(env, { status: "open", limit: 500, onReadError });
+  } catch (err) {
+    console.error("stats_offers_failed", { err: String(err?.message || err) });
+    degraded = true;
+  }
+
+  let matchIds = [];
+  try {
+    matchIds = await listIds(env, "idx:matches");
+  } catch (err) {
+    console.error("stats_matches_failed", { err: String(err?.message || err) });
+    degraded = true;
+  }
+
   return {
     openOffers: offers.length,
     matches: matchIds.length,
+    degraded,
     feeBps: Number(env.FEE_BPS || 500),
     hubPayTo: hubPayToBase(env) || null,
     split: {

@@ -223,6 +223,11 @@ export function buildOpenApi(env, origin) {
                       product: { type: "string" },
                       brand: { type: "string" },
                       openOffers: { type: "number" },
+                      degraded: {
+                        type: "boolean",
+                        description:
+                          "True when a KV read failed while computing the counters. openOffers/matches are then 0 because the book could not be read, NOT because it is empty — treat the counts as unknown.",
+                      },
                       rails: { type: "object" },
                     },
                     required: ["ok"],

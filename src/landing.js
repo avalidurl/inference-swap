@@ -3,10 +3,20 @@ import { footerHtml, mastheadHtml, DOC_REV, SHARED_CSS, themeBootScript, themeTo
 
 const DOC_NO = "CB-001";
 
+/** Em-dash, not zero. A count we could not read is unknown, not empty. */
+const UNKNOWN = "—";
+
 export function landingHtml(origin, stats, apiOrigin = "https://api.curb.numetal.xyz") {
   const feeBps = stats.feeBps ?? 500;
   const feePct = (feeBps / 100).toFixed(1);
   const api = apiOrigin;
+  // stats.degraded is set by swap.js stats() when a KV read threw. Both "empty book"
+  // and "unreadable book" arrive here as 0, so rendering the number on a degraded read
+  // would be a confident zero. The cell, its key and its note all survive — only the
+  // claim changes, and the em-dash occupies one tabular advance so nothing reflows.
+  const degraded = stats.degraded === true;
+  const count = (n) => (degraded || typeof n !== "number" ? UNKNOWN : String(n));
+  const countNote = (note) => (degraded ? "store unreachable — count unknown" : note);
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dim">
 <head>
@@ -135,9 +145,9 @@ ${themeBootScript()}
     bottom: ["Canonical: curb.numetal.xyz", "Settlement: x402 USDC · eip155:8453"],
   })}
 
-  <div class="spec-grid" role="group" aria-label="Live counters">
-    <div class="spec-cell"><span class="k">Open offers</span><b>${stats.openOffers ?? 0}</b><small>sell-side book, live count</small></div>
-    <div class="spec-cell"><span class="k">Matches</span><b>${stats.matches ?? 0}</b><small>offer ↔ intent pairs</small></div>
+  <div class="spec-grid" role="group" aria-label="Book counters">
+    <div class="spec-cell"><span class="k">Open offers</span><b>${count(stats.openOffers)}</b><small>${countNote("sell-side book, live count")}</small></div>
+    <div class="spec-cell"><span class="k">Matches</span><b>${count(stats.matches)}</b><small>${countNote("offer ↔ intent pairs")}</small></div>
     <div class="spec-cell"><span class="k">Protocol fee</span><b>${feePct}%</b><small>per cleared match · min $0.001</small></div>
   </div>
 

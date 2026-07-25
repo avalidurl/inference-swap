@@ -31,7 +31,13 @@ export async function putJson(env, key, obj, ttlSec) {
   await env.SWAP.put(key, JSON.stringify(obj), opts);
 }
 
-export async function getJson(env, key) {
+/**
+ * Read + parse one KV value. Returns null when the key is absent OR unreadable —
+ * those two cases are indistinguishable to the caller, which is fine for a lookup
+ * but NOT for a count. Callers that render a number pass `onError` so a swallowed
+ * KV failure can be reported as "unknown" instead of silently under-counting.
+ */
+export async function getJson(env, key, onError) {
   // Clamp/validate the key locally: never let an over-long key reach KV (it
   // returns a 414 whose raw message would otherwise leak the backend).
   if (typeof key !== "string" || key.length === 0 || keyTooLong(key)) return null;
@@ -40,6 +46,7 @@ export async function getJson(env, key) {
     raw = await env.SWAP.get(key);
   } catch (err) {
     console.error("kv_get_failed", { keyBytes: new TextEncoder().encode(key).length, err: String(err?.message || err) });
+    onError?.(err);
     return null;
   }
   if (!raw) return null;
