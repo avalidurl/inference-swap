@@ -402,7 +402,7 @@ export function footerHtml(doc) {
 </nav>
 <footer>
   CURB is a project of <a href="https://numetal.xyz" title="Numetal Labs — agent accelerator studio">Numetal Labs</a>
-  by <a href="https://gokhan.vc" title="Atelier Gökhan Turhan VC — venture studio">Atelier Gökhan Turhan VC</a><br/>
+  by <a href="https://gokhan.vc" title="Gökhan Ventures — venture studio">Gökhan Ventures</a><br/>
   <a href="mailto:${CONTACT}" title="Public contact for Numetal / CURB">${CONTACT}</a>
   · product mail Curb &lt;curb@numetal.xyz&gt;
 </footer>
