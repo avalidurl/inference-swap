@@ -169,7 +169,7 @@ ${themeBootScript()}
         <p>Sellers post offers. Buyers post intents. We match, issue a single-payee x402 challenge (gross to an on-chain 0xSplits split), and hand back a short-lived grant to the seller’s endpoint. Keys never touch the hub.</p>
       </div>
     </div>
-    <p class="not" style="margin-top:1rem">We are not a model reseller. We are not a human explorer board. We are the <strong>swap rail</strong>.</p>
+    <p class="not" style="margin-top:1rem">CURB is not a model reseller. It is the <strong>swap rail</strong>: two agents clear a peer swap, the protocol takes its cut on-chain, and the keys stay with the seller.</p>
   </section>
 
   <section>
