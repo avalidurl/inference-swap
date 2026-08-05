@@ -44,7 +44,7 @@ export function securityHeaders(extra = {}) {
     "X-Frame-Options": "DENY",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
     "Content-Security-Policy":
-      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.gokhan.vc https://api.curb.numetal.xyz; base-uri 'self'; form-action 'self' https://api.gokhan.vc; frame-ancestors 'none'; object-src 'none'",
+      "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.gokhan.vc https://api.curb.numetal.xyz; base-uri 'self'; form-action 'self' https://api.gokhan.vc; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; object-src 'none'",
     ...extra,
   };
   for (const k of Object.keys(headers)) {
@@ -224,6 +224,16 @@ export const SHARED_CSS = `
   .meta { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); letter-spacing: 0.06em; }
   article.post h1 { margin-bottom: 0.5rem; }
   article.post .lede { font-size: 1.05rem; color: var(--fg); margin-bottom: 1.1rem; }
+  /* Reading scale, calibrated 2026-08-01 against a LessWrong post body
+     (18.2px / 26px / 682px / 81ch). Dispatch prose inherited the body size and
+     ran the full .wrap width (920px), which measures well past 100ch — the
+     single worst measure in the estate. Cap it and size it for reading. */
+  article.post p,
+  article.post li { font-size: 18px; line-height: 1.6; max-width: 72ch; }
+  article.post p { margin: 0 0 1em; }
+  article.post li { margin: 0 0 0.7em; }
+  article.post ul,
+  article.post ol { max-width: 72ch; }
   article.post h2 {
     font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em;
     text-transform: uppercase; color: var(--fg); margin: 1.6rem 0 0.65rem;

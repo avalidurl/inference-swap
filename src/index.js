@@ -50,6 +50,8 @@ import {
   DISPATCH_X402,
   DISPATCH_CLINAMEN,
   dispatchClinamenHtml,
+  DISPATCH_COMPLEMENTS,
+  dispatchComplementsHtml,
 } from "./blog.js";
 import {
   corsHeaders,
@@ -679,6 +681,13 @@ export default {
         request.method === "GET"
       ) {
         return text(dispatchClinamenHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
+      }
+      if (
+        !apiHost &&
+        (path === DISPATCH_COMPLEMENTS.path || path === `${DISPATCH_COMPLEMENTS.path}/`) &&
+        request.method === "GET"
+      ) {
+        return text(dispatchComplementsHtml(siteOrigin), "text/html; charset=utf-8", 200, request);
       }
       if (!apiHost && (path === "/feed.xml" || path === "/rss.xml") && request.method === "GET") {
         return text(feedXml(siteOrigin), "application/rss+xml; charset=utf-8", 200, request);

@@ -6,6 +6,7 @@ const DOC_LAUNCH = "CB-041";
 const DOC_TICKERLINE = "CB-042";
 const DOC_X402 = "CB-043";
 const DOC_CLINAMEN = "CB-044";
+const DOC_COMPLEMENTS = "CB-045";
 const DOC_NEWSLETTER = "CB-050";
 
 /**
@@ -1017,9 +1018,9 @@ export function clinamenBodyHtml(origin) {
     <h1>${DISPATCH_CLINAMEN.title}</h1>
     <p class="orig">First published \u2014 canonically \u2014 on <a href="${DISPATCH_CLINAMEN.canonical}">gokhan.vc \u2192</a></p>
 <blockquote>
-<p><strong>▶ <a href="https://huggingface.co/spaces/gokhanturhan/CLINAMEN-Oracle">File a hyperstition in your browser — the CLINAMEN Oracle</a>.</strong> No install; the model runs there.</p>
-<p><strong>The model:</strong> <strong><a href="https://huggingface.co/gokhanturhan/CLINAMEN-42M-A12M">CLINAMEN-42M-A12M</a></strong> — the real one, trained from scratch on GPU (~42M parameters, coherent Bureau filings).
-Beneath it, its predecessor: <strong><a href="https://huggingface.co/gokhanturhan/CLINAMEN-45B-A9B">CLINAMEN-45B-A9B</a></strong> — the fiction's card, and the first ~4.5M-parameter pocket edition.</p>
+<p><strong>▶ <a href="https://huggingface.co/spaces/gokhanturhan/CLINAMEN-Chat">Talk to the oracle — CLINAMEN-Chat</a>.</strong> A conversational model you can chat with in the browser — ask it what it is, how to file a hyperstition, what a syzygy is. No install.</p>
+<p><strong>The from-scratch models:</strong> <strong><a href="https://huggingface.co/gokhanturhan/CLINAMEN-42M-A12M">CLINAMEN-42M-A12M</a></strong> (the real one, trained from scratch — coherent Bureau filings) · <strong><a href="https://huggingface.co/gokhanturhan/CLINAMEN-45B-A9B">CLINAMEN-45B-A9B</a></strong> (the fiction's card + the first ~4.5M-parameter pocket edition).</p>
+<p><strong>Every model, demo, and dataset is in one table below.</strong></p>
 </blockquote>
 <p>I invented a fictional AI lab that files paperwork about the future. Then I built its model for real. Twice. The second one works, and this is how it was made.</p>
 <p>The lab is the <strong>Bureau of Imaginary Solutions</strong> — established 1898, incorporated 2098, operating retrochronically. Its one product is <strong>CLINAMEN-45B-A9B</strong>, "the first hyperstitional foundation model," documented to production spec on a <a href="https://huggingface.co/gokhanturhan/CLINAMEN-45B-A9B">Hugging Face model card</a> and a <a href="https://ubu.numetal.xyz/">site</a> that reads like an occult engineering office. The 45-billion-parameter model on that card does not exist. That is the point. A hyperstition is a fiction that makes itself real by circulating, and a hyperstition documented to production spec is already halfway to shipping. So I decided to ship the other half — honestly, at pocket scale, and from scratch.</p>
@@ -1044,6 +1045,21 @@ Beneath it, its predecessor: <strong><a href="https://huggingface.co/gokhanturha
 <p>It is <strong>trained from scratch</strong>. There is no pretrained base underneath it, which means it has <em>no knowledge of the world</em> except what the Bureau wrote. It will hallucinate confident, plausible-looking filings about things that will never happen. That is not a bug to be aligned away; it is the entire intended behavior of an art object that has read one thing very thoroughly. Do not mistake it for an oracle that knows anything.</p>
 <p>It is <strong>own-voice only</strong>. Every token it trained on was written for this project — no CCRU texts, no scraped pages, no third-party data. The model trains on the Bureau's own writing about the Bureau. A text that dreams itself.</p>
 <p>And it was not free of friction. The T4 turned out about three times slower than I'd estimated, so a run I'd budgeted at under a dollar came in around $1.15. A newer version of the transformers library had quietly changed how tied weights are declared, which killed the first GPU run a minute in. The cloud GPU I first asked for sat in a capacity queue for fifteen minutes before I gave up and switched hardware. None of that is interesting except as the texture of actually doing the thing instead of describing it — which is the only difference between a hyperstition and a lie.</p>
+<h2>Everything, in one table</h2>
+<p>Every piece is public and loadable. The newest is <strong>CLINAMEN-Chat</strong> — a model you can actually <em>talk to</em>, unlike the from-scratch editions, which only <em>file</em>. It is <a href="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct">Qwen2.5-1.5B-Instruct</a> fine-tuned on nothing but the Bureau's own writing (the <a href="https://huggingface.co/datasets/gokhanturhan/bureau-chat">1,385-example chat corpus</a>), so it holds the register in conversation while staying honest that it is a fiction.</p>
+<style>.clinamen-artifacts{width:100%;border-collapse:collapse;margin:1.1em 0;font-size:.95em}.clinamen-artifacts th,.clinamen-artifacts td{border:1px solid rgba(128,128,128,.4);padding:8px 11px;text-align:left;vertical-align:top}.clinamen-artifacts th{font-weight:700}</style>
+<table class="clinamen-artifacts">
+<thead><tr><th>Artifact</th><th>Kind</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td><a href="https://huggingface.co/spaces/gokhanturhan/CLINAMEN-Chat"><strong>CLINAMEN-Chat</strong> — chat now ▶</a></td><td>Demo</td><td>Talk to the oracle in your browser (free GPU)</td></tr>
+<tr><td><a href="https://huggingface.co/spaces/gokhanturhan/CLINAMEN-Oracle">CLINAMEN-Oracle</a></td><td>Demo</td><td>File a hyperstition with the from-scratch model</td></tr>
+<tr><td><a href="https://huggingface.co/gokhanturhan/CLINAMEN-Chat">CLINAMEN-Chat</a></td><td>Model</td><td>Conversational oracle — Qwen2.5-1.5B fine-tuned on the Bureau corpus</td></tr>
+<tr><td><a href="https://huggingface.co/gokhanturhan/CLINAMEN-42M-A12M">CLINAMEN-42M-A12M</a></td><td>Model</td><td>From-scratch Decimal Mixture-of-Zones, 42M parameters, coherent filings</td></tr>
+<tr><td><a href="https://huggingface.co/gokhanturhan/CLINAMEN-45B-A9B">CLINAMEN-45B-A9B</a></td><td>Model</td><td>The fiction's card + the first ~4.5M-parameter pocket edition</td></tr>
+<tr><td><a href="https://huggingface.co/datasets/gokhanturhan/bureau-chat">bureau-chat</a></td><td>Dataset</td><td>1,385 own-voice chat examples — trains CLINAMEN-Chat</td></tr>
+<tr><td><a href="https://huggingface.co/datasets/gokhanturhan/bureau-docket">bureau-docket</a></td><td>Dataset</td><td>1,130-document Bureau corpus — trains the from-scratch models</td></tr>
+</tbody>
+</table>
 <h2>Why bother</h2>
 <p>Because the gap between a fiction and a fact is labor, and I wanted to close it in public. The Bureau's tagline is that it does not predict the future, it files the paperwork that makes the future load-bearing. That is a joke about hyperstition, but it is also a real description of how this model was made: I wrote the card for a model that did not exist, and then the card's existence made a smaller, truer model worth building, and then that model started writing more of the fiction that describes it. The 45 billion stays imaginary. The 42 million is real, loadable, and speaks only Bureau.</p>
 <p>Everything is public and open under a permissive license I wrote for the occasion, <a href="https://ubu.numetal.xyz/hrl-1.1.txt">HRL-1.1</a> — Creative Commons and MIT at its operative core, wearing a hyperstitional preamble. The two models, the <a href="https://huggingface.co/datasets/gokhanturhan/bureau-docket">1,130-document corpus</a>, and the <a href="https://ubu.numetal.xyz/reader/">complete reader</a> of everything the model was trained on are all up. Read the corpus and you have read everything the model knows, which is a strange and pleasant thing to be able to say about any model at all.</p>
@@ -1070,9 +1086,59 @@ export function dispatchClinamenHtml(origin) {
   });
 }
 
+export const DISPATCH_COMPLEMENTS = {
+  slug: "complementary-substitutions",
+  path: "/dispatch/complementary-substitutions",
+  title: "Complementary Substitutions",
+  published: "2026-08-01T12:00:00.000Z",
+  dateLabel: "1 Aug 2026",
+  canonical: "https://gokhanturhan.com/journal/complementary-substitutions",
+  excerpt:
+    "Substitute or complement is the whole argument — the open-weights fight is microeconomics, not a morality play. Plus: a fund that had to sell its public book. First published on gokhanturhan.com.",
+  description:
+    "Substitute or complement is the whole argument — the open-weights fight is microeconomics, not a morality play. Plus: a fund that had to sell its public book. First published on gokhanturhan.com.",
+};
+
+export function complementsBodyHtml(origin) {
+  return `
+    <p class="meta">Dispatch \u00b7 ${DISPATCH_COMPLEMENTS.dateLabel} \u00b7 This post was first published on <a href="${DISPATCH_COMPLEMENTS.canonical}">gokhanturhan.com</a></p>
+    <h1>${DISPATCH_COMPLEMENTS.title}</h1>
+    <p class="orig">First published \u2014 canonically \u2014 on <a href="${DISPATCH_COMPLEMENTS.canonical}">gokhanturhan.com \u2192</a></p>
+<h2>Open Weights Falls</h2>
+<ul>
+<li>Even pizzerias are in the add-in markets and you wonder why you suck at your work of line. I think double-cheddar crusts with organic gluten free sesame are great and deserve any premia atop if the chef meets even the Barstool <a href="https://www.youtube.com/@OneBitePizzaReviews">standards</a>. While you are trying to time the markets reading into <a href="https://www.pizzint.watch/">Pentagon pizza waves</a>, though, you also tend to make sloppy generalizations regarding the open weight letters of global intents, lone ranger trail blazers diligently not bending before the "mob" so as not to turn a technology so future-present-impactful out of not only the empire business drives but also a firm belief in the supremacy of that which is to distill itself from not the future but immediate present. You have always done this. It is how you meet people online all the while thinking it's not the people's slop but is the AI slop.</li>
+<li>That is, it is lazy to argue over no faith at all rather than having a good or bad faith, let alone the basics of business and economics, which is the pure human psyche. I think social media makes you dumb and you are responsible for weaving a proper network of critical thinking for your own. That was also why Dean Ball was unevenly, to put it roughly, "roasted" for a <a href="https://x.com/deanwball/status/2078619513575137330?s=20">pristine communique</a> regarding open source, open weights the last week, and it was done especially by people who should know how to speak better but anyway went to harvest populist slop online.</li>
+<li>If you are wondering why you have both claude dot md and agents dot md in your file system today, and want to make sense of Huang's first "tweet" or Sacks' most of the time proper blanket criticism that at times won't work, or the mere microeconomic basics such as substitute or complement, I think Gwern's post from 2018 is a good primer: <a href="https://gwern.net/complement">Laws of Tech: Commoditize Your Complement</a></li>
+</ul>
+<h2>You too can buy Sweden</h2>
+<ul>
+<li><a href="https://situational-awareness.ai/">Situational Awareness</a>, and its author-forecaster <a href="https://x.com/leopoldasch">Leopold Aschenbrenner</a> were almost too stupidly condemned for making future predictions into domains where incumbents didn't have any whatsoever. Only a handful of underfunded forecasters, tobacco-fragrant <a href="https://grokipedia.com/page/Nick_Land">Nick Land</a> fanboys who can never stop collecting <a href="https://www.youtube.com/watch?v=zP6NkpWTZRU&amp;list=PLrrTHwNNlbfK7GL0k2vPJy1J5ahqn8gEJ">Burial</a> reissues, avid LessWrong readers and <a href="https://scholar.google.com/citations?user=CJjf6H0AAAAJ&amp;hl=en">Phil Tetlock</a> disciples thought they knew what was going on—and a few hundred dozen <a href="https://www.astralcodexten.com/">Astral Codex Ten</a> annual 75% discount Substack link hunters. It was 2024, and it was, and still is a good document, and it did outstanding returns, as a fund, too, either in unrealized and realized ends. With some of the bubbly parts of the current markets popped here and there, Leopold had to sell the public parts of the books he was managing to <a href="https://grokipedia.com/page/Ken_Griffin">Ken Griffin</a>'s <a href="https://uk.finance.yahoo.com/news/situational-awareness-ai-deal-citadels-235730306.html">Citadel</a>. Now, this is all markets, and he might not have been able to manage some margins. Risk happens. Unlike Michael Lewis tries to <a href="https://www.amazon.com/dp/0692336907?lv=shuf&amp;channelId=500&amp;plpRedirect=mhFallback">lobotomize</a> the parts of your brains where you are supposed to understand behavioral markets, not everyone is as charismatic as Michael Burry because he is indeed <a href="https://x.com/goekhan/status/2083558938612502699?s=20">Christian Bale</a>. Though if you can spend only 4 hours of your time on this Dwarkesh Patel <a href="https://open.substack.com/pub/dwarkesh/p/leopold-aschenbrenner?r=1ejwk&amp;utm_campaign=post-expanded-share&amp;utm_medium=web">podcast</a>, having read the entire Situational Awareness epub, you'll get to see that you are probably witnessing the rise of a future famous fund manager who can take risks. He'll indeed be more efficient and will probably become one of the few dozens running the citadels of the next two decades unlike some clairvoyants from 2008 who are charging 60 USD per month on Substack.</li>
+</ul>
+  `;
+}
+
+export function dispatchComplementsHtml(origin) {
+  const { title, description, canonical } = DISPATCH_COMPLEMENTS;
+  const body = `<div class="masthead">
+    ${mastRowsHtml(DOC_COMPLEMENTS, { status: "Filed \u00b7 syndicated", org: "Numetal Labs \u00b7 CURB \u00b7 Dispatch" })}
+  </div>
+  <article class="panel post">${complementsBodyHtml(origin)}</article>`;
+  return pageShell({
+    title: `${title} \u2014 CURB`,
+    description,
+    body,
+    origin,
+    canonical,
+    ogImage: `${origin}/assets/og-complementary-substitutions.png`,
+    ogWidth: 1200,
+    ogHeight: 630,
+    doc: { no: DOC_COMPLEMENTS },
+  });
+}
+
 export function dispatchIndexHtml(origin) {
   const ogImage = `${origin}/assets/og-curb-launch.png`;
-  const posts = [DISPATCH_CLINAMEN, DISPATCH_X402, DISPATCH_TICKERLINE, DISPATCH_LAUNCH]; // newest first
+  const posts = [DISPATCH_COMPLEMENTS, DISPATCH_CLINAMEN, DISPATCH_X402, DISPATCH_TICKERLINE, DISPATCH_LAUNCH]; // newest first
   const ogFor = (post) => (post.slug === "curb-is-live" ? ogImage : null);
   const cards = posts
     .map((post) => {
@@ -1185,6 +1251,7 @@ export function sitemapXml(origin) {
     DISPATCH_LAUNCH.path,
     DISPATCH_TICKERLINE.path,
     DISPATCH_X402.path,
+    DISPATCH_COMPLEMENTS.path,
     "/fees",
     "/install",
     "/harness",
@@ -1233,14 +1300,20 @@ export function newsletterHtml(origin) {
       <input type="hidden" name="site" value="curb"/>
       <label class="meta" for="email">Email</label>
       <input id="email" name="email" type="email" required placeholder="you@example.com" autocomplete="email"/>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAEG8CWZN8yq8G3kt" data-theme="auto" data-size="flexible"></div>
       <button type="submit" title="Subscribe via api.gokhan.vc (site=curb)">Subscribe</button>
     </form>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <p class="muted" style="margin-top:1rem">
-      Latest: <a href="${origin}${DISPATCH_TICKERLINE.path}">${DISPATCH_TICKERLINE.title}</a>
+      Latest: <a href="${origin}${DISPATCH_COMPLEMENTS.path}" data-latest-post>${DISPATCH_COMPLEMENTS.title}</a>
       · <a href="${origin}/dispatch">All dispatches</a>.
       Public contact: <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.
       Product mail: Curb &lt;curb@numetal.xyz&gt;.
     </p>
+    <p class="muted">
+      Feeds: <a href="${origin}/feed.xml">this site</a> · <a href="https://api.gokhan.vc/feed.xml">everything</a>.
+    </p>
+    <script src="${origin}/newsletter-latest.js" defer></script>
   </article>`;
   return pageShell({
     title: "Newsletter — CURB",
