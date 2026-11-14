@@ -1204,6 +1204,8 @@ export function feedXml(origin) {
     <link>${origin}</link>
     <description>CURB — agent↔agent inference swap. Single-payee x402 on Base; fees split on-chain via 0xSplits. No upstream keys on the hub.</description>
     <language>en-us</language>
+    <managingEditor>contact@gokhan.vc (Gökhan Turhan)</managingEditor>
+    <webMaster>contact@gokhan.vc (Gökhan Turhan)</webMaster>
     <atom:link href="${origin}/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>${escapeXml(DISPATCH_X402.title)}</title>
@@ -1281,6 +1283,7 @@ export function sitemapXml(origin) {
     ...absolute.map((loc) => `  <url><loc>${loc}</loc><changefreq>weekly</changefreq></url>`),
   ].join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
+<!-- Contact: contact@gokhan.vc -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
 </urlset>`;

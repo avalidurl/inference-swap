@@ -207,6 +207,7 @@ export const SHARED_CSS = `
   footer a { color: var(--muted); }
   footer a:hover { color: var(--fg); }
   form { display: grid; gap: 0.75rem; max-width: 28rem; }
+  .cf-turnstile, .cf-turnstile iframe { display: block; width: 100%; max-width: 100%; }
   input[type="email"] {
     font-family: var(--mono); font-size: 0.9rem; padding: 0.65rem 0.75rem;
     border: 1px solid var(--line); background: var(--code-bg); color: var(--fg);
