@@ -1232,14 +1232,14 @@ export function newsletterHtml(origin) {
     <form method="POST" action="https://api.gokhan.vc/newsletter/subscribe">
       <input type="hidden" name="site" value="curb"/>
       <label class="meta" for="email">Email</label>
-      <input id="email" name="email" type="email" required placeholder="you@example.com" autocomplete="email"/>
+      <input id="email" name="email" type="email" required placeholder="contact@gokhan.vc" autocomplete="email"/>
       <button type="submit" title="Subscribe via api.gokhan.vc (site=curb)">Subscribe</button>
     </form>
     <p class="muted" style="margin-top:1rem">
       Latest: <a href="${origin}${DISPATCH_TICKERLINE.path}">${DISPATCH_TICKERLINE.title}</a>
       · <a href="${origin}/dispatch">All dispatches</a>.
-      Public contact: <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.
-      Product mail: Curb &lt;curb@numetal.xyz&gt;.
+      Public contact: <a href="mailto:contact@gokhan.vc">contact@gokhan.vc</a>.
+      Product mail: Curb &lt;contact@gokhan.vc&gt;.
     </p>
   </article>`;
   return pageShell({

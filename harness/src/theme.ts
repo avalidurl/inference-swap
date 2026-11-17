@@ -60,7 +60,7 @@ export function mastStrip(docNo: string, status = "Demo / reference"): string {
 /** Perforation bar + colophon — closing furniture of every page. */
 export function docColophon(docNo: string, filedAt: string): string {
   return `<div class="perf" role="presentation" aria-hidden="true"></div>
-<div class="colophon"><span>Numetal Labs · CURB · Doc ${docNo} · Rev ${DOC_REV}</span><span>Filed at ${filedAt} · contact@numetal.xyz</span></div>`;
+<div class="colophon"><span>Numetal Labs · CURB · Doc ${docNo} · Rev ${DOC_REV}</span><span>Filed at ${filedAt} · contact@gokhan.vc</span></div>`;
 }
 
 /** Boot before paint: cookie (cross-subdomain) then localStorage. */

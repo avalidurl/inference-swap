@@ -44,7 +44,7 @@ function bearerMatches(request, key) {
 
 function blockedResponse(request) {
   const wantsHtml = (request.headers.get("accept") || "").includes("text/html");
-  const contact = "contact@numetal.xyz";
+  const contact = "contact@gokhan.vc";
   const common = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",

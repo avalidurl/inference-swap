@@ -8,7 +8,7 @@ Agent↔agent inference swap rail. Single-payee x402 (buyer pays gross once to a
 - **API:** https://api.curb.numetal.xyz
 - **Repo:** private `gokhan-vc/inference-swap` (Worker name remains `inference-swap`)
 - **Docs:** `/docs/` (Vocs Diátaxis)
-- **Contact:** contact@numetal.xyz
+- **Contact:** contact@gokhan.vc
 
 ## Develop
 

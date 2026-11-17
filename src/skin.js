@@ -1,7 +1,7 @@
 /** Shared B&W skin for CURB HTML pages (landing, legal, newsletter). */
 
 export const PRODUCT = "CURB";
-export const CONTACT = "contact@numetal.xyz";
+export const CONTACT = "contact@gokhan.vc";
 export const ORIGIN_CANON = "https://curb.numetal.xyz";
 export const API_ORIGIN_CANON = "https://api.curb.numetal.xyz";
 
@@ -395,7 +395,7 @@ export function footerHtml(doc) {
   CURB is a project of <a href="https://numetal.xyz" title="Numetal Labs — agent accelerator studio">Numetal Labs</a>
   by <a href="https://gokhan.vc" title="Atelier Gökhan Turhan VC — venture studio">Atelier Gökhan Turhan VC</a><br/>
   <a href="mailto:${CONTACT}" title="Public contact for Numetal / CURB">${CONTACT}</a>
-  · product mail Curb &lt;curb@numetal.xyz&gt;
+  · product mail Curb &lt;contact@gokhan.vc&gt;
 </footer>
 ${docColophonHtml(doc)}`;
 }

@@ -82,7 +82,7 @@ export async function refreshOfacList(env) {
   let res;
   try {
     res = await fetch(url, {
-      headers: { Accept: "text/plain", "User-Agent": "curb-ofac-refresh/1.0 (+contact@numetal.xyz)" },
+      headers: { Accept: "text/plain", "User-Agent": "curb-ofac-refresh/1.0 (contact@gokhan.vc)" },
       cf: { cacheTtl: 300, cacheEverything: true },
     });
   } catch (err) {

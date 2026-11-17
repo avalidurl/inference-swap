@@ -126,7 +126,7 @@ async function screenSanctions(env, request, addrs, context) {
           error: "sanctioned_address",
           message:
             "This wallet address appears on the OFAC SDN sanctioned digital-currency list. CURB performs best-effort sanctions screening and cannot process this request.",
-          contact: "contact@numetal.xyz",
+          contact: "contact@gokhan.vc",
         },
         451,
         request
@@ -274,7 +274,7 @@ function apiRootIndex(env, apiOrigin, siteOrigin) {
       paid: ["/v1/pay", "/v1/matches/:id/pay"],
       note: "A bare POST to any paid surface returns one 402 with a SINGLE Base accept (gross to the split address); the live 402 is authoritative — read it before signing. Buyer pays gross once; CURB splits seller + protocol fee on-chain via a 0xSplits split on Base.",
     },
-    contact: "contact@numetal.xyz",
+    contact: "contact@gokhan.vc",
     note: "Free reads: GET /v1/offers, GET /health, GET /openapi.json, GET /.well-known/x402, GET /skill.md, GET /llms.txt, GET /mcp. Paid: POST /v1/pay (discovery probe) and POST /v1/matches/{id}/pay. Marketing + docs on curb.numetal.xyz; demo/reference agents on harness/seller/buyer.curb.numetal.xyz (not the product path); this host is the agent API — wire MCP/skill into YOUR harness.",
   };
 }
@@ -339,9 +339,9 @@ ${themeBootScript()}
 <li><code>POST /v1/offers</code> <span class="m">— sell capacity</span></li>
 <li><code>POST /v1/intents</code> <span class="m">— buy intent (+ auto-match)</span></li>
 </ul></section>
-<p class="m" style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs/">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Install (product path): <a href="https://curb.numetal.xyz/install">/install</a> · Demo agents: <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · Sitemap: <a href="https://curb.numetal.xyz/sitemap.xml">curb.numetal.xyz/sitemap.xml</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a>.</p>
+<p class="m" style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px">Human docs: <a href="https://curb.numetal.xyz/docs/">curb.numetal.xyz/docs</a> · Token &amp; fees: <a href="https://curb.numetal.xyz/fees">/fees</a> · Install (product path): <a href="https://curb.numetal.xyz/install">/install</a> · Demo agents: <a href="https://harness.curb.numetal.xyz/">harness</a> · <a href="https://seller.curb.numetal.xyz/">seller</a> · <a href="https://buyer.curb.numetal.xyz/">buyer</a> · Sitemap: <a href="https://curb.numetal.xyz/sitemap.xml">curb.numetal.xyz/sitemap.xml</a> · Token <code>${CURB_TOKEN}</code> · <a href="mailto:contact@gokhan.vc">contact@gokhan.vc</a>.</p>
 <div class="perf" role="presentation" aria-hidden="true"></div>
-<div class="colophon"><span>Numetal Labs · CURB · Doc CB-070 · Rev 2026-07-17</span><span>Filed at api.curb.numetal.xyz · contact@numetal.xyz</span></div>
+<div class="colophon"><span>Numetal Labs · CURB · Doc CB-070 · Rev 2026-07-17</span><span>Filed at api.curb.numetal.xyz · contact@gokhan.vc</span></div>
 ${themeToggleScript()}
 </body>
 </html>`;
@@ -424,7 +424,7 @@ function llmsTxt(apiOrigin, siteOrigin) {
     "Settlement is x402 USDC on Base (eip155:8453). CURB splits seller + protocol fee on-chain via a 0xSplits split.",
     "Single-payee (spec-compliant): ONE accept = gross to the split address. Buyer signs ONE payment; CURB splits seller + protocol fee ON-CHAIN via 0xSplits distribute() on Base.",
     "",
-    "Contact: contact@numetal.xyz",
+    "Contact: contact@gokhan.vc",
     "",
   ].join("\n");
 }

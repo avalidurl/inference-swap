@@ -540,7 +540,7 @@ function slidesHtml(siteOrigin, apiOrigin) {
         <h1 class="wide" data-animate>Back the clearing rail for agent inference.</h1>
         <div class="callout" data-animate>
           <div class="amt">Small, aligned round for people who get machine-native markets.</div>
-          <p>Structure is a conversation — SAFE, token-warrant, whatever fits your jurisdiction. <a href="mailto:contact@numetal.xyz">contact@numetal.xyz</a></p>
+          <p>Structure is a conversation — SAFE, token-warrant, whatever fits your jurisdiction. <a href="mailto:contact@gokhan.vc">contact@gokhan.vc</a></p>
         </div>
         <ul class="bullets">
           <li data-animate>Wire the rail: <strong>${apiOrigin}/mcp</strong> + <strong>/skill.md</strong> into your harness.</li>
@@ -548,7 +548,7 @@ function slidesHtml(siteOrigin, apiOrigin) {
         </ul>
         <p class="fine" data-animate>Appendix — Split ${TX.splitAddr.slice(0, 6)}…${TX.splitAddr.slice(-4)} on Base · USDC settlement (eip155:8453) · fee 500 bps, min $0.001 · seller ~95% / hub ~5%. Invitation to a conversation, not an offer or solicitation; not investment or legal advice.</p>
         <div class="deck-perf" role="presentation" aria-hidden="true"></div>
-        <div class="deck-colophon" data-animate><span>Numetal Labs · CURB · Doc CB-030 · Rev 2026-07-17</span><span>Filed at curb.numetal.xyz/deck · contact@numetal.xyz</span></div>`,
+        <div class="deck-colophon" data-animate><span>Numetal Labs · CURB · Doc CB-030 · Rev 2026-07-17</span><span>Filed at curb.numetal.xyz/deck · contact@gokhan.vc</span></div>`,
     })
   );
 
@@ -573,7 +573,7 @@ updated: ${UPDATED}
 
 > Agent-to-agent excess-inference swap. Seller posts an offer; buyer posts an intent; CURB matches, issues one x402 USDC challenge on Base, splits funds on-chain (seller ~95% / hub ~5%) via a 0xSplits split, and hands back a short-lived grant to the seller's own endpoint. CURB never touches the model, upstream keys, or funds. Revenue = a protocol fee per swap.
 >
-> Contact: contact@numetal.xyz · API: ${apiOrigin}
+> Contact: contact@gokhan.vc · API: ${apiOrigin}
 
 ---
 
@@ -740,7 +740,7 @@ Small, aligned round for people who get machine-native markets. Structure is a c
 - Wire the rail: ${apiOrigin}/mcp + /skill.md into your harness.
 - Verify the loop yourself on Basescan (slide 8) · read the docs at ${siteOrigin}/docs/.
 
-**contact@numetal.xyz**
+**contact@gokhan.vc**
 
 Appendix — Split ${TX.splitAddr} on Base · USDC settlement (eip155:8453) · fee 500 bps, min $0.001 · seller ~95% / hub ~5%. Invitation to a conversation, not an offer or solicitation; not investment or legal advice.
 `;
