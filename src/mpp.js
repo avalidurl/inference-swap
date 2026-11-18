@@ -74,9 +74,17 @@ function hubRecipient(env) {
   return String(env.HUB_PAY_TO || "").trim().toLowerCase();
 }
 
+function stripTrailingSlashes(value) {
+  let end = value.length;
+  while (end > 0 && value.charAt(end - 1) === "/") end -= 1;
+  return value.slice(0, end);
+}
+
 /** MPPScan attribution realm — hostname only, no scheme. Consistent build↔verify (same env). */
 export function mppRealm(env) {
-  const raw = String(env.PUBLIC_API_URL || env.MPP_REALM || "https://api.curb.numetal.xyz").replace(/\/+$/, "");
+  const raw = stripTrailingSlashes(
+    String(env.PUBLIC_API_URL || env.MPP_REALM || "https://api.curb.numetal.xyz")
+  );
   try {
     return new URL(raw.includes("://") ? raw : `https://${raw}`).host;
   } catch {

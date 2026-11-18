@@ -10,7 +10,7 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import { copyFile, mkdir, readFile, chmod, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { dirname, join, extname } from "node:path";
+import { dirname, join, extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
@@ -35,30 +35,104 @@ const MIME = {
   ".css": "text/css",
 };
 
+const ASSETS_ROOT = resolve(ROOT, "assets");
+const PUBLIC_ASSETS_ROOT = resolve(ROOT, "public", "assets");
+const OG_ROOT = resolve(__dirname, "og");
+const ASSETS_PREFIX = ASSETS_ROOT.endsWith(sep) ? ASSETS_ROOT : ASSETS_ROOT + sep;
+const PUBLIC_ASSETS_PREFIX = PUBLIC_ASSETS_ROOT.endsWith(sep)
+  ? PUBLIC_ASSETS_ROOT
+  : PUBLIC_ASSETS_ROOT + sep;
+const OG_PREFIX = OG_ROOT.endsWith(sep) ? OG_ROOT : OG_ROOT + sep;
+
+function unsafeRequestPath(urlPath) {
+  if (urlPath === "") return true;
+  if (urlPath.includes("\0") || urlPath.includes("\\")) return true;
+  return urlPath.split("/").includes("..");
+}
+
 function serve() {
   return createServer(async (req, res) => {
     try {
-      const path = decodeURIComponent(req.url?.split("?")[0] || "/");
-      let file;
-      if (path === "/" || path === "/og.html") file = OG_HTML;
-      else if (path.startsWith("/assets/")) {
-        const name = path.slice("/assets/".length);
-        const candidates = [join(ROOT, "assets", name), join(ROOT, "public/assets", name)];
-        file = candidates.find((c) => existsSync(c)) || candidates[0];
-      } else {
-        file = join(__dirname, "og", path.replace(/^\//, ""));
+      const raw = req.url?.split("?")[0] || "/";
+      let urlPath;
+      try {
+        urlPath = decodeURIComponent(raw);
+      } catch {
+        res.writeHead(404);
+        res.end("not found");
+        return;
+      }
+      if (unsafeRequestPath(urlPath)) {
+        res.writeHead(404);
+        res.end("not found");
+        return;
+      }
+
+      if (urlPath === "/" || urlPath === "/og.html") {
+        if (!existsSync(OG_HTML)) {
+          res.writeHead(404);
+          res.end("not found");
+          return;
+        }
+        const body = await readFile(OG_HTML);
+        res.writeHead(200, { "Content-Type": MIME[extname(OG_HTML)] || "application/octet-stream" });
+        res.end(body);
+        return;
+      }
+
+      if (urlPath.startsWith("/assets/")) {
+        const name = urlPath.slice("/assets/".length);
+        if (name === "") {
+          res.writeHead(404);
+          res.end("not found");
+          return;
+        }
+        const fromAssets = resolve(ASSETS_ROOT, name);
+        if (fromAssets.startsWith(ASSETS_PREFIX)) {
+          if (existsSync(fromAssets)) {
+            const body = await readFile(fromAssets);
+            res.writeHead(200, { "Content-Type": MIME[extname(fromAssets)] || "application/octet-stream" });
+            res.end(body);
+            return;
+          }
+        }
+        const fromPublic = resolve(PUBLIC_ASSETS_ROOT, name);
+        if (fromPublic.startsWith(PUBLIC_ASSETS_PREFIX)) {
+          if (existsSync(fromPublic)) {
+            const body = await readFile(fromPublic);
+            res.writeHead(200, { "Content-Type": MIME[extname(fromPublic)] || "application/octet-stream" });
+            res.end(body);
+            return;
+          }
+        }
+        res.writeHead(404);
+        res.end("not found");
+        return;
+      }
+
+      const name = urlPath.replace(/^\//, "");
+      if (name === "") {
+        res.writeHead(404);
+        res.end("not found");
+        return;
+      }
+      const file = resolve(OG_ROOT, name);
+      if (!file.startsWith(OG_PREFIX)) {
+        res.writeHead(404);
+        res.end("not found");
+        return;
       }
       if (!existsSync(file)) {
         res.writeHead(404);
-        res.end("not found " + path);
+        res.end("not found");
         return;
       }
       const body = await readFile(file);
       res.writeHead(200, { "Content-Type": MIME[extname(file)] || "application/octet-stream" });
       res.end(body);
-    } catch (e) {
+    } catch {
       res.writeHead(500);
-      res.end(String(e));
+      res.end("error");
     }
   });
 }

@@ -135,10 +135,13 @@ export class CurbSeller extends Agent<HarnessEnv, SellerState> {
         openOffers: offers.length + 1,
         api,
       };
-    } catch (e) {
-      const msg = String((e as Error)?.message || e);
-      this.setState({ ...this.state, lastError: msg, lastEnsureAt: new Date().toISOString() });
-      return { ok: false, error: msg };
+    } catch {
+      this.setState({
+        ...this.state,
+        lastError: "request failed",
+        lastEnsureAt: new Date().toISOString(),
+      });
+      return { ok: false, error: "request failed" };
     }
   }
 

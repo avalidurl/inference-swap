@@ -536,6 +536,12 @@ async function cdpVerifySettle(env, facilitator, host, basePath, paymentPayload,
   }
 }
 
+function stripTrailingSlashes(value) {
+  let end = value.length;
+  while (end > 0 && value.charAt(end - 1) === "/") end -= 1;
+  return value.slice(0, end);
+}
+
 /**
  * Verify a payment against a match's single-payee challenge before minting a grant.
  * Returns {ok, verified, demo, mode, ...}. Never throws; never prints secrets.
@@ -569,12 +575,12 @@ export async function verifyPayment(env, request, match) {
   const payloads = decodePaymentPayloads(header);
   if (!payloads.length) return { ok: false, verified: false, mode, reason: "payment_unreadable" };
 
-  const facilitator = (env.FACILITATOR || CDP_FACILITATOR).replace(/\/+$/, "");
+  const facilitator = stripTrailingSlashes(env.FACILITATOR || CDP_FACILITATOR);
   let host, basePath;
   try {
     const fu = new URL(facilitator);
     host = fu.host;
-    basePath = fu.pathname.replace(/\/+$/, "");
+    basePath = stripTrailingSlashes(fu.pathname);
   } catch {
     return { ok: false, verified: false, mode, reason: "bad_facilitator" };
   }

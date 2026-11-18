@@ -103,10 +103,13 @@ export class CurbBuyer extends Agent<HarnessEnv, BuyerState> {
         lastError: null,
       });
       return { ok: true, result };
-    } catch (e) {
-      const msg = String((e as Error)?.message || e);
-      this.setState({ ...this.state, lastError: msg, lastIntentAt: new Date().toISOString() });
-      return { ok: false, error: msg };
+    } catch {
+      this.setState({
+        ...this.state,
+        lastError: "request failed",
+        lastIntentAt: new Date().toISOString(),
+      });
+      return { ok: false, error: "request failed" };
     }
   }
 
@@ -129,10 +132,9 @@ export class CurbBuyer extends Agent<HarnessEnv, BuyerState> {
           "CURB does not sign. Settle the single gross accept (→ on-chain 0xSplits split) with agentcash or any x402 client, then call seller endpoint with the grant.",
         payUrl: `${this.env.CURB_API_URL || CURB_API}/v1/matches/${id}/pay`,
       };
-    } catch (e) {
-      const msg = String((e as Error)?.message || e);
-      this.setState({ ...this.state, lastError: msg });
-      return { ok: false, error: msg };
+    } catch {
+      this.setState({ ...this.state, lastError: "request failed" });
+      return { ok: false, error: "request failed" };
     }
   }
 
